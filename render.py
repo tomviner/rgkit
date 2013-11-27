@@ -77,8 +77,8 @@ class RobotSprite:
         # if dying, fade out
         elif self.hp_next <= 0:
             bot_color = blend_colors(bot_color, self.renderer._settings.normal_color, 1-delta)
-        bot_color = rgb_to_hex(*bot_color)
         x,y = self.location
+        bot_size = self.renderer._blocksize
         self.animation_offset = (0,0)
         if self.action == 'move':
             # if normal move, start at bot location and move to next location
@@ -107,8 +107,10 @@ class RobotSprite:
         elif self.action == 'guard':
             pass
         elif self.action == 'suicide':
-            pass
-        self.draw_bot(delta, (x,y), bot_color)
+            bot_size = self.renderer._blocksize * (1 + delta/2)
+            bot_color = blend_colors(bot_color, (1, 1, 0), delta)
+        bot_color = rgb_to_hex(*bot_color)
+        self.draw_bot(delta, (x,y), bot_color, bot_size)
         self.draw_bot_hp(delta, (x,y))
 
     def compute_color(self, player, hp):
@@ -123,9 +125,8 @@ class RobotSprite:
         b = max(b, 0)
         return (r, g, b)
     
-    def draw_bot(self, delta, loc, color):
-        x, y = self.renderer.grid_to_xy(loc)
-        rx, ry = self.renderer.square_bottom_corner((x,y))
+    def draw_bot(self, delta, loc, color, size):
+        x,y,rx,ry = self.renderer.grid_bbox(loc, size)
         ox, oy = self.animation_offset
         if self.square is None:
             self.square = self.renderer.draw_grid_object(self.location, type="circle", layer=3, fill=color, width=0)
@@ -460,3 +461,10 @@ class Render:
     def square_bottom_corner(self, square_topleft):
         x,y = square_topleft
         return (x + self._blocksize - 3, y + self._blocksize - 3)
+
+    def grid_bbox(self, loc, width=25):
+        x,y = self.grid_to_xy(loc)
+        x += (self._blocksize - 3) / 2
+        y += (self._blocksize - 3) / 2
+        halfwidth = width / 2
+        return (int(x-halfwidth), int(y-halfwidth), int(x+halfwidth), int(y+halfwidth))
