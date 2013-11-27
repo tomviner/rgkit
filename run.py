@@ -46,8 +46,7 @@ def play(players, names, print_info=True, animate_render=True):
     return g.get_scores()
 
 def bot_name(path_to_bot):
-    return path_to_bot.split("/")[-1].split("\\")[-1].split(".py")[0]
-
+    return os.path.splitext(os.path.basename(path_to_bot))[0]
 if __name__ == '__main__':
 
     args = parser.parse_args()
