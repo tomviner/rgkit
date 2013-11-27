@@ -8,9 +8,9 @@ import game
 from settings import settings
 
 parser = argparse.ArgumentParser(description="Robot game execution script.")
-parser.add_argument("usercode1",
+parser.add_argument("red_user",
                     help="File containing first robot class definition.")
-parser.add_argument("usercode2",
+parser.add_argument("green_user",
                     help="File containing second robot class definition.")
 parser.add_argument("-m", "--map", help="User-specified map file.",
                     default=os.path.join(os.path.dirname(__file__), 'maps/default.py'))
@@ -56,9 +56,9 @@ if __name__ == '__main__':
     map_data = ast.literal_eval(open(map_name).read())
     game.init_settings(map_data)
 
-    players = [make_player(args.usercode1),
-               make_player(args.usercode2)]
-    playernames = [bot_name(args.usercode1), bot_name(args.usercode2)]
+    players = [make_player(args.red_user),
+               make_player(args.green_user)]
+    playernames = [bot_name(args.red_user), bot_name(args.green_user)]
 
     scores = []
 
