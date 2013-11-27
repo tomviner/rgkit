@@ -25,7 +25,7 @@ def make_player(fname):
     with open(fname) as player_code:
         return game.Player(player_code.read())
 
-def play(players, print_info=True):
+def play(players, names, print_info=True):
     g = game.Game(*players, record_turns=True)
     for i in xrange(settings.max_turns):
         if print_info:
@@ -38,10 +38,13 @@ def play(players, print_info=True):
         # run headless
         import render
 
-        render.Render(g, game.settings)
+        render.Render(g, game.settings, names)
         print g.history
 
     return g.get_scores()
+
+def bot_name(path_to_bot):
+    return path_to_bot.split("/")[-1].split("\\")[-1].split(".py")[0]
 
 if __name__ == '__main__':
 
@@ -53,11 +56,12 @@ if __name__ == '__main__':
 
     players = [make_player(args.usercode1),
                make_player(args.usercode2)]
+    playernames = [bot_name(args.usercode1), bot_name(args.usercode2)]
 
     scores = []
 
     for i in xrange(args.count):
-        scores.append(play(players, not args.headless))
+        scores.append(play(players, playernames, not args.headless))
         print scores[-1]
 
     if args.count > 1:

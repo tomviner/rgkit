@@ -3,13 +3,14 @@ import game
 
 
 class Render:
-    def __init__(self, game_inst, settings, block_size=25):
+    def __init__(self, game_inst, settings, names=["Red", "Green"], block_size=25):
         self._settings = settings
         self._blocksize = block_size
         self._winsize = block_size * self._settings.board_size + 40
         self._game = game_inst
         self._colors = game.Field(self._settings.board_size)
         self._paused = True
+        self._names = names
 
         self._master = Tkinter.Tk()
         self._master.title('Robot Game')
@@ -20,8 +21,14 @@ class Render:
         self._win.pack()
 
         self.prepare_backdrop(self._win)
-        self._label = self._win.create_text(
+        self._labelred = self._win.create_text(
             self._blocksize/2, self._winsize + self._blocksize/2,
+            anchor='nw', font='TkFixedFont', fill='red')
+        self._labelgreen = self._win.create_text(
+            self._blocksize/2, self._winsize + self._blocksize*2/2,
+            anchor='nw', font='TkFixedFont', fill='green')
+        self._label = self._win.create_text(
+            self._blocksize/2, self._winsize + self._blocksize*3/2,
             anchor='nw', font='TkFixedFont', fill='white')
 
         self.create_controls(self._win, width, height)
@@ -170,13 +177,16 @@ class Render:
                         self.paint()
                         currentAction += ' to %s' % (target,)
 
-        lines = [
-            'Red: %d | Green: %d | Turn: %d/%d' % (red, green, turns, max_turns),
+        r_text = '%s: %d' % (self._names[0], red)
+        g_text = '%s: %d' % (self._names[1], green)
+        white_text = [
+            'Turn: %d/%d' % (turns, max_turns),
             'Highlighted: %s; %s' % (self._highlighted, info),
             currentAction
         ]
-        self._win.itemconfig(
-            self._label, text='\n'.join(lines))
+        self._win.itemconfig(self._label, text='\n'.join(white_text))
+        self._win.itemconfig(self._labelred, text=r_text)
+        self._win.itemconfig(self._labelgreen, text=g_text)
 
     def get_square_info(self, loc):
         if loc in self._settings.obstacles:
