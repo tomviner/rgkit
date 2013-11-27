@@ -8,9 +8,9 @@ import game
 from settings import settings
 
 parser = argparse.ArgumentParser(description="Robot game execution script.")
-parser.add_argument("usercode1",
+parser.add_argument("red_user",
                     help="File containing first robot class definition.")
-parser.add_argument("usercode2",
+parser.add_argument("green_user",
                     help="File containing second robot class definition.")
 parser.add_argument("-m", "--map", help="User-specified map file.",
                     default=os.path.join(os.path.dirname(__file__), 'maps/default.py'))
@@ -28,7 +28,7 @@ def make_player(fname):
     with open(fname) as player_code:
         return game.Player(player_code.read())
 
-def play(players, print_info=True, animate_render=True):
+def play(players, names, print_info=True, animate_render=True):
     g = game.Game(*players, record_turns=True)
     for i in xrange(settings.max_turns):
         if print_info:
@@ -40,11 +40,13 @@ def play(players, print_info=True, animate_render=True):
         # this way, people who don't have tkinter can still
         # run headless
         import render
-
-        render.Render(g, game.settings, animate_render)
+        render.Render(g, game.settings, animate_render, names)
         print g.history
 
     return g.get_scores()
+
+def bot_name(path_to_bot):
+    return path_to_bot.split("/")[-1].split("\\")[-1].split(".py")[0]
 
 if __name__ == '__main__':
 
@@ -54,13 +56,14 @@ if __name__ == '__main__':
     map_data = ast.literal_eval(open(map_name).read())
     game.init_settings(map_data)
 
-    players = [make_player(args.usercode1),
-               make_player(args.usercode2)]
+    players = [make_player(args.red_user),
+               make_player(args.green_user)]
+    playernames = [bot_name(args.red_user), bot_name(args.green_user)]
 
     scores = []
 
     for i in xrange(args.count):
-        scores.append(play(players, not args.headless, args.no_animate))
+        scores.append(play(players, playernames, not args.headless, args.no_animate))
         print scores[-1]
 
     if args.count > 1:

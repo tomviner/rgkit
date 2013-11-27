@@ -80,7 +80,7 @@ class RobotSprite:
         x,y = self.location
         bot_size = self.renderer._blocksize
         self.animation_offset = (0,0)
-        if self.action == 'move':
+        if self.action == 'move' and self.target is not None:
             # if normal move, start at bot location and move to next location
             # (note that first half of all move animations is the same)
             if delta < 0.5 or self.location_next == self.target:
@@ -97,7 +97,7 @@ class RobotSprite:
             off_x = dx*delta*self.renderer._blocksize
             off_y = dy*delta*self.renderer._blocksize
             self.animation_offset = (off_x, off_y)
-        elif self.action == 'attack':
+        elif self.action == 'attack' and self.target is not None:
             if self.overlay is None and self.renderer.show_arrows.get():
                 offset = (self.renderer._blocksize/2,self.renderer._blocksize/2)
                 self.overlay = self.renderer.draw_line(self.location, self.target, layer=4, fill='orange', offset=offset, width=3.0, arrow=Tkinter.LAST)
@@ -152,13 +152,14 @@ class RobotSprite:
         self.text = None
 
 class Render:
-    def __init__(self, game_inst, settings, animations, block_size=25):
+    def __init__(self, game_inst, settings, animations, names=["Red", "Green"], block_size=25):
         self._settings = settings
         self.animations = animations
         self._blocksize = block_size
         self._winsize = block_size * self._settings.board_size + 40
         self._game = game_inst
         self._paused = True
+        self._names = names
         self._layers = {}
 
         self._master = Tkinter.Tk()
@@ -170,8 +171,14 @@ class Render:
         self._win.pack()
 
         self.prepare_backdrop(self._win)
-        self._label = self._win.create_text(
+        self._labelred = self._win.create_text(
             self._blocksize/2, self._winsize + self._blocksize/2,
+            anchor='nw', font='TkFixedFont', fill='red')
+        self._labelgreen = self._win.create_text(
+            self._blocksize/2, self._winsize + self._blocksize*2/2,
+            anchor='nw', font='TkFixedFont', fill='green')
+        self._label = self._win.create_text(
+            self._blocksize/2, self._winsize + self._blocksize*3/2,
             anchor='nw', font='TkFixedFont', fill='white')
 
         self.create_controls(self._win, width, height)
@@ -366,13 +373,16 @@ class Render:
                     if self._highlighted_target is not None:
                         currentAction += ' to %s' % (self._highlighted_target,)
 
-        lines = [
-            'Red: %d | Green: %d | Turn: %d/%d' % (red, green, turns, max_turns),
+        r_text = '%s: %d' % (self._names[0], red)
+        g_text = '%s: %d' % (self._names[1], green)
+        white_text = [
+            'Turn: %d/%d' % (turns, max_turns),
             'Highlighted: %s; %s' % (self._highlighted, info),
             currentAction
         ]
-        self._win.itemconfig(
-            self._label, text='\n'.join(lines))
+        self._win.itemconfig(self._label, text='\n'.join(white_text))
+        self._win.itemconfig(self._labelred, text=r_text)
+        self._win.itemconfig(self._labelgreen, text=g_text)
 
     def get_square_info(self, loc):
         if loc in self._settings.obstacles:
