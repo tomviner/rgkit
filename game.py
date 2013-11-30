@@ -240,7 +240,7 @@ class Game:
             user_robot = self._players[robot.player_id].get_robot()
             for prop in settings.exposed_properties + settings.player_only_properties:
                 setattr(user_robot, prop, getattr(robot, prop))
-            self.last_hps[user_robot.location] = user_robot.hp # save hp before actions are processed
+            self.last_hps[user_robot.location] = user_robot.hp  # save hp before actions are processed
             try:
                 next_action = user_robot.act(game_info_copies[robot.player_id])
                 if not robot.is_valid_action(next_action):
@@ -396,7 +396,7 @@ class Game:
                     dummy['player'] = log['player']
                     self.action_at[end_turn][log['loc_end']] = dummy
             return self.action_at[end_turn]
-    
+
     def get_robot_count(self, player, turn):
         global settings
 

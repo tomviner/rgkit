@@ -85,7 +85,7 @@ class RobotSprite:
         else:
             alpha_hack = 1
             bot_rgb = bot_rgb_base
-        x,y = self.location
+        x, y = self.location
         bot_size = self.renderer._blocksize
         self.animation_offset = (0, 0)
         if self.action == 'move' and self.target is not None:
@@ -517,7 +517,7 @@ class Render:
         return (x + self._blocksize - 3, y + self._blocksize - 3)
 
     def grid_bbox(self, loc, width=25):
-        x,y = self.grid_to_xy(loc)
+        x, y = self.grid_to_xy(loc)
         x += (self._blocksize - 3) / 2
         y += (self._blocksize - 3) / 2
         halfwidth = width / 2
