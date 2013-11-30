@@ -72,13 +72,15 @@ class RobotSprite:
         """
         # fix delta to between 0 and 1
         delta = max(0, min(delta, 1))
-        bot_color = self.compute_color(self.id, self.hp)
+        bot_rgb_base = self.compute_color(self.id, self.hp)
         # if spawn, fade in
         if self.action == 'spawn':
-            bot_color = blend_colors(bot_color, self.renderer._settings.normal_color, delta)
+            bot_rgb = blend_colors(bot_rgb_base, self.renderer._settings.normal_color, delta)
         # if dying, fade out
         elif self.hp_next <= 0:
-            bot_color = blend_colors(bot_color, self.renderer._settings.normal_color, 1-delta)
+            bot_rgb = blend_colors(bot_rgb_base, self.renderer._settings.normal_color, 1-delta)
+        else:
+            bot_rgb = bot_rgb_base
         x,y = self.location
         bot_size = self.renderer._blocksize
         self.animation_offset = (0, 0)
@@ -110,9 +112,9 @@ class RobotSprite:
             pass
         elif self.action == 'suicide':
             bot_size = self.renderer._blocksize * (1 + delta/2)
-            bot_color = blend_colors(bot_color, (1, 1, 0), delta)
-        bot_color = rgb_to_hex(*bot_color)
-        self.draw_bot(delta, (x, y), bot_color, bot_size)
+            bot_rgb = blend_colors(bot_rgb, (1, 1, 0), delta)
+        bot_hex = rgb_to_hex(*bot_rgb)
+        self.draw_bot(delta, (x, y), bot_hex, bot_size)
         self.draw_bot_hp(delta, (x, y))
 
     def compute_color(self, player, hp):
@@ -138,10 +140,13 @@ class RobotSprite:
     def draw_bot_hp(self, delta, loc):
         x, y = self.renderer.grid_to_xy(loc)
         ox, oy = self.animation_offset
-        tex_color = "#888"
+        tex_rgb = self.renderer._settings.text_color_dark \
+            if self.hp_next > self.renderer._settings.robot_hp / 2 \
+            else self.renderer._settings.text_color_bright
+        tex_hex = rgb_to_hex(*tex_rgb)
         val = int(self.hp * (1-delta) + self.hp_next * delta)
         if self.text is None:
-            self.text = self.renderer.draw_text(self.location, val, tex_color)
+            self.text = self.renderer.draw_text(self.location, val, tex_hex)
         self.renderer._win.itemconfig(self.text, text=val)
         self.renderer._win.coords(self.text, (x+ox+10, y+oy+10))
 
@@ -196,6 +201,7 @@ class Render:
         self._t_paused = 0
         self._t_frame_start = 0
         self._t_next_frame = 0
+        self._t_cursor_start = 0
         self.slider_delay = 0
         self.update_frame_timing()
 
@@ -272,6 +278,7 @@ class Render:
                     self._highlighted_target = None
                 self.update_highlight_sprite()
                 self.update_title()
+                self._t_cursor_start = millis()
 
         self._master.bind("<Button-1>", lambda e: onclick(e))
         self._master.bind('<Left>', lambda e: prev())
@@ -424,10 +431,11 @@ class Render:
                 else:
                     self.update_frame_timing(self._t_next_frame)
         subframe = float((now - self._t_frame_start) % self.slider_delay) / float(self.slider_delay)
+        subframe_hlt = float((now - self._t_cursor_start) % self._settings.cursor_blink) / float(self._settings.cursor_blink)
         if self.animations:
-            self.paint(subframe)
+            self.paint(subframe, subframe_hlt)
         else:
-            self.paint(0)
+            self.paint(0, 0)
 
     def determine_bg_color(self, loc):
         if loc in self._settings.obstacles:
@@ -441,9 +449,10 @@ class Render:
                 loc = (x, y)
                 self.draw_grid_object(loc, fill=self.determine_bg_color(loc), layer=1, width=0)
         # draw text labels
+        text_color = rgb_to_hex(*self._settings.text_color)
         for y in range(self._settings.board_size):
-            self.draw_text((y, 0), str(y), '#888')
-            self.draw_text((0, y), str(y), '#888')
+            self.draw_text((y, 0), str(y), color=text_color)
+            self.draw_text((0, y), str(y), color=text_color)
 
     def update_sprites_new_turn(self):
         for sprite in self._sprites:
@@ -465,11 +474,11 @@ class Render:
             self._highlight_sprite.clear()
         self._highlight_sprite = HighlightSprite(self._highlighted, self._highlighted_target, self)
 
-    def paint(self, subframe=0):
+    def paint(self, subframe=0, subframe_hlt=0):
         for sprite in self._sprites:
             sprite.animate(subframe if not self._paused else 0)
         if self._highlight_sprite is not None:
-            self._highlight_sprite.animate(subframe)
+            self._highlight_sprite.animate(subframe_hlt)
         self.update_layers()
 
     def grid_to_xy(self, loc):

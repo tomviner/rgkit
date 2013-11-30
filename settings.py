@@ -12,11 +12,15 @@ settings = {
     # rendering
     'FPS': 60,  # frames per second
     'turn_interval': 300,  # milliseconds per turn
+    'cursor_blink': 1000, # milliseconds per full cycle
     'colors': [(0.9, 0, 0.2), (0, 0.9, 0.2)],
     'obstacle_color': (.2, .2, .2),
     'normal_color': (.9, .9, .9),
     'highlight_color': (0.6, 0.6, 0.6),
     'target_color': (0.6, 0.6, 1),
+    'text_color': (1, 1, 1),
+    'text_color_bright': (1, 1, 1),
+    'text_color_dark': (0, 0, 0),
 
     # rating systems
     'rating_range': 150,
