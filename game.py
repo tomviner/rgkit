@@ -280,6 +280,7 @@ class Game:
         return self._field[loc]
 
     def spawn_robot(self, player_id, loc):
+        global settings
         if self.robot_at_loc(loc) is not None:
             return False
 
@@ -379,7 +380,32 @@ class Game:
         global settings
         if turn in self.action_at:
             return self.action_at[turn]
-        elif turn <= 0:
-            return self.action_at[1]
+        elif turn < 0:
+            return self.action_at[0]
+        elif turn == settings.max_turns:
+            # get or make dummy data for last turn
+            end_turn = settings.max_turns
+            if end_turn not in self.action_at:
+                self.action_at[end_turn] = {}
+                for loc, log in self.action_at[end_turn-1].items():
+                    dummy = {}
+                    dummy['name'] = ''
+                    dummy['target'] = None
+                    dummy['hp'] = dummy['hp_end'] = log['hp_end']
+                    dummy['loc'] = dummy['loc_end'] = log['loc_end']
+                    dummy['player'] = log['player']
+                    self.action_at[end_turn][log['loc_end']] = dummy
+            return self.action_at[end_turn]
+    
+    def get_robot_count(self, player, turn):
+        global settings
+
+        history = self.history[player]
+        if turn < 0:
+            return history[0]
+        elif turn < settings.max_turns or len(history) == settings.max_turns:
+            return history[turn]
         else:
-            return self.action_at[settings.max_turns-1]
+            bots = [bot for bot in self._robots if bot.player_id == player]
+            history.append(bots)
+            return bots

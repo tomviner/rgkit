@@ -2,6 +2,7 @@ import Tkinter
 import game
 import rg
 import time
+import math
 
 def millis():
     return int(time.time() * 1000)
@@ -75,11 +76,14 @@ class RobotSprite:
         bot_rgb_base = self.compute_color(self.id, self.hp)
         # if spawn, fade in
         if self.action == 'spawn':
+            alpha_hack = delta
             bot_rgb = blend_colors(bot_rgb_base, self.renderer._settings.normal_color, delta)
         # if dying, fade out
         elif self.hp_next <= 0:
+            alpha_hack = 1-delta
             bot_rgb = blend_colors(bot_rgb_base, self.renderer._settings.normal_color, 1-delta)
         else:
+            alpha_hack = 1
             bot_rgb = bot_rgb_base
         x,y = self.location
         bot_size = self.renderer._blocksize
@@ -101,9 +105,13 @@ class RobotSprite:
             off_x = dx*delta*self.renderer._blocksize
             off_y = dy*delta*self.renderer._blocksize
             self.animation_offset = (off_x, off_y)
+            # movement arrows
+            if self.overlay is None and self.renderer.show_arrows.get():
+                offset = (2*self.renderer._blocksize/3, 2*self.renderer._blocksize/3)
+                self.overlay = self.renderer.draw_line(self.location, self.target, layer=4, fill='blue', offset=offset, width=3.0, arrow=Tkinter.LAST)
         elif self.action == 'attack' and self.target is not None:
             if self.overlay is None and self.renderer.show_arrows.get():
-                offset = (self.renderer._blocksize/2, self.renderer._blocksize/2)
+                offset = (self.renderer._blocksize/3, self.renderer._blocksize/3)
                 self.overlay = self.renderer.draw_line(self.location, self.target, layer=4, fill='orange', offset=offset, width=3.0, arrow=Tkinter.LAST)
             elif self.overlay is not None and not self.renderer.show_arrows.get():
                 self.renderer.remove_object(self.overlay)
@@ -115,7 +123,7 @@ class RobotSprite:
             bot_rgb = blend_colors(bot_rgb, (1, 1, 0), delta)
         bot_hex = rgb_to_hex(*bot_rgb)
         self.draw_bot(delta, (x, y), bot_hex, bot_size)
-        self.draw_bot_hp(delta, (x, y))
+        self.draw_bot_hp(delta, (x, y), bot_rgb, alpha_hack)
 
     def compute_color(self, player, hp):
         max_hp = float(self.renderer._settings.robot_hp + 20)
@@ -128,26 +136,27 @@ class RobotSprite:
         g = max(g, 0)
         b = max(b, 0)
         return (r, g, b)
-    
+
     def draw_bot(self, delta, loc, color, size):
-        x, y, rx, ry = self.renderer.grid_bbox(loc, size)
+        x, y, rx, ry = self.renderer.grid_bbox(loc, size-2)
         ox, oy = self.animation_offset
         if self.square is None:
             self.square = self.renderer.draw_grid_object(self.location, type="circle", layer=3, fill=color, width=0)
         self.renderer._win.itemconfig(self.square, fill=color)
         self.renderer._win.coords(self.square, (x+ox, y+oy, rx+ox, ry+oy))
 
-    def draw_bot_hp(self, delta, loc):
+    def draw_bot_hp(self, delta, loc, bot_color, alpha):
         x, y = self.renderer.grid_to_xy(loc)
         ox, oy = self.animation_offset
         tex_rgb = self.renderer._settings.text_color_dark \
             if self.hp_next > self.renderer._settings.robot_hp / 2 \
             else self.renderer._settings.text_color_bright
+        tex_rgb = blend_colors(tex_rgb, bot_color, alpha)
         tex_hex = rgb_to_hex(*tex_rgb)
         val = int(self.hp * (1-delta) + self.hp_next * delta)
         if self.text is None:
             self.text = self.renderer.draw_text(self.location, val, tex_hex)
-        self.renderer._win.itemconfig(self.text, text=val)
+        self.renderer._win.itemconfig(self.text, text=val, fill=tex_hex)
         self.renderer._win.coords(self.text, (x+ox+10, y+oy+10))
 
     def clear(self):
@@ -161,7 +170,7 @@ class RobotSprite:
 class Render:
     def __init__(self, game_inst, settings, animations, names=["Red", "Green"], block_size=25):
         self._settings = settings
-        self.animations = animations
+        self._animations = animations
         self._blocksize = block_size
         self._winsize = block_size * self._settings.board_size + 40
         self._game = game_inst
@@ -190,7 +199,8 @@ class Render:
 
         self.create_controls(self._win, width, height)
 
-        self._turn = 1
+        self._turn = 0.0
+        self._sub_turn = 0.0
 
         self._highlighted = None
         self._highlighted_target = None
@@ -202,7 +212,7 @@ class Render:
         self._t_frame_start = 0
         self._t_next_frame = 0
         self._t_cursor_start = 0
-        self.slider_delay = 0
+        self._slider_delay = 0
         self.update_frame_timing()
 
         self.draw_background()
@@ -217,12 +227,23 @@ class Render:
         if obj is not None:
             self._win.delete(obj)
 
-    def change_turn(self, turns):
-        self._turn = min(max(self._turn + turns, 1), self._game.turns)
-        self.update_title()
+    def turn_changed(self):
         self._highlighted = None
         self._highlighted_target = None
         self.update_sprites_new_turn()
+
+    def step_turn(self, turns):
+        # if halfway through an animation, changing turn negative really means go back one less
+        if self._animations and not self._paused and self._turn > math.floor(self._turn):
+            turns += 1
+        # if past the end, step back extra
+        if self._turn >= self._settings.max_turns:
+            turns -= 1
+        self._turn = math.floor(self._turn) + turns
+        self._turn = min(max(self._turn, 0.0), self._game.turns)
+        self.update_frame_timing()
+        self.turn_changed()
+        self.update_title()
         self.paint()
 
     def toggle_pause(self):
@@ -233,34 +254,33 @@ class Render:
         if self._paused:
             self._t_paused = now
         else:
-            if self._t_paused != 0:
-                self.update_frame_timing(now - (self._t_paused - self._t_frame_start))
-            else:
-                self.update_frame_timing(now)
+            self.update_frame_timing(now)
+            self._turn = math.floor(self._turn)
 
     def update_frame_timing(self, tstart=None):
         if tstart is None:
             tstart = millis()
         self._t_frame_start = tstart
-        self._t_next_frame = tstart + self.slider_delay
+        self._t_next_frame = tstart + self._slider_delay
 
     def create_controls(self, win, width, height):
-        def change_turn(turns):
+        def step_turn(turns):
             if not self._paused:
                 self.toggle_pause()
-            self.change_turn(turns)
+            self.step_turn(turns)
 
         def prev():
-            change_turn(-1)
+            step_turn(-1)
 
         def next():
-            change_turn(+1)
+            step_turn(+1)
 
         def restart():
-            change_turn((-self._turn)+1)
+            step_turn((-self._turn))
 
         def pause():
             self.toggle_pause()
+            self.update_title()
 
         def onclick(event):
             x = (event.x - 20) / self._blocksize
@@ -293,7 +313,7 @@ class Render:
         arrows_box = Tkinter.Checkbutton(frame, text="Show Arrows", variable=self.show_arrows, command=self.paint)
         arrows_box.pack()
 
-        self._toggle_button = Tkinter.Button(frame, text=u'\u25B6', command=self.toggle_pause)
+        self._toggle_button = Tkinter.Button(frame, text=u'\u25B6', command=pause)
         self._toggle_button.pack(side='left')
 
         prev_button = Tkinter.Button(frame, text='<', command=prev)
@@ -364,14 +384,14 @@ class Render:
         item = self._win.create_line(srcx+ox, srcy+oy, dstx+ox, dsty+oy, **kargs)
         return item
 
-    def current_turn(self):
-        return min(self._settings.max_turns-1, self._turn)
-
     def update_title(self):
-        turns = self.current_turn()
+        display_turn = math.ceil(self._turn) if not self._paused else self.current_turn()
         max_turns = self._settings.max_turns
-        red = len(self._game.history[0][self._turn - 1])
-        green = len(self._game.history[1][self._turn - 1])
+        game_turn = self.current_turn()
+        if game_turn >= self._settings.max_turns:
+            game_turn = self._settings.max_turns-1
+        red = len(self._game.history[0][game_turn])
+        green = len(self._game.history[1][game_turn])
         info = ''
         currentAction = ''
         if self._highlighted is not None:
@@ -391,13 +411,16 @@ class Render:
         r_text = '%s: %d' % (self._names[0], red)
         g_text = '%s: %d' % (self._names[1], green)
         white_text = [
-            'Turn: %d/%d' % (turns, max_turns),
+            'Turn: %d/%d' % (display_turn, max_turns),
             'Highlighted: %s; %s' % (self._highlighted, info),
             currentAction
         ]
         self._win.itemconfig(self._label, text='\n'.join(white_text))
         self._win.itemconfig(self._labelred, text=r_text)
         self._win.itemconfig(self._labelgreen, text=g_text)
+
+    def current_turn(self):
+        return min(int(math.floor(self._turn) + 1), self._settings.max_turns)
 
     def get_square_info(self, loc):
         if loc in self._settings.obstacles:
@@ -413,7 +436,7 @@ class Render:
         v = -self._time_slider.get()
         if v > 0:
             v = v * 20
-        self.slider_delay = self._settings.turn_interval + v
+        self._slider_delay = self._settings.turn_interval + v
 
     def callback(self):
         self.update_slider_value()
@@ -424,16 +447,19 @@ class Render:
         now = millis()
         # check if frame-update
         if not self._paused:
-            if now >= self._t_next_frame:
-                self.change_turn(1)
-                if self._turn >= self._settings.max_turns:
-                    self.toggle_pause()
-                else:
-                    self.update_frame_timing(self._t_next_frame)
-        subframe = float((now - self._t_frame_start) % self.slider_delay) / float(self.slider_delay)
+            self._sub_turn = float((now - self._t_frame_start)) / float(self._slider_delay)
+            self._turn = math.floor(self._turn) + self._sub_turn
+            if self._turn >= self._settings.max_turns:
+                self.toggle_pause()
+                self._turn = self._settings.max_turns
+            self.update_title()
+            if self._sub_turn >= 1:
+                self._sub_turn -= 1
+                self.update_frame_timing(self._t_next_frame)
+                self.turn_changed()
         subframe_hlt = float((now - self._t_cursor_start) % self._settings.cursor_blink) / float(self._settings.cursor_blink)
-        if self.animations:
-            self.paint(subframe, subframe_hlt)
+        if self._animations:
+            self.paint(self._sub_turn, subframe_hlt)
         else:
             self.paint(0, 0)
 
@@ -460,12 +486,13 @@ class Render:
         self._sprites = []
 
         self.update_highlight_sprite()
-        bots_activity = self._game.get_robot_actions(self._turn)
+        turn_action = self.current_turn()
+        bots_activity = self._game.get_robot_actions(turn_action)
         try:
             for bot_data in bots_activity.values():
                 self._sprites.append(RobotSprite(bot_data, self))
         except:
-            print bots_activity
+            print "bots at turn %d:" % turn_action, bots_activity
             raw_input()
 
     def update_highlight_sprite(self):
@@ -476,7 +503,7 @@ class Render:
 
     def paint(self, subframe=0, subframe_hlt=0):
         for sprite in self._sprites:
-            sprite.animate(subframe if not self._paused else 0)
+            sprite.animate(subframe)
         if self._highlight_sprite is not None:
             self._highlight_sprite.animate(subframe_hlt)
         self.update_layers()
