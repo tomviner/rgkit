@@ -235,10 +235,12 @@ class Game:
         game_info_copies = self.build_players_game_info()
         actions = {}
 
+        self.last_hps = {}
         for robot in self._robots:
             user_robot = self._players[robot.player_id].get_robot()
             for prop in settings.exposed_properties + settings.player_only_properties:
                 setattr(user_robot, prop, getattr(robot, prop))
+            self.last_hps[user_robot.location] = user_robot.hp # save hp before actions are processed
             try:
                 next_action = user_robot.act(game_info_copies[robot.player_id])
                 if not robot.is_valid_action(next_action):
@@ -254,14 +256,12 @@ class Game:
         commands.insert(0, 'move')
 
         self.last_locs = {}
-        self.last_hps = {}
         for cmd in commands:
             for robot, action in actions.iteritems():
                 if action[0] != cmd:
                     continue
 
                 old_loc = robot.location
-                self.last_hps[old_loc] = robot.hp  # save hp before actions are processed
                 try:
                     robot.issue_command(action, actions)
                 except Exception:

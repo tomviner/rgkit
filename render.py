@@ -447,7 +447,7 @@ class Render:
         now = millis()
         # check if frame-update
         if not self._paused:
-            self._sub_turn = float((now - self._t_frame_start)) / float(self._slider_delay)
+            self._sub_turn = max(0.0, float((now - self._t_frame_start)) / float(self._slider_delay))
             self._turn = math.floor(self._turn) + self._sub_turn
             if self._turn >= self._settings.max_turns:
                 self.toggle_pause()
