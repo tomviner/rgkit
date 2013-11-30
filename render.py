@@ -213,7 +213,7 @@ class Render:
         self._t_next_frame = 0
         self._t_cursor_start = 0
         self._slider_delay = 0
-        self.update_frame_timing()
+        self.update_frame_start_time()
 
         self.draw_background()
         self.update_title()
@@ -233,15 +233,13 @@ class Render:
         self.update_sprites_new_turn()
 
     def step_turn(self, turns):
-        # if halfway through an animation, changing turn negative really means go back one less
-        if self._animations and not self._paused and self._turn > math.floor(self._turn):
-            turns += 1
         # if past the end, step back extra
         if self._turn >= self._settings.max_turns:
             turns -= 1
         self._turn = math.floor(self._turn) + turns
         self._turn = min(max(self._turn, 0.0), self._game.turns)
-        self.update_frame_timing()
+        self._sub_turn = 0.0
+        self.update_frame_start_time()
         self.turn_changed()
         self.update_title()
         self.paint()
@@ -254,18 +252,20 @@ class Render:
         if self._paused:
             self._t_paused = now
         else:
-            self.update_frame_timing(now)
+            self.update_frame_start_time(now)
             self._turn = math.floor(self._turn)
 
-    def update_frame_timing(self, tstart=None):
-        if tstart is None:
-            tstart = millis()
+    def update_frame_start_time(self, tstart=None):
+        tstart = tstart or millis()
         self._t_frame_start = tstart
         self._t_next_frame = tstart + self._slider_delay
 
     def create_controls(self, win, width, height):
         def step_turn(turns):
             if not self._paused:
+                # if halfway through an animation, changing turn negative really means go back to the start of that turn
+                if turns < 0:
+                    turns += 1
                 self.toggle_pause()
             self.step_turn(turns)
 
@@ -455,7 +455,7 @@ class Render:
             self.update_title()
             if self._sub_turn >= 1:
                 self._sub_turn -= 1
-                self.update_frame_timing(self._t_next_frame)
+                self.update_frame_start_time(self._t_next_frame)
                 self.turn_changed()
         subframe_hlt = float((now - self._t_cursor_start) % self._settings.cursor_blink) / float(self._settings.cursor_blink)
         if self._animations:
