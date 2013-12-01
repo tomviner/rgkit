@@ -3,6 +3,14 @@
 import os
 import ast
 import argparse
+import itertools
+
+_is_multiprocessing_supported = True
+try:
+    from multiprocessing import Pool
+except ImportError:
+    _is_multiprocessing_supported = False  # the OS does not support it. See http://bugs.python.org/issue3770
+
 ###
 import game
 from settings import settings
@@ -45,8 +53,51 @@ def play(players, names, print_info=True, animate_render=True):
 
     return g.get_scores()
 
+
 def bot_name(path_to_bot):
     return os.path.splitext(os.path.basename(path_to_bot))[0]
+
+def test_runs_sequentially(args):
+    players = [make_player(args.red_user),
+               make_player(args.green_user)]
+    playernames = [bot_name(args.red_user), bot_name(args.green_user)]
+    scores = []
+    for i in xrange(args.count):
+        scores.append(
+            play(players, playernames, not args.headless, args.no_animate)
+        )
+        print scores[-1]
+    return scores
+
+def task(data):
+    red_user, green_user, headless, no_animate = data
+    result = play(
+        [
+            make_player(red_user),
+            make_player(green_user)
+        ],
+        [
+            bot_name(red_user),
+            bot_name(green_user)
+        ],
+        not headless,
+        no_animate,
+    )
+    print result
+    return result
+
+def test_runs_concurrently(args):
+    data = itertools.repeat(
+        [
+            args.red_user,
+            args.green_user,
+            args.headless,
+            args.no_animate,
+        ],
+        args.count
+    )
+    return Pool().map(task, data, 1)
+
 if __name__ == '__main__':
 
     args = parser.parse_args()
@@ -55,15 +106,10 @@ if __name__ == '__main__':
     map_data = ast.literal_eval(open(map_name).read())
     game.init_settings(map_data)
 
-    players = [make_player(args.red_user),
-               make_player(args.green_user)]
-    playernames = [bot_name(args.red_user), bot_name(args.green_user)]
-
-    scores = []
-
-    for i in xrange(args.count):
-        scores.append(play(players, playernames, not args.headless, args.no_animate))
-        print scores[-1]
+    runner = test_runs_sequentially
+    if _is_multiprocessing_supported and args.count > 1:
+        runner = test_runs_concurrently
+    scores = runner(args)
 
     if args.count > 1:
         p1won = sum(p1 > p2 for p1, p2 in scores)
