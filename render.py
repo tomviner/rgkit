@@ -141,7 +141,7 @@ class RobotSprite:
         x, y, rx, ry = self.renderer.grid_bbox(loc, size-2)
         ox, oy = self.animation_offset
         if self.square is None:
-            self.square = self.renderer.draw_grid_object(self.location, type="circle", layer=3, fill=color, width=0)
+            self.square = self.renderer.draw_grid_object(self.location, type=self.renderer._settings.robot_shape, layer=3, fill=color, width=0)
         self.renderer._win.itemconfig(self.square, fill=color)
         self.renderer._win.coords(self.square, (x+ox, y+oy, rx+ox, ry+oy))
 
