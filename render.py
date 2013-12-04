@@ -231,6 +231,7 @@ class Render:
         self._highlighted = None
         self._highlighted_target = None
         self.update_sprites_new_turn()
+        self.update_title_and_text()
 
     def step_turn(self, turns):
         # if past the end, step back extra
@@ -388,7 +389,6 @@ class Render:
 
     def update_title_and_text(self):
         display_turn = self.current_turn_int()
-        print "update title: ", self._turn, ".", self._sub_turn, "\tdisplay:", display_turn
         max_turns = self._settings.max_turns
         count_turn = int(math.ceil(self._turn + self._sub_turn))
         if count_turn > self._settings.max_turns:
@@ -451,21 +451,24 @@ class Render:
     def tick(self):
         now = millis()
         # check if frame-update
-        if not self._paused:
-            self._sub_turn = max(0.0, float((now - self._t_frame_start)) / float(self._slider_delay))
-            if self._turn >= self._settings.max_turns:
-                self.toggle_pause()
-                self._turn = self._settings.max_turns
-            self.update_title_and_text()
-            if self._sub_turn >= 1:
-                self._sub_turn -= 1
-                self._turn += 1
-                self.update_frame_start_time(self._t_next_frame)
-                self.turn_changed()
-        subframe_hlt = float((now - self._t_cursor_start) % self._settings.cursor_blink) / float(self._settings.cursor_blink)
         if self._animations:
+            if not self._paused:
+                self._sub_turn = max(0.0, float((now - self._t_frame_start)) / float(self._slider_delay))
+                if self._turn >= self._settings.max_turns:
+                    self.toggle_pause()
+                    self._turn = self._settings.max_turns
+                self.update_title_and_text()
+                if self._sub_turn >= 1:
+                    self._sub_turn -= 1
+                    self._turn += 1
+                    self.update_frame_start_time(self._t_next_frame)
+                    self.turn_changed()
+            subframe_hlt = float((now - self._t_cursor_start) % self._settings.cursor_blink) / float(self._settings.cursor_blink)
             self.paint(self._sub_turn, subframe_hlt)
-        else:
+        elif now > self._t_next_frame and not self._paused:
+            self._turn += 1
+            self.update_frame_start_time(self._t_next_frame)
+            self.turn_changed()
             self.paint(0, 0)
 
     def determine_bg_color(self, loc):
