@@ -199,7 +199,7 @@ class Render:
 
         self.create_controls(self._win, width, height)
 
-        self._turn = 0.0
+        self._turn = 1.0
         self._sub_turn = 0.0
 
         self._highlighted = None
@@ -216,7 +216,7 @@ class Render:
         self.update_frame_start_time()
 
         self.draw_background()
-        self.update_title()
+        self.update_title_and_text()
         self.update_sprites_new_turn()
         self.paint()
 
@@ -236,12 +236,14 @@ class Render:
         # if past the end, step back extra
         if self._turn >= self._settings.max_turns:
             turns -= 1
-        self._turn = math.floor(self._turn) + turns
-        self._turn = min(max(self._turn, 0.0), self._game.turns)
+        if self._sub_turn > 0 and turns < 0:
+            turns += 1
+        self._turn = self.current_turn_int() + turns
+        self._turn = min(max(self._turn, 1.0), self._game.turns)
         self._sub_turn = 0.0
         self.update_frame_start_time()
         self.turn_changed()
-        self.update_title()
+        self.update_title_and_text()
         self.paint()
 
     def toggle_pause(self):
@@ -253,7 +255,6 @@ class Render:
             self._t_paused = now
         else:
             self.update_frame_start_time(now)
-            self._turn = math.floor(self._turn)
 
     def update_frame_start_time(self, tstart=None):
         tstart = tstart or millis()
@@ -276,11 +277,11 @@ class Render:
             step_turn(+1)
 
         def restart():
-            step_turn((-self._turn))
+            step_turn((-self._turn)+1)
 
         def pause():
             self.toggle_pause()
-            self.update_title()
+            self.update_title_and_text()
 
         def onclick(event):
             x = (event.x - 20) / self._blocksize
@@ -291,13 +292,13 @@ class Render:
                     self._highlighted = None
                 else:
                     self._highlighted = loc
-                action = self._game.get_robot_actions(self.current_turn()).get(loc)
+                action = self._game.get_robot_actions(self.current_turn_int()).get(loc)
                 if action is not None:
                     self._highlighted_target = action.get("target", None)
                 else:
                     self._highlighted_target = None
                 self.update_highlight_sprite()
-                self.update_title()
+                self.update_title_and_text()
                 self._t_cursor_start = millis()
 
         self._master.bind("<Button-1>", lambda e: onclick(e))
@@ -384,10 +385,10 @@ class Render:
         item = self._win.create_line(srcx+ox, srcy+oy, dstx+ox, dsty+oy, **kargs)
         return item
 
-    def update_title(self):
-        display_turn = math.ceil(self._turn) if not self._paused else self.current_turn()
+    def update_title_and_text(self):
+        display_turn = self.current_turn_int()
         max_turns = self._settings.max_turns
-        game_turn = self.current_turn()
+        game_turn = self.current_turn_int()
         if game_turn >= self._settings.max_turns:
             game_turn = self._settings.max_turns-1
         red = len(self._game.history[0][game_turn])
@@ -419,14 +420,14 @@ class Render:
         self._win.itemconfig(self._labelred, text=r_text)
         self._win.itemconfig(self._labelgreen, text=g_text)
 
-    def current_turn(self):
-        return min(int(math.floor(self._turn) + 1), self._settings.max_turns)
+    def current_turn_int(self):
+        return min(int(math.floor(self._turn + self._sub_turn)), self._settings.max_turns)
 
     def get_square_info(self, loc):
         if loc in self._settings.obstacles:
             return ['obstacle']
 
-        all_bots = self._game.get_robot_actions(self.current_turn())
+        all_bots = self._game.get_robot_actions(self.current_turn_int())
         if loc in all_bots:
             return ['bot', all_bots[loc]]
 
@@ -448,13 +449,13 @@ class Render:
         # check if frame-update
         if not self._paused:
             self._sub_turn = max(0.0, float((now - self._t_frame_start)) / float(self._slider_delay))
-            self._turn = math.floor(self._turn) + self._sub_turn
             if self._turn >= self._settings.max_turns:
                 self.toggle_pause()
                 self._turn = self._settings.max_turns
-            self.update_title()
+            self.update_title_and_text()
             if self._sub_turn >= 1:
                 self._sub_turn -= 1
+                self._turn += 1
                 self.update_frame_start_time(self._t_next_frame)
                 self.turn_changed()
         subframe_hlt = float((now - self._t_cursor_start) % self._settings.cursor_blink) / float(self._settings.cursor_blink)
@@ -486,7 +487,7 @@ class Render:
         self._sprites = []
 
         self.update_highlight_sprite()
-        turn_action = self.current_turn()
+        turn_action = self.current_turn_int()
         bots_activity = self._game.get_robot_actions(turn_action)
         try:
             for bot_data in bots_activity.values():
