@@ -253,6 +253,7 @@ class Render:
         now = millis()
         if self._paused:
             self._t_paused = now
+            self._sub_turn = 0.0
         else:
             self.update_frame_start_time(now)
 
@@ -387,12 +388,15 @@ class Render:
 
     def update_title_and_text(self):
         display_turn = self.current_turn_int()
+        print "update title: ", self._turn, ".", self._sub_turn, "\tdisplay:", display_turn
         max_turns = self._settings.max_turns
-        game_turn = self.current_turn_int()
-        if game_turn >= self._settings.max_turns:
-            game_turn = self._settings.max_turns-1
-        red = len(self._game.history[0][game_turn])
-        green = len(self._game.history[1][game_turn])
+        count_turn = int(math.ceil(self._turn + self._sub_turn))
+        if count_turn > self._settings.max_turns:
+            count_turn = self._settings.max_turns
+        if count_turn < 0:
+            count_turn = 0
+        red = len(self._game.history[0][count_turn-1])
+        green = len(self._game.history[1][count_turn-1])
         info = ''
         currentAction = ''
         if self._highlighted is not None:
