@@ -9,9 +9,12 @@ try:
 except ImportError:
     import dummy_threading as _threading
 
-import defaultrobots
-import rg
-from settings import settings, AttrDict
+
+from rgkit import rg, defaultrobots
+from rgkit.settings import settings, AttrDict
+
+sys.modules['rg'] = rg  # preserve backwards compatible robot imports
+
 
 def init_settings(map_data):
     global settings

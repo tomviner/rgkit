@@ -4,7 +4,7 @@ import ast
 import Tkinter
 import sys
 
-from settings import settings, AttrDict
+from rgkit.settings import settings
 
 BLOCKSIZE = 20
 PADDING = 4
