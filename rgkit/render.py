@@ -1,7 +1,8 @@
 import Tkinter
-import game
-import rg
 import time
+
+from rgkit import rg
+
 
 def millis():
     return int(time.time() * 1000)
