@@ -10,7 +10,6 @@ setup(
     packages=['rgkit'],
     package_data={'rgkit': ['maps/*.py']},
     license='Unlicense',
-    long_description=open('README.md').read(),
     entry_points={
         'console_scripts': [
             'rgrun = rgkit.run:main',
