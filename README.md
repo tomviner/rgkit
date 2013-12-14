@@ -24,6 +24,10 @@ __pip__
 The easiest way to install the kit is with
 `[pip](http://www.pip-installer.org/en/latest/)`. From the terminal, run:
 
+    pip install rgkit
+
+Or if you want the development version:
+
     pip install git+https://github.com/WhiteHalmos/rgkit.git
 
 __Note:__ *This will install rgkit system-wide. It is recommended to use
@@ -38,7 +42,7 @@ Installing with `virtualenv` requires the following steps:
     cd my_robot
     virtualenv env
     source env/bin/activate
-    pip install git+https://github.com/WhiteHalmos/rgkit.git
+    pip install rgkit
 
 __setup.py__
 
