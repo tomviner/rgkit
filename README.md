@@ -37,8 +37,8 @@ Installing with `virtualenv` requires the following steps:
     mkdir my_robot
     cd my_robot
     virtualenv env
-    source env/bin/activate pip
-    install git+https://travis-ci.org/WhiteHalmos/rgkit
+    source env/bin/activate
+    pip install git+https://travis-ci.org/WhiteHalmos/rgkit
 
 __setup.py__
 
