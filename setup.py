@@ -9,8 +9,8 @@ setup(
     long_description=open('README.md').read(),
     entry_points={
         'console_scripts': [
-            'rg = rgkit.run:main',
-            'rgmapeditor = rgkit.mapeditor:main'
+            'rgrun = rgkit.run:main',
+            'rgmap = rgkit.mapeditor:main'
         ]
     },
 )
