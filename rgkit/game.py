@@ -49,12 +49,13 @@ class Player:
         return self._robot
 
 class InternalRobot:
-    def __init__(self, location, hp, player_id, robot_id, field):
+    def __init__(self, location, hp, player_id, robot_id, field, seed):
         self.location = location
         self.hp = hp
         self.player_id = player_id
         self.robot_id = robot_id
         self.field = field
+        self._random = random.Random(seed)
 
     def __repr__(self):
         return '<%s: player: %d, hp: %d>' % (
@@ -152,7 +153,7 @@ class InternalRobot:
     def call_attack(self, loc, action_table, damage=None):
         global settings
 
-        damage = int(damage or random.randint(*settings.attack_range))
+        damage = int(damage or self._random.randint(*settings.attack_range))
 
         robot = self.field[loc]
         if not robot or robot.player_id == self.player_id:
@@ -190,7 +191,8 @@ class Field:
 
 class AbstractGame(object):
     def __init__(self, player1, player2, record_actions=False,
-                 record_history=False, unit_testing=False, print_info=False):
+                 record_history=False, unit_testing=False, print_info=False,
+                 seed=None):
         self._players = (player1, player2)
         self._record_actions = record_actions
         self._record_history = record_history
@@ -200,6 +202,10 @@ class AbstractGame(object):
         self._field = Field(settings.board_size)
         self._id_inc = 0
         self.turns = 0
+        if seed is None:
+            seed = random.randint(0, sys.maxint)
+        self.seed = seed
+        self._random = random.Random(seed)
 
         self.action_at = []
 
@@ -230,6 +236,7 @@ class AbstractGame(object):
                 AttrDict(dict((x, getattr(y, x)) for x in props))
             ) for y in self._robots),
             'turn': self.turns,
+            'seed': 0, # To be set per robot
         })
 
     def build_players_game_info(self):
@@ -255,6 +262,9 @@ class AbstractGame(object):
             for prop in props:
                 setattr(user_robot, prop, getattr(robot, prop))
             try:
+                # Give each player bot an individual seed for every act call
+                game_info_copies[robot.player_id].seed = self._random.randint(
+                    0, sys.maxint)
                 next_action = user_robot.act(game_info_copies[robot.player_id])
                 if not robot.is_valid_action(next_action):
                     raise Exception(
@@ -301,8 +311,8 @@ class AbstractGame(object):
             return False
 
         robot_id = self.get_robot_id()
-        robot = InternalRobot(
-            loc, settings.robot_hp, player_id, robot_id, self._field)
+        robot = InternalRobot(loc, settings.robot_hp, player_id, robot_id,
+                              self._field, self._random.randint(0, sys.maxint))
         self._robots.append(robot)
         self._field[loc] = robot
         if self._record_actions:
@@ -320,14 +330,17 @@ class AbstractGame(object):
     def spawn_robot_batch(self):
         global settings
 
-        locs = random.sample(settings.spawn_coords,
-                             settings.spawn_per_player * 2)
+        locs = self._random.sample(settings.spawn_coords,
+                                   settings.spawn_per_player * 2)
         for player_id in (0, 1):
             for i in range(settings.spawn_per_player):
                 loc = locs.pop()
-                # Only spawn where no previous robot is at
-                while not self.spawn_robot(player_id, loc):
-                    loc = random.choice(settings.spawn_coords)
+                # Only spawn where no previous robot is at (try up to 10 times)
+                for i in range(10):
+                    if self.spawn_robot(player_id, loc):
+                        break
+                    else:
+                        loc = self._random.choice(settings.spawn_coords)
 
     def clear_spawn_points(self):
         for loc in settings.spawn_coords:
@@ -418,10 +431,11 @@ class AbstractGame(object):
 
 class Game(AbstractGame):
     def __init__(self, player1, player2, record_actions=False,
-                 record_history=False, unit_testing=False, print_info=False):
+                 record_history=False, unit_testing=False, print_info=False,
+                 seed=None):
         super(Game, self).__init__(
             player1, player2, record_actions, record_history, unit_testing,
-            print_info)
+            print_info, seed)
 
         if self._record_history:
             self.history = [list() for i in range(2)]
@@ -454,10 +468,11 @@ class PatientList(list):
 
 class ThreadedGame(AbstractGame):
     def __init__(self, player1, player2, record_actions=False,
-                 record_history=False, unit_testing=False, print_info=False):
+                 record_history=False, unit_testing=False, print_info=False,
+                 seed=None):
         super(ThreadedGame, self).__init__(
             player1, player2, record_actions, record_history, unit_testing,
-            print_info)
+            print_info, seed)
 
         self.turns_running_lock = _threading.Lock()
         self.per_turn_events = [_threading.Event()
