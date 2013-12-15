@@ -61,5 +61,6 @@ def toward(curr, dest):
     x_diff, y_diff = x - x0, y - y0
 
     if abs(x_diff) < abs(y_diff):
-        return (x0, y0 + y_diff / abs(y_diff))
+        if (x0, y0 + y_diff / abs(y_diff)) not in settings.obstacles:
+            return (x0, y0 + y_diff / abs(y_diff))
     return (x0 + x_diff / abs(x_diff), y0)
