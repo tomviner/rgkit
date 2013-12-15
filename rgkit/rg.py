@@ -60,6 +60,16 @@ def toward(curr, dest):
     x, y = dest
     x_diff, y_diff = x - x0, y - y0
 
-    if abs(x_diff) < abs(y_diff):
-        return (x0, y0 + y_diff / abs(y_diff))
-    return (x0 + x_diff / abs(x_diff), y0)
+    move_y = (x0, y0 + cmp(y_diff, 0))
+    move_x = (x0 + cmp(x_diff, 0), y0)
+
+    if abs(y_diff) > abs(x_diff):
+        if move_y not in settings.obstacles:
+            return move_y
+        else:
+            return move_x
+    else:
+        if move_x not in settings.obstacles:
+            return move_x
+        else:
+            return move_y
