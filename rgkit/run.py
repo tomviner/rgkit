@@ -6,6 +6,7 @@ import imp
 import inspect
 import itertools
 import pkg_resources
+import random
 import sys
 
 _is_multiprocessing_supported = True
@@ -50,7 +51,8 @@ group.add_argument("-H", "--headless", action="store_true",
 group.add_argument("-T", "--play-in-thread", action="store_true",
                    default=False,
                    help="Separate GUI thread from robot move calculations.")
-parser.add_argument("--game-seed", default='initialseed',
+parser.add_argument("--game-seed",
+                    default=random.randint(0, sys.maxint),
                     help="Appended with game countfor per-match seeds.")
 parser.add_argument("--match-seeds", nargs='*',
                     help="Used for random seed of the first matches in order.")
@@ -103,7 +105,7 @@ def test_runs_sequentially(args):
     for i in xrange(args.count):
         # A sequential, deterministic seed is used for each match that can be
         # overridden by user provided ones.
-        match_seed = args.game_seed + str(i)
+        match_seed = str(args.game_seed) + '-' + str(i)
         if args.match_seeds and i < len(args.match_seeds):
             match_seed = args.match_seeds[i]
         scores.append(
@@ -142,7 +144,7 @@ def task(data):
 def test_runs_concurrently(args):
     data = []
     for i in xrange(args.count):
-        match_seed = args.game_seed + str(i)
+        match_seed = str(args.game_seed) + '-' + str(i)
         if args.match_seeds and i < len(args.match_seeds):
             match_seed = args.match_seeds[i]
         data.append([
