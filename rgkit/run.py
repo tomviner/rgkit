@@ -52,7 +52,7 @@ group.add_argument("-T", "--play-in-thread", action="store_true",
                    default=False,
                    help="Separate GUI thread from robot move calculations.")
 parser.add_argument("--game-seed",
-                    default='t',
+                    default=random.randint(0, sys.maxint),
                     help="Appended with game countfor per-match seeds.")
 parser.add_argument("--match-seeds", nargs='*',
                     help="Used for random seed of the first matches in order.")
