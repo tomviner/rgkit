@@ -11,7 +11,7 @@ import sys
 
 _is_multiprocessing_supported = True
 try:
-    from multiprocessing import Pool
+    import multiprocessing
 except ImportError:
     # the OS does not support it. See http://bugs.python.org/issue3770
     _is_multiprocessing_supported = False
@@ -52,7 +52,7 @@ group.add_argument("-T", "--play-in-thread", action="store_true",
                    default=False,
                    help="Separate GUI thread from robot move calculations.")
 parser.add_argument("--game-seed",
-                    default=random.randint(0, sys.maxint),
+                    default='t',
                     help="Appended with game countfor per-match seeds.")
 parser.add_argument("--match-seeds", nargs='*',
                     help="Used for random seed of the first matches in order.")
@@ -155,7 +155,10 @@ def test_runs_concurrently(args):
             args.play_in_thread,
             match_seed,
         ])
-    return Pool().map(task, data, 1)
+    num_cpu = multiprocessing.cpu_count() - 1
+    if num_cpu == 0:
+        num_cpu = 1
+    return multiprocessing.Pool(num_cpu).map(task, data, 1)
 
 
 def main():
