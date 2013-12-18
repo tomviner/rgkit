@@ -31,7 +31,6 @@ settings = {
     'highlight_cursor_blink_interval': 0.5,
     'bot_shape': 'square',
     # 'bot_shape': 'circle',
-    # 'bot_animate': True,
     'draw_movement_arrow': True,
     # 'draw_movement_arrow': False,
 

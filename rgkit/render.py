@@ -541,12 +541,16 @@ class Render:
         if self._highlight_sprite is not None or need_update:
             self._highlight_sprite.clear()
         self._highlight_sprite = HighlightSprite(self._highlighted, self._highlighted_target, self)
+        self.paint_highlight_sprite(0)
+
+    def paint_highlight_sprite(self, subframe_hlt=0):
+        if self._highlight_sprite is not None:
+            self._highlight_sprite.animate(subframe_hlt)
 
     def paint(self, subframe=0, subframe_hlt=0):
         for sprite in self._sprites:
             sprite.animate(subframe)
-        if self._highlight_sprite is not None:
-            self._highlight_sprite.animate(subframe_hlt)
+        self.paint_highlight_sprite(subframe_hlt)
         self.update_layers()
 
     def grid_to_xy(self, loc):
