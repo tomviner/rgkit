@@ -8,6 +8,7 @@ import itertools
 import pkg_resources
 import random
 import sys
+import os
 
 _is_multiprocessing_supported = True
 try:
@@ -29,9 +30,9 @@ from rgkit import game
 
 
 parser = argparse.ArgumentParser(description="Robot game execution script.")
-parser.add_argument("usercode1",
+parser.add_argument("player1",
                     help="File containing first robot class definition.")
-parser.add_argument("usercode2",
+parser.add_argument("player2",
                     help="File containing second robot class definition.")
 parser.add_argument("-m", "--map",
                     help="User-specified map file.",
@@ -41,9 +42,9 @@ parser.add_argument("-m", "--map",
 parser.add_argument("-c", "--count", type=int,
                     default=1,
                     help="Game count, default: 1")
-parser.add_argument("-A", "--no-animate", action="store_false",
-                    default=True,
-                    help="Disable animations in rendering.")
+parser.add_argument("-A", "--animate", action="store_true",
+                    default=False,
+                    help="Enable animations in rendering.")
 group = parser.add_mutually_exclusive_group()
 group.add_argument("-H", "--headless", action="store_true",
                    default=False,
@@ -70,7 +71,7 @@ def make_player(fname):
 
 
 def play(players, print_info=True, animate_render=True, play_in_thread=False,
-         match_seed=None):
+         match_seed=None, names=["Red", "Green"]):
     if play_in_thread:
         g = game.ThreadedGame(*players,
                               print_info=print_info,
@@ -93,14 +94,16 @@ def play(players, print_info=True, animate_render=True, play_in_thread=False,
         from rgkit import render
 
         g.run_all_turns()
-        render.Render(g, game.settings, animate_render)
+        print "rendering %s animations" % ("with" if animate_render else "without")
+        render.Render(g, game.settings, animate_render, names=names)
         print g.history
 
     return g.get_scores()
 
 
 def test_runs_sequentially(args):
-    players = [make_player(args.usercode1), make_player(args.usercode2)]
+    players = [make_player(args.player1), make_player(args.player2)]
+    names = [bot_name(args.player1), bot_name(args.player2)]
     scores = []
     for i in xrange(args.count):
         # A sequential, deterministic seed is used for each match that can be
@@ -111,17 +114,18 @@ def test_runs_sequentially(args):
         scores.append(
             play(players,
                  not args.headless,
-                 args.no_animate,
+                 args.animate,
                  args.play_in_thread,
-                 match_seed=match_seed)
+                 match_seed=match_seed,
+                 names=names)
         )
         print scores[-1]
     return scores
 
 
 def task(data):
-    (usercode1,
-     usercode2,
+    (player1,
+     player2,
      headless,
      no_animate,
      play_in_thread,
@@ -129,13 +133,17 @@ def task(data):
 
     result = play(
         [
-            make_player(usercode1),
-            make_player(usercode2)
+            make_player(player1),
+            make_player(player2)
         ],
         not headless,
         no_animate,
         play_in_thread,
         match_seed=match_seed,
+        names=[
+            bot_name(player1),
+            bot_name(player2)
+        ],
     )
     print '{0} - seed: {1}'.format(result, match_seed)
     return result
@@ -148,8 +156,8 @@ def test_runs_concurrently(args):
         if args.match_seeds and i < len(args.match_seeds):
             match_seed = args.match_seeds[i]
         data.append([
-            args.usercode1,
-            args.usercode2,
+            args.player1,
+            args.player2,
             args.headless,
             args.no_animate,
             args.play_in_thread,
@@ -160,6 +168,8 @@ def test_runs_concurrently(args):
         num_cpu = 1
     return multiprocessing.Pool(num_cpu).map(task, data, 1)
 
+def bot_name(path_to_bot):
+    return os.path.splitext(os.path.basename(path_to_bot))[0]
 
 def main():
     args = parser.parse_args()

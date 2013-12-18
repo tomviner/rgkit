@@ -207,10 +207,28 @@ class AbstractGame(object):
         self.seed = seed
         self._random = random.Random(seed)
 
-        self.action_at = []
+        self.actions_on_turn = {} # dict mapping from turn # to dict-of-actions by location
 
-    def get_action_at(self, idx):
-        return self.action_at[idx]
+    def get_actions_on_turn(self, turn):
+        global settings
+        if turn in self.actions_on_turn:
+            return self.actions_on_turn[turn]
+        elif turn < 0:
+            return self.actions_on_turn[0]
+        elif turn == settings.max_turns:
+            # get or make dummy data for last turn
+            end_turn = settings.max_turns
+            if end_turn not in self.actions_on_turn:
+                self.actions_on_turn[end_turn] = {}
+                for loc, log in self.actions_on_turn[end_turn-1].items():
+                    dummy = {}
+                    dummy['name'] = ''
+                    dummy['target'] = None
+                    dummy['hp'] = dummy['hp_end'] = log['hp_end']
+                    dummy['loc'] = dummy['loc_end'] = log['loc_end']
+                    dummy['player'] = log['player']
+                    self.actions_on_turn[end_turn][log['loc_end']] = dummy
+            return self.actions_on_turn[end_turn]
 
     def get_robot_id(self):
         ret = self._id_inc
@@ -255,12 +273,14 @@ class AbstractGame(object):
         game_info_copies = self.build_players_game_info()
         actions = {}
 
+        self.last_hps = {}
         for robot in self._robots:
             user_robot = self._players[robot.player_id].get_robot()
             props = (settings.exposed_properties +
                      settings.player_only_properties)
             for prop in props:
                 setattr(user_robot, prop, getattr(robot, prop))
+            self.last_hps[user_robot.location] = user_robot.hp  # save hp before actions are processed
             try:
                 # Give each player bot an individual seed for every act call
                 game_info_copies[robot.player_id].seed = self._random.randint(
@@ -281,14 +301,12 @@ class AbstractGame(object):
         commands.insert(0, 'move')
 
         self.last_locs = {}
-        self.last_hps = {}
         for cmd in commands:
             for robot, action in actions.iteritems():
                 if action[0] != cmd:
                     continue
 
                 old_loc = robot.location
-                self.last_hps[old_loc] = robot.hp
                 try:
                     robot.issue_command(action, actions)
                 except Exception:
@@ -307,6 +325,7 @@ class AbstractGame(object):
         return self._field[loc]
 
     def spawn_robot(self, player_id, loc):
+        global settings
         if self.robot_at_loc(loc) is not None:
             return False
 
@@ -316,7 +335,7 @@ class AbstractGame(object):
         self._robots.append(robot)
         self._field[loc] = robot
         if self._record_actions:
-            self.get_action_at(self.turns)[loc] = {
+            self.actions_on_turn[self.turns][loc] = {
                 'name': 'spawn',
                 'target': None,
                 'hp': robot.hp,
@@ -390,7 +409,7 @@ class AbstractGame(object):
         if self._record_actions:
             for robot, action in actions.iteritems():
                 loc = self.last_locs.get(robot.location, robot.location)
-                log_action = self.get_action_at(self.turns).get(loc, {})
+                log_action = self.get_actions_on_turn(self.turns).get(loc, {})
                 hp_start = self.last_hps.get(loc, robot.hp)
                 log_action['name'] = log_action.get('name', action[0])
                 log_action['target'] = log_action.get(
@@ -402,7 +421,7 @@ class AbstractGame(object):
                                                        robot.location)
                 log_action['player'] = log_action.get('player',
                                                       robot.player_id)
-                self.get_action_at(self.turns)[loc] = log_action
+                self.get_actions_on_turn(self.turns)[loc] = log_action
 
         self.remove_dead()
         self.turns += 1
@@ -421,13 +440,18 @@ class AbstractGame(object):
             scores[robot.player_id] += 1
         return scores
 
-    def get_robot_actions(self, turn):
+    def get_robot_count(self, player, turn):
         global settings
-        if turn <= 0:
-            return self.action_at[1]
-        elif turn >= settings.max_turns:
-            return self.action_at[settings.max_turns-1]
-        return self.action_at[turn]
+
+        history = self.history[player]
+        if turn < 0:
+            return history[0]
+        elif turn < settings.max_turns or len(history) == settings.max_turns:
+            return history[turn]
+        else:
+            bots = [bot for bot in self._robots if bot.player_id == player]
+            history.append(bots)
+            return bots
 
 class Game(AbstractGame):
     def __init__(self, player1, player2, record_actions=False,
@@ -441,7 +465,8 @@ class Game(AbstractGame):
             self.history = [list() for i in range(2)]
 
         if self._record_actions:
-            self.action_at = [dict() for x in xrange(settings.max_turns)]
+            records = [{} for i in range(settings.max_turns)]
+            self.actions_on_turn = dict(zip(range(settings.max_turns), records))
             self.last_locs = {}
             self.last_hps = {}
 
@@ -485,17 +510,22 @@ class ThreadedGame(AbstractGame):
                             for i in range(2)]
 
         if self._record_actions:
-            self.action_at = PatientList(self.per_turn_events)
-            self._unsafe_action_at = [dict()
+            self.actions_on_turn = PatientList(self.per_turn_events)
+            self._unsafe_actions_on_turn = [dict()
                                       for x in xrange(settings.max_turns)]
-            self.action_at.extend(self._unsafe_action_at)
+            self.actions_on_turn.extend(self._unsafe_actions_on_turn)
             self.last_locs = {}
             self.last_hps = {}
 
         self.spawn_starting()
 
-    def get_action_at(self, idx):
-        return self.action_at.forced_get(idx)
+    def get_actions_on_turn(self, turn):
+        print "threaded get-action"
+        if turn < 0:
+            turn = 0
+        elif turn > self._settings.max_turns:
+            turn = self._settings.max_turns
+        return self.actions_on_turn.forced_get(turn)
 
     def run_turn(self):
         super(ThreadedGame, self).run_turn()
