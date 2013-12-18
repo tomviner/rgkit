@@ -4,7 +4,7 @@ import ast
 import Tkinter
 import sys
 
-from settings import settings, AttrDict
+from rgkit.settings import settings
 
 BLOCKSIZE = 20
 PADDING = 4
@@ -20,7 +20,7 @@ color_mapping = {
 
 def print_instructions():
     print '''
-usage: python mapeditor.py [<starting map file>]
+usage: python mapeditor.py <starting map file>
 
 I made this map editor to use for myself. Therefore, it might not seem
 very user-friendly, but it's not that hard. There are just a bunch of
@@ -41,12 +41,12 @@ Just for yourself
 Other functions
 ===============
 [d] fill board with selected color
-[f] save map data to map file provided or newmap.py by default
+[f] save map data to map file provided
 [i] invert black and white colors
 '''
 
 class MapEditor:
-    def __init__(self, blocksize, padding, map_file="newmap.py"):
+    def __init__(self, blocksize, padding, map_file):
         global settings
 
         self._blocksize = blocksize
@@ -188,9 +188,11 @@ class MapEditor:
         if event.char in func_map:
             func_map[event.char]()
 
-if __name__ == '__main__':
-    print_instructions()
+def main():
     if len(sys.argv) > 1:
         MapEditor(BLOCKSIZE, PADDING, sys.argv[1])
     else:
-        MapEditor(BLOCKSIZE, PADDING)
+        print_instructions()
+
+if __name__ == '__main__':
+    main()

@@ -53,10 +53,6 @@ def play(players, names, print_info=True, animate_render=True):
 
     return g.get_scores()
 
-
-def bot_name(path_to_bot):
-    return os.path.splitext(os.path.basename(path_to_bot))[0]
-
 def test_runs_sequentially(args):
     players = [make_player(args.red_user),
                make_player(args.green_user)]
