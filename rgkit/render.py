@@ -205,19 +205,19 @@ class Render:
         self._master.title('Robot Game')
 
         width = self._winsize
-        height = self._winsize + self._blocksize * 11/4
+        height = self._winsize + self._blocksize * 7 / 2
         self._win = Tkinter.Canvas(self._master, width=width, height=height)
         self._win.pack()
 
         self.prepare_backdrop(self._win)
         self._labelred = self._win.create_text(
-            self._blocksize/2, self._winsize + self._blocksize/2,
+            self._blocksize / 2, self._winsize + self._blocksize * 1 / 4,
             anchor='nw', font='TkFixedFont', fill='red')
         self._labelgreen = self._win.create_text(
-            self._blocksize/2, self._winsize + self._blocksize*2/2,
+            self._blocksize / 2, self._winsize + self._blocksize * 7 / 8,
             anchor='nw', font='TkFixedFont', fill='green')
         self._label = self._win.create_text(
-            self._blocksize/2, self._winsize + self._blocksize*3/2,
+            self._blocksize / 2, self._winsize + self._blocksize * 3 / 2,
             anchor='nw', font='TkFixedFont', fill='white')
 
         self.create_controls(self._win, width, height)
@@ -364,7 +364,8 @@ class Render:
         self._time_slider = Tkinter.Scale(frame,
                                           from_=-self._settings.turn_interval/2,
                                           to_=self._settings.turn_interval/2,
-                                          orient=Tkinter.HORIZONTAL, borderwidth=0)
+                                          orient=Tkinter.HORIZONTAL, borderwidth=0,
+                                          length=90)
         self._time_slider.pack(fill=Tkinter.X)
         self._time_slider.set(0)
 
