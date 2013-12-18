@@ -108,7 +108,7 @@ class RobotSprite:
         self.animation_offset = (0, 0)
         arrow_fill = None
         if self.action == 'move' and self.target is not None:
-            if self.renderer._animate:
+            if self.renderer._animations:
                 # if normal move, start at bot location and move to next location
                 # (note that first half of all move animations is the same)
                 if delta < 0.5 or self.location_next == self.target:
@@ -132,12 +132,12 @@ class RobotSprite:
         elif self.action == 'guard':
             pass
         elif self.action == 'suicide':
-            # explosion animation (TODO size and color configurable in settings)
-            # expand size (up to 1.5x original size)
-            bot_size = self.renderer._blocksize * (1 + delta/2)
-            # color fade to yellow
-            bot_rgb = blend_colors(bot_rgb, (1, 1, 0), delta)
-                    
+            if self.renderer._animations:
+                # explosion animation (TODO size and color configurable in settings)
+                # expand size (up to 1.5x original size)
+                bot_size = self.renderer._blocksize * (1 + delta/2)
+                # color fade to yellow
+                bot_rgb = blend_colors(bot_rgb, (1, 1, 0), 1-delta)
         # DRAW ARROWS
         if arrow_fill is not None:
             if self.overlay is None and self.renderer.show_arrows.get():

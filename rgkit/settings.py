@@ -17,8 +17,8 @@ settings = {
     # 'colors': [(0.9, 0, 0.2), (0, 0.9, 0.2)],
     'obstacle_color': (.2, .2, .2),
     'text_color': (0.6, 0.6, 0.6), # for labelling rows/columns
-    'text_color_dark': (0.2, 0.2, 0.2), # HP color when bots are bright
-    'text_color_bright': (0.6, 0.6, 0.6), # HP color when bots are dark
+    'text_color_dark': (0.1, 0.1, 0.1), # HP color when bots are bright
+    'text_color_bright': (0.9, 0.9, 0.9), # HP color when bots are dark
     'normal_color': (.9, .9, .9),
     'highlight_color': (0.6, 0.6, 0.6),
     'target_color': (0.6, 0.6, 1),
