@@ -15,7 +15,7 @@ Here are some excellent tools made by fellow players!
 * [Fetch Stats](https://github.com/afffsdd/Get-Robot)
 
 Robot Game's original creator is
-[Brandon Hisao](https://github.com/brandonhsiao).
+[Brandon Hsiao](https://github.com/brandonhsiao).
 
 ## Package Installation
 
