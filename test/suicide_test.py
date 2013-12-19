@@ -54,10 +54,12 @@ class SuicideTest(base.BaseTestCase):
         self.assertEqual(bot3.hp, settings['robot_hp'])
 
     def test_move_into_suicide_bot(self):
+        # Note, recent change to suicide blocking move.
         _, [bot2] = self.simulate(
             [RobotSuicide, RobotMoveLeft],
             [(10, 10)], [],
-            [(11, 10)], [(10, 10)])
+            [(11, 10)], [(11, 10)])
 
         self.assertEqual(len(self._game._robots), 1)
-        self.assertEqual(bot2.hp, settings['robot_hp'] - settings['suicide_damage'])
+        self.assertEqual(bot2.hp, settings['robot_hp'] -
+                settings['suicide_damage'] - settings['collision_damage'])
