@@ -26,6 +26,7 @@ class HighlightSprite:
         self.location = loc
         self.target = target
         self.renderer = render
+        self.settings = self.renderer._settings
         self.hlt_square = None
         self.target_square = None
 
@@ -51,18 +52,18 @@ class HighlightSprite:
         self.target_square = None
 
     def animate(self, delta=0):
-        if self.renderer._settings.highlight_cursor_blink:
-            if not delta < self.renderer._settings.highlight_cursor_blink_interval:
+        if self.settings.highlight_cursor_blink:
+            if not delta < self.settings.highlight_cursor_blink_interval:
                 self.clear()
                 return
 
         if self.location is not None:
             if self.hlt_square is None:
-                color = self.renderer._settings.highlight_color
+                color = self.settings.highlight_color
                 color = self.get_mixed_color(color, self.location)
                 self.hlt_square = self.renderer.draw_grid_object(self.location, fill=color, layer=3, width=0)
             if self.target is not None and self.target_square is None:
-                color = self.renderer._settings.target_color
+                color = self.settings.target_color
                 color = self.get_mixed_color(color, self.target)
                 self.target_square = self.renderer.draw_grid_object(self.target, fill=color, layer=3, width=0)
 
@@ -76,6 +77,7 @@ class RobotSprite:
         self.hp_next = max(0, action_info['hp_end'])
         self.id = action_info['player']
         self.renderer = render
+        self.settings = self.renderer._settings
         self.animation_offset = (0, 0)
 
         # Tkinter objects
@@ -92,23 +94,28 @@ class RobotSprite:
         # fix delta to between 0 and 1
         delta = max(0, min(delta, 1))
         bot_rgb_base = self.compute_color(self, self.id, self.hp)
+
+        # default settings
+        alpha_hack = 1
+        bot_rgb = bot_rgb_base
         # if spawn, fade in
-        if self.action == 'spawn':
-            alpha_hack = delta
-            bot_rgb = blend_colors(bot_rgb_base, self.renderer._settings.normal_color, delta)
-        # if dying, fade out
-        elif self.hp_next <= 0:
-            alpha_hack = 1-delta
-            bot_rgb = blend_colors(bot_rgb_base, self.renderer._settings.normal_color, 1-delta)
-        else:
-            alpha_hack = 1
-            bot_rgb = bot_rgb_base
+        if self.settings.bot_die_animation:
+            if self.action == 'spawn':
+                alpha_hack = delta
+                bot_rgb = blend_colors(bot_rgb_base, self.settings.normal_color, delta)
+            # if dying, fade out
+            elif self.hp_next <= 0:
+                alpha_hack = 1-delta
+                bot_rgb = blend_colors(bot_rgb_base, self.settings.normal_color, 1-delta)
+
         x, y = self.location
         bot_size = self.renderer._blocksize
         self.animation_offset = (0, 0)
         arrow_fill = None
+        
+        # move animations
         if self.action == 'move' and self.target is not None:
-            if self.renderer._animations:
+            if self.renderer._animations and self.settings.bot_move_animation:
                 # if normal move, start at bot location and move to next location
                 # (note that first half of all move animations is the same)
                 if delta < 0.5 or self.location_next == self.target:
@@ -125,19 +132,26 @@ class RobotSprite:
                 off_x = dx*delta*self.renderer._blocksize
                 off_y = dy*delta*self.renderer._blocksize
                 self.animation_offset = (off_x, off_y)            
-            if self.renderer._settings.draw_movement_arrow:
+            if self.settings.draw_movement_arrow:
                 arrow_fill = 'lightblue'
+
+        # attack animations
         elif self.action == 'attack' and self.target is not None:
             arrow_fill = 'orange'
+
+        # guard animations
         elif self.action == 'guard':
             pass
+        
+        # suicide animations
         elif self.action == 'suicide':
-            if self.renderer._animations:
+            if self.renderer._animations and self.settings.bot_suicide_animation:
                 # explosion animation (TODO size and color configurable in settings)
                 # expand size (up to 1.5x original size)
                 bot_size = self.renderer._blocksize * (1 + delta/2)
                 # color fade to yellow
                 bot_rgb = blend_colors(bot_rgb, (1, 1, 0), 1-delta)
+
         # DRAW ARROWS
         if arrow_fill is not None:
             if self.overlay is None and self.renderer.show_arrows.get():
@@ -146,6 +160,7 @@ class RobotSprite:
             elif self.overlay is not None and not self.renderer.show_arrows.get():
                 self.renderer.remove_object(self.overlay)
                 self.overlay = None
+        
         # DRAW BOTS WITH HP
         bot_hex = rgb_to_hex(*bot_rgb)
         self.draw_bot(delta, (x, y), bot_hex, bot_size)
@@ -153,7 +168,7 @@ class RobotSprite:
 
     @staticmethod
     def compute_color(self, player, hp):
-        r, g, b = self.renderer._settings.colors[player]
+        r, g, b = self.settings.colors[player]
         maxclr = min(hp, 50)
         r += (100 - maxclr * 1.75) / 255
         g += (100 - maxclr * 1.75) / 255
@@ -164,16 +179,16 @@ class RobotSprite:
         x, y, rx, ry = self.renderer.grid_bbox(loc, size-2)
         ox, oy = self.animation_offset
         if self.square is None:
-            self.square = self.renderer.draw_grid_object(self.location, type=self.renderer._settings.bot_shape, layer=3, fill=color, width=0)
+            self.square = self.renderer.draw_grid_object(self.location, type=self.settings.bot_shape, layer=3, fill=color, width=0)
         self.renderer._win.itemconfig(self.square, fill=color)
         self.renderer._win.coords(self.square, (x+ox, y+oy, rx+ox, ry+oy))
 
     def draw_bot_hp(self, delta, loc, bot_color, alpha):
         x, y = self.renderer.grid_to_xy(loc)
         ox, oy = self.animation_offset
-        tex_rgb = self.renderer._settings.text_color_bright \
-            if self.hp_next > self.renderer._settings.robot_hp / 2 \
-            else self.renderer._settings.text_color_dark
+        tex_rgb = self.settings.text_color_bright \
+            if self.hp_next > self.settings.robot_hp / 2 \
+            else self.settings.text_color_dark
         tex_rgb = blend_colors(tex_rgb, bot_color, alpha)
         tex_hex = rgb_to_hex(*tex_rgb)
         val = int(self.hp * (1-delta) + self.hp_next * delta)
@@ -205,19 +220,19 @@ class Render:
         self._master.title('Robot Game')
 
         width = self._winsize
-        height = self._winsize + self._blocksize * 11/4
+        height = self._winsize + self._blocksize * 7 / 2
         self._win = Tkinter.Canvas(self._master, width=width, height=height)
         self._win.pack()
 
         self.prepare_backdrop(self._win)
         self._labelred = self._win.create_text(
-            self._blocksize/2, self._winsize + self._blocksize/2,
+            self._blocksize / 2, self._winsize + self._blocksize * 1 / 4,
             anchor='nw', font='TkFixedFont', fill='red')
         self._labelgreen = self._win.create_text(
-            self._blocksize/2, self._winsize + self._blocksize*2/2,
+            self._blocksize / 2, self._winsize + self._blocksize * 7 / 8,
             anchor='nw', font='TkFixedFont', fill='green')
         self._label = self._win.create_text(
-            self._blocksize/2, self._winsize + self._blocksize*3/2,
+            self._blocksize / 2, self._winsize + self._blocksize * 3 / 2,
             anchor='nw', font='TkFixedFont', fill='white')
 
         self.create_controls(self._win, width, height)
@@ -364,7 +379,8 @@ class Render:
         self._time_slider = Tkinter.Scale(frame,
                                           from_=-self._settings.turn_interval/2,
                                           to_=self._settings.turn_interval/2,
-                                          orient=Tkinter.HORIZONTAL, borderwidth=0)
+                                          orient=Tkinter.HORIZONTAL, borderwidth=0,
+                                          length=90)
         self._time_slider.pack(fill=Tkinter.X)
         self._time_slider.set(0)
 
@@ -540,12 +556,17 @@ class Render:
         if self._highlight_sprite is not None or need_update:
             self._highlight_sprite.clear()
         self._highlight_sprite = HighlightSprite(self._highlighted, self._highlighted_target, self)
+        self.paint_highlight_sprite(0)
+
+    def paint_highlight_sprite(self, subframe_hlt=0):
+        if self._highlight_sprite is not None:
+            self._highlight_sprite.animate(subframe_hlt)
 
     def paint(self, subframe=0, subframe_hlt=0):
         for sprite in self._sprites:
             sprite.animate(subframe)
-        if self._highlight_sprite is not None:
-            self._highlight_sprite.animate(subframe_hlt)
+        self.update_highlight_sprite()
+        self.paint_highlight_sprite(subframe_hlt)
         self.update_layers()
 
     def grid_to_xy(self, loc):
