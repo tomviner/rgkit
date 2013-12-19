@@ -206,7 +206,7 @@ class RobotSprite:
         self.text = None
 
 class Render:
-    def __init__(self, game_inst, settings, animations, names=["Red", "Green"], block_size=25):
+    def __init__(self, game_inst, settings, animations, names=["Red", "Blue"], block_size=25):
         self._settings = settings
         self._animations = animations
         self._blocksize = block_size
@@ -228,9 +228,9 @@ class Render:
         self._labelred = self._win.create_text(
             self._blocksize / 2, self._winsize + self._blocksize * 1 / 4,
             anchor='nw', font='TkFixedFont', fill='red')
-        self._labelgreen = self._win.create_text(
+        self._labelblue = self._win.create_text(
             self._blocksize / 2, self._winsize + self._blocksize * 7 / 8,
-            anchor='nw', font='TkFixedFont', fill='green')
+            anchor='nw', font='TkFixedFont', fill='blue')
         self._label = self._win.create_text(
             self._blocksize / 2, self._winsize + self._blocksize * 3 / 2,
             anchor='nw', font='TkFixedFont', fill='white')
@@ -262,7 +262,7 @@ class Render:
         self._win.mainloop()
 
     def loc_robot_hp_color(self, loc):
-        for index, color in enumerate(('red', 'green')):
+        for index, color in enumerate(('red', 'blue')):
             self._game.get_actions_on_turn(self._turn)
             for robot in self._game.history[index][self._turn - 1]:
                 if robot[0] == loc:
@@ -445,7 +445,7 @@ class Render:
         if count_turn < 0:
             count_turn = 0
         red = len(self._game.history[0][count_turn-1])
-        green = len(self._game.history[1][count_turn-1])
+        blue = len(self._game.history[1][count_turn-1])
         info = ''
         currentAction = ''
         if self._highlighted is not None:
@@ -456,14 +456,14 @@ class Render:
                 actioninfo = squareinfo[1]
                 hp = actioninfo['hp']
                 team = actioninfo['player']
-                info = '%s Bot: %d HP' % (['Red', 'Green'][team], hp)
+                info = '%s Bot: %d HP' % (['Red', 'Blue'][team], hp)
                 if actioninfo.get('name') is not None:
                     currentAction += 'Current Action: %s' % (actioninfo['name'],)
                     if self._highlighted_target is not None:
                         currentAction += ' to %s' % (self._highlighted_target,)
 
         r_text = '%s: %d' % (self._names[0], red)
-        g_text = '%s: %d' % (self._names[1], green)
+        g_text = '%s: %d' % (self._names[1], blue)
         white_text = [
             'Turn: %d/%d' % (display_turn, max_turns),
             'Highlighted: %s; %s' % (self._highlighted, info),
@@ -471,7 +471,7 @@ class Render:
         ]
         self._win.itemconfig(self._label, text='\n'.join(white_text))
         self._win.itemconfig(self._labelred, text=r_text)
-        self._win.itemconfig(self._labelgreen, text=g_text)
+        self._win.itemconfig(self._labelblue, text=g_text)
 
     def current_turn_int(self):
         return min(int(math.floor(self._turn + self._sub_turn)), self._settings.max_turns)

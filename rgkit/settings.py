@@ -15,7 +15,7 @@ settings = {
     'turn_interval': 300,  # milliseconds per turn
 
     # colors
-    'colors': [(0.49, 0.14, 0.14), (0.14, 0.49, 0.14)],
+    'colors': [(0.49, 0.14, 0.14), (0.14, 0.14, 0.49)],
     # 'colors': [(0.9, 0, 0.2), (0, 0.9, 0.2)],
     'obstacle_color': (.2, .2, .2),
     'text_color': (0.6, 0.6, 0.6), # for labelling rows/columns
