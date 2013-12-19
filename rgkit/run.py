@@ -96,7 +96,6 @@ def play(players, print_info=True, animate_render=True, play_in_thread=False,
         g.run_all_turns()
         print "rendering %s animations" % ("with" if animate_render else "without")
         render.Render(g, game.settings, animate_render, names=names)
-        print g.history
 
     return g.get_scores()
 

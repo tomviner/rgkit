@@ -49,13 +49,16 @@ class Player:
         return self._robot
 
 class InternalRobot:
-    def __init__(self, location, hp, player_id, robot_id, field, seed):
+    def __init__(self, location, hp, player_id, robot_id, field, seed=None):
         self.location = location
         self.hp = hp
         self.player_id = player_id
         self.robot_id = robot_id
         self.field = field
-        self._random = random.Random(seed)
+        if seed is None:
+            self._random = random.Random()
+        else:
+            self._random = random.Random(seed)
 
     def __repr__(self):
         return '<%s: player: %d, hp: %d>' % (
@@ -99,8 +102,10 @@ class InternalRobot:
         return loc in good_around
 
     def is_collision(self, loc, robot, cmd, params, actions, move_exclude):
-        if cmd == 'suicide':
-            return False
+        # All damage is taken care of at the end of turn from now on, for
+        # consistency and ease of understanding. No exceptions.
+        #if cmd == 'suicide':
+        #    return False
         if cmd != 'move':
             return robot.location == loc
         if params[0] == loc:
@@ -282,9 +287,8 @@ class AbstractGame(object):
                 setattr(user_robot, prop, getattr(robot, prop))
             self.last_hps[user_robot.location] = user_robot.hp  # save hp before actions are processed
             try:
-                # Give each player bot an individual seed for every act call
-                game_info_copies[robot.player_id].seed = self._random.randint(
-                    0, sys.maxint)
+                # Reset random for each player bot
+                random.seed(self._random.randint(0, sys.maxint))
                 next_action = user_robot.act(game_info_copies[robot.player_id])
                 if not robot.is_valid_action(next_action):
                     raise Exception(
@@ -330,8 +334,9 @@ class AbstractGame(object):
             return False
 
         robot_id = self.get_robot_id()
-        robot = InternalRobot(loc, settings.robot_hp, player_id, robot_id,
-                              self._field, self._random.randint(0, sys.maxint))
+        robot = InternalRobot(
+            loc, settings.robot_hp, player_id, robot_id, self._field,
+            seed=self._random.randint(0, sys.maxint))
         self._robots.append(robot)
         self._field[loc] = robot
         if self._record_actions:
