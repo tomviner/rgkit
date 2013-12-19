@@ -70,7 +70,7 @@ def make_player(fname):
         raise IOError(msg)
 
 
-def play(players, print_info=True, animate_render=True, play_in_thread=False,
+def play(players, print_info=True, animate_render=False, play_in_thread=False,
          match_seed=None, names=["Red", "Green"]):
     if play_in_thread:
         g = game.ThreadedGame(*players,
@@ -126,7 +126,7 @@ def task(data):
     (player1,
      player2,
      headless,
-     no_animate,
+     animate,
      play_in_thread,
      match_seed) = data
 
@@ -136,7 +136,7 @@ def task(data):
             make_player(player2)
         ],
         not headless,
-        no_animate,
+        animate,
         play_in_thread,
         match_seed=match_seed,
         names=[
@@ -158,7 +158,7 @@ def test_runs_concurrently(args):
             args.player1,
             args.player2,
             args.headless,
-            args.no_animate,
+            args.animate,
             args.play_in_thread,
             match_seed,
         ])
