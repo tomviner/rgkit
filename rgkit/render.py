@@ -195,7 +195,8 @@ class RobotSprite:
         if self.text is None:
             self.text = self.renderer.draw_text(self.location, val, tex_hex)
         self.renderer._win.itemconfig(self.text, text=val, fill=tex_hex)
-        self.renderer._win.coords(self.text, (x+ox+10, y+oy+10))
+        self.renderer._win.coords(self.text, (x+ox+(self.renderer._blocksize-self.renderer.cell_border_width)/2,
+            y+oy+(self.renderer._blocksize-self.renderer.cell_border_width)/2))
 
     def clear(self):
         self.renderer.remove_object(self.square)
@@ -205,37 +206,63 @@ class RobotSprite:
         self.overlay = None
         self.text = None
 
+
 class Render:
-    def __init__(self, game_inst, settings, animations, names=["Red", "Blue"], block_size=25):
+    def __init__(self, game_inst, settings, animations, names=["Red", "Blue"]):
+        self.size_changed=True
+        self.init=True
+
         self._settings = settings
         self._animations = animations
-        self._blocksize = block_size
-        self._winsize = block_size * self._settings.board_size + 40
+        self._blocksize = 25
+        self._winsize = self._blocksize * self._settings.board_size + 40
         self._game = game_inst
         self._paused = True
         self._names = names
         self._layers = {}
 
+        self.cell_border_width = 2
+
         self._master = Tkinter.Tk()
+        self._master.configure(background="#333")
         self._master.title('Robot Game')
 
         width = self._winsize
-        height = self._winsize + self._blocksize * 7 / 2
-        self._win = Tkinter.Canvas(self._master, width=width, height=height)
+        height = self._winsize
+
+        self._board_frame = Tkinter.Frame(self._master, background="#555")
+        self._info_frame = Tkinter.Frame(self._master, background="#333")
+        self._control_frame = Tkinter.Frame(self._info_frame)
+
+        self._board_frame.pack(side=Tkinter.TOP, fill=Tkinter.BOTH, expand=True)
+
+        #tkinter problem: 'pack' distributes space according to which widgets have
+        # expand set to true, not to which directions they can actually expand to. 
+        self._info_frame.pack(side=Tkinter.BOTTOM)#,fill=Tkinter.X, expand=True)
+
+        self._control_frame.pack(side=Tkinter.RIGHT)
+
+        #tkinter problem: highlightthickness supposedly defaults to 0, but doesn't
+        self._win = Tkinter.Canvas(self._board_frame, width=width, height=height,
+            background="#555",highlightthickness=0)
+        self._info = Tkinter.Canvas(self._info_frame, width=300, height=95,
+            background="#333",highlightthickness=0)
+
         self._win.pack()
+        self._info.pack(side=Tkinter.LEFT)
 
-        self.prepare_backdrop(self._win)
-        self._labelred = self._win.create_text(
-            self._blocksize / 2, self._winsize + self._blocksize * 1 / 4,
+        self._master.bind('<Configure>', self.on_resize)
+
+        self._labelred = self._info.create_text(
+            self._blocksize / 2, self._blocksize * 1 / 4,
             anchor='nw', font='TkFixedFont', fill='red')
-        self._labelblue = self._win.create_text(
-            self._blocksize / 2, self._winsize + self._blocksize * 7 / 8,
+        self._labelblue = self._info.create_text(
+            self._blocksize / 2, self._blocksize * 7 / 8,
             anchor='nw', font='TkFixedFont', fill='blue')
-        self._label = self._win.create_text(
-            self._blocksize / 2, self._winsize + self._blocksize * 3 / 2,
+        self._label = self._info.create_text(
+            self._blocksize / 2, self._blocksize * 3 / 2,
             anchor='nw', font='TkFixedFont', fill='white')
-
-        self.create_controls(self._win, width, height)
+        self.create_controls(self._info, width, height)
 
         self._turn = 1.0
         self._sub_turn = 0.0
@@ -254,12 +281,16 @@ class Render:
         self.update_frame_start_time()
 
         self.draw_background()
-        self.update_title_and_text()
+        self.update_info_frame()
         self.update_sprites_new_turn()
         self.paint()
 
         self.callback()
-        self._win.mainloop()
+
+        self._master.mainloop()
+
+    def on_resize(self, event):
+        self.size_changed=True
 
     def loc_robot_hp_color(self, loc):
         for index, color in enumerate(('red', 'blue')):
@@ -279,9 +310,27 @@ class Render:
         if self._settings.clear_highlight_target_between_turns:
             self._highlighted_target = None
         self.update_sprites_new_turn()
-        self.update_title_and_text()
+        self.update_info_frame()
+
+    def update_block_size(self):
+        if self.size_changed:
+            if self.init:
+                self.init = False
+                return
+            
+            self.size_changed=False
+            self._win.delete("all")
+            print "Size changed, adjusting cell size..."
+
+            self._winsize = max(min(self._board_frame.winfo_width(),self._board_frame.winfo_height()),250)
+            self._blocksize = (self._winsize-40)/self._settings.board_size
+            self._win.configure(width=self._winsize,height=self._winsize)
+
+            self.draw_background()
 
     def step_turn(self, turns):
+        self.update_block_size()
+
         # if past the end, step back extra
         if self._turn >= self._settings.max_turns:
             turns -= 1
@@ -292,7 +341,7 @@ class Render:
         self._sub_turn = 0.0
         self.update_frame_start_time()
         self.turn_changed()
-        self.update_title_and_text()
+        self.update_info_frame()
         self.paint()
 
     def toggle_pause(self):
@@ -309,6 +358,7 @@ class Render:
     def update_frame_start_time(self, tstart=None):
         tstart = tstart or millis()
         self._t_frame_start = tstart
+
         self._t_next_frame = tstart + self._slider_delay
 
     def create_controls(self, win, width, height):
@@ -331,7 +381,7 @@ class Render:
 
         def pause():
             self.toggle_pause()
-            self.update_title_and_text()
+            self.update_info_frame()
 
         def onclick(event):
             x = (event.x - 20) / self._blocksize
@@ -348,7 +398,7 @@ class Render:
                 else:
                     self._highlighted_target = None
                 self.update_highlight_sprite()
-                self.update_title_and_text()
+                self.update_info_frame()
                 self._t_cursor_start = millis()
 
         self._master.bind("<Button-1>", lambda e: onclick(e))
@@ -358,8 +408,7 @@ class Render:
 
         self.show_arrows = Tkinter.BooleanVar()
 
-        frame = Tkinter.Frame()
-        win.create_window(width, height, anchor=Tkinter.SE, window=frame)
+        frame = self._control_frame
 
         arrows_box = Tkinter.Checkbutton(frame, text="Show Arrows", variable=self.show_arrows, command=self.paint)
         arrows_box.pack()
@@ -383,14 +432,6 @@ class Render:
                                           length=90)
         self._time_slider.pack(fill=Tkinter.X)
         self._time_slider.set(0)
-
-    def prepare_backdrop(self, win):
-        self._win.create_rectangle(0, 0, self._winsize, self._winsize + self._blocksize, fill='#555', width=0)
-        self._win.create_rectangle(0, self._winsize, self._winsize, self._winsize + self._blocksize * 15/4, fill='#333', width=0)
-        for x in range(self._settings.board_size):
-            for y in range(self._settings.board_size):
-                rgb = self._settings.normal_color if "normal" in rg.loc_types((x, y)) else self._settings.obstacle_color
-                self.draw_grid_object((x, y), fill=rgb_to_hex(*rgb), layer=1, width=0)
 
     def draw_grid_object(self, loc, type="square", layer=0, **kargs):
         layer_id = 'layer %d' % layer
@@ -419,7 +460,8 @@ class Render:
         self._layers[layer_id] = None
         x, y = self.grid_to_xy(loc)
         item = self._win.create_text(
-            x+10, y+10,
+            x+(self._blocksize-self.cell_border_width)/2,
+            y+(self._blocksize-self.cell_border_width)/2,
             text=text, font='TkFixedFont', fill=color, tags=[layer_id])
         return item
 
@@ -436,7 +478,7 @@ class Render:
         item = self._win.create_line(srcx+ox, srcy+oy, dstx+ox, dsty+oy, **kargs)
         return item
 
-    def update_title_and_text(self):
+    def update_info_frame(self):
         display_turn = self.current_turn_int()
         max_turns = self._settings.max_turns
         count_turn = int(math.ceil(self._turn + self._sub_turn))
@@ -469,9 +511,9 @@ class Render:
             'Highlighted: %s; %s' % (self._highlighted, info),
             currentAction
         ]
-        self._win.itemconfig(self._label, text='\n'.join(white_text))
-        self._win.itemconfig(self._labelred, text=r_text)
-        self._win.itemconfig(self._labelblue, text=g_text)
+        self._info.itemconfig(self._label, text='\n'.join(white_text))
+        self._info.itemconfig(self._labelred, text=r_text)
+        self._info.itemconfig(self._labelblue, text=g_text)
 
     def current_turn_int(self):
         return min(int(math.floor(self._turn + self._sub_turn)), self._settings.max_turns)
@@ -506,7 +548,7 @@ class Render:
                 if self._turn >= self._settings.max_turns:
                     self.toggle_pause()
                     self._turn = self._settings.max_turns
-                self.update_title_and_text()
+                self.update_info_frame()
                 if self._sub_turn >= 1:
                     self._sub_turn -= 1
                     self._turn += 1
@@ -542,6 +584,8 @@ class Render:
             sprite.clear()
         self._sprites = []
 
+        self.update_block_size()
+
         self.update_highlight_sprite()
         turn_action = self.current_turn_int()
         bots_activity = self._game.get_actions_on_turn(turn_action)
@@ -575,11 +619,12 @@ class Render:
 
     def square_bottom_corner(self, square_topleft):
         x, y = square_topleft
-        return (x + self._blocksize - 3, y + self._blocksize - 3)
+        return (x + self._blocksize - self.cell_border_width, y + self._blocksize - self.cell_border_width)
 
     def grid_bbox(self, loc, width=25):
         x, y = self.grid_to_xy(loc)
-        x += (self._blocksize - 3) / 2
-        y += (self._blocksize - 3) / 2
-        halfwidth = width / 2
-        return (int(x-halfwidth), int(y-halfwidth), int(x+halfwidth), int(y+halfwidth))
+        x += (self._blocksize - self.cell_border_width) / 2.
+        y += (self._blocksize - self.cell_border_width) / 2.
+        halfwidth = self._blocksize / 2.
+        halfborder = self.cell_border_width / 2.
+        return (int(x-halfwidth+halfborder), int(y-halfwidth+halfborder), int(x+halfwidth-halfborder), int(y+halfwidth-halfborder))
