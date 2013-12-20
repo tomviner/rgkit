@@ -525,7 +525,7 @@ class ThreadedGame(AbstractGame):
         self.spawn_starting()
 
     def get_actions_on_turn(self, turn):
-        print "threaded get-action"
+        # print "threaded get-action"
         if turn < 0:
             turn = 0
         elif turn > self._settings.max_turns:

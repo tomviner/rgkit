@@ -43,6 +43,7 @@ settings = {
     'bot_die_animation': True,
     'bot_move_animation': False,
     'bot_suicide_animation': False,
+    'bot_hp_animation': False,
 
     # rating systems
     'rating_range': 150,

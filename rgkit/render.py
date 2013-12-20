@@ -164,7 +164,7 @@ class RobotSprite:
         # DRAW BOTS WITH HP
         bot_hex = rgb_to_hex(*bot_rgb)
         self.draw_bot(delta, (x, y), bot_hex, bot_size)
-        self.draw_bot_hp(delta, (x, y), bot_rgb, alpha_hack)
+        self.draw_bot_hp(delta if self.settings.bot_hp_animation else 0, (x, y), bot_rgb, alpha_hack)
 
     @staticmethod
     def compute_color(self, player, hp):
@@ -209,7 +209,7 @@ class RobotSprite:
 
 class Render:
     def __init__(self, game_inst, settings, animations, names=["Red", "Blue"]):
-        self.size_changed=True
+        self.size_changed=False
         self.init=True
 
         self._settings = settings
@@ -320,7 +320,7 @@ class Render:
             
             self.size_changed=False
             self._win.delete("all")
-            print "Size changed, adjusting cell size..."
+            # print "Size changed, adjusting cell size..."
 
             self._winsize = max(min(self._board_frame.winfo_width(),self._board_frame.winfo_height()),250)
             self._blocksize = (self._winsize-40)/self._settings.board_size
@@ -329,8 +329,6 @@ class Render:
             self.draw_background()
 
     def step_turn(self, turns):
-        self.update_block_size()
-
         # if past the end, step back extra
         if self._turn >= self._settings.max_turns:
             turns -= 1
@@ -561,6 +559,7 @@ class Render:
             self.update_frame_start_time(self._t_next_frame)
             self.turn_changed()
             self.paint(0, 0)
+        self.update_block_size()
 
     def determine_bg_color(self, loc):
         if loc in self._settings.obstacles:
