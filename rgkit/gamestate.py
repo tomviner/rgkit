@@ -1,4 +1,5 @@
 import random
+import sys
 from collections import defaultdict
 
 from rgkit import rg
@@ -6,8 +7,14 @@ from rgkit.settings import AttrDict
 
 
 class GameState:
-    def __init__(self, settings, use_start=False, turn=0, next_robot_id=0):
+    def __init__(self, settings, use_start=False,
+                 turn=0, next_robot_id=0, seed=None):
         self._settings = settings
+
+        if seed is None:
+            seed = random.randint(0, sys.maxint)
+        self._seed = seed
+        self._random = random.Random(self._seed)
 
         self.robots = {}
         self.turn = turn
