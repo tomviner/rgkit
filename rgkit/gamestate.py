@@ -190,8 +190,8 @@ class GameState:
     def get_game_info(self, player_id):
         game_info = AttrDict()
 
-        game_info.robots = {loc: AttrDict(robot)
-                            for loc, robot in self.robots.iteritems()}
+        game_info.robots = dict((loc, AttrDict(robot))
+                                for loc, robot in self.robots.iteritems())
         for loc, robot in game_info.robots.iteritems():
             if robot.player_id != player_id:
                 del robot.robot_id
