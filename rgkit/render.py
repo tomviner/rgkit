@@ -288,7 +288,7 @@ class Render:
         if self._sub_turn > 0 and turns < 0:
             turns += 1
         self._turn = self.current_turn_int() + turns
-        self._turn = min(max(self._turn, 1.0), self._game.turns)
+        self._turn = min(max(self._turn, 1.0), self._game.state.turn)
         self._sub_turn = 0.0
         self.update_frame_start_time()
         self.turn_changed()

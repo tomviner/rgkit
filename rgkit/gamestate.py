@@ -49,7 +49,7 @@ class GameState:
         return loc in self.robots
 
     def _clear_spawn(self):
-        for loc in settings.spawn_coords:
+        for loc in self._settings.spawn_coords:
             if self.is_robot(loc):
                 self.remove_robot(loc)
 
@@ -172,7 +172,7 @@ class GameState:
         new_state._clear_dead()
 
         if spawn:
-            if self.turn % 10 == 0:
+            if self.turn % self._settings.spawn_every == 0:
                 new_state._clear_spawn()
                 new_state._spawn_robots()
 
