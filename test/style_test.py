@@ -4,7 +4,7 @@ from glob import glob
 
 class TestCodeFormat(unittest.TestCase):
     def test_pep8_conformance(self):
-        files = glob('*.py') + glob('test/*.py')
+        files = glob('rgkit/*.py') + glob('test/*.py')
 
         pep8style = pep8.StyleGuide()
         pep8style.options.ignore += ('E302', 'E501')

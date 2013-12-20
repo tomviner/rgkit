@@ -12,12 +12,12 @@ class TestAttack(unittest.TestCase):
         state = GameState(settings)
         state.add_robot((10, 10), 0)
         state.add_robot((9, 10), 1)
-        
+
         actions = {
             (10, 10): ['attack', (9, 10)],
             (9, 10): ['attack', (10, 10)]
         }
-        
+
         state2 = state.apply_actions(actions, spawn=False)
 
         self.assertTrue(state2.is_robot((10, 10)))
@@ -31,12 +31,12 @@ class TestAttack(unittest.TestCase):
         state = GameState(settings)
         state.add_robot((10, 10), 0, hp=settings.attack_range[0])
         state.add_robot((9, 10), 1, hp=settings.attack_range[0])
-        
+
         actions = {
             (10, 10): ['attack', (9, 10)],
             (9, 10): ['attack', (10, 10)]
         }
-        
+
         state2 = state.apply_actions(actions, spawn=False)
 
         self.assertFalse(state2.is_robot((10, 10)))
@@ -46,12 +46,12 @@ class TestAttack(unittest.TestCase):
         state = GameState(settings)
         state.add_robot((10, 10), 0)
         state.add_robot((9, 10), 1)
-        
+
         actions = {
             (10, 10): ['attack', (9, 10)],
             (9, 10): ['guard']
         }
-        
+
         state2 = state.apply_actions(actions, spawn=False)
 
         self.assertTrue(state2.is_robot((9, 10)))
@@ -62,12 +62,12 @@ class TestAttack(unittest.TestCase):
         state = GameState(settings)
         state.add_robot((10, 10), 0)
         state.add_robot((9, 10), 0)
-        
+
         actions = {
             (10, 10): ['attack', (9, 10)],
             (9, 10): ['attack', (10, 10)]
         }
-        
+
         state2 = state.apply_actions(actions, spawn=False)
 
         self.assertTrue(state2.is_robot((10, 10)))
@@ -79,12 +79,12 @@ class TestAttack(unittest.TestCase):
         state = GameState(settings)
         state.add_robot((10, 10), 0)
         state.add_robot((9, 10), 1)
-        
+
         actions = {
             (10, 10): ['attack', (9, 10)],
             (9, 10): ['move', (8, 10)]
         }
-        
+
         state2 = state.apply_actions(actions, spawn=False)
 
         self.assertTrue(state2.is_robot((8, 10)))
@@ -95,13 +95,13 @@ class TestAttack(unittest.TestCase):
         state.add_robot((10, 10), 0)
         state.add_robot((9, 10), 1)
         state.add_robot((7, 10), 1)
-        
+
         actions = {
             (10, 10): ['attack', (9, 10)],
             (9, 10): ['move', (8, 10)],
             (7, 10): ['move', (8, 10)]
         }
-        
+
         state2 = state.apply_actions(actions, spawn=False)
 
         self.assertTrue(state2.is_robot((9, 10)))
@@ -112,12 +112,12 @@ class TestAttack(unittest.TestCase):
         state = GameState(settings)
         state.add_robot((10, 10), 0)
         state.add_robot((8, 10), 1)
-        
+
         actions = {
             (10, 10): ['attack', (9, 10)],
             (8, 10): ['move', (9, 10)]
         }
-        
+
         state2 = state.apply_actions(actions, spawn=False)
 
         self.assertTrue(state2.is_robot((9, 10)))

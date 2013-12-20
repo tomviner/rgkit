@@ -55,5 +55,3 @@ class TestStateMisc(unittest.TestCase):
         self.assertEquals(game_info.robots[6, 11].player_id, state.robots[(6, 11)].player_id)
         self.assertRaises(AttributeError, lambda: game_info.robots[6, 11].robot_id)
         self.assertEquals(game_info.turn, state.turn)
-    
-    

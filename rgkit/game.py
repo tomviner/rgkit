@@ -127,7 +127,7 @@ class AbstractGame(object):
         self.state = self.state.apply_actions(actions)
         return actions
 
-    def make_history(self):
+    def make_history(self, actions):
         robots = [[] for i in range(2)]
         for loc, robot in self.state.robots.iteritems():
             robot_info = {}
@@ -135,6 +135,8 @@ class AbstractGame(object):
                      self._settings.player_only_properties)
             for prop in props:
                 robot_info[prop] = getattr(robot, prop)
+            if loc in actions:
+                robot_info['action'] = actions[loc]
             robots[robot.player_id].append(robot_info)
         return robots
 
@@ -213,7 +215,7 @@ class AbstractGame(object):
         self.capture_actions(actions, new_state)
 
         if self._record_history:
-            round_history = self.make_history()
+            round_history = self.make_history(actions)
             for i in (0, 1):
                 self.history[i].append(round_history[i])
 

@@ -112,7 +112,7 @@ class RobotSprite:
         bot_size = self.renderer._blocksize
         self.animation_offset = (0, 0)
         arrow_fill = None
-        
+
         # move animations
         if self.action == 'move' and self.target is not None:
             if self.renderer._animations and self.settings.bot_move_animation:
@@ -131,7 +131,7 @@ class RobotSprite:
                 dy = ty - y
                 off_x = dx*delta*self.renderer._blocksize
                 off_y = dy*delta*self.renderer._blocksize
-                self.animation_offset = (off_x, off_y)            
+                self.animation_offset = (off_x, off_y)
             if self.settings.draw_movement_arrow:
                 arrow_fill = 'lightblue'
 
@@ -142,7 +142,7 @@ class RobotSprite:
         # guard animations
         elif self.action == 'guard':
             pass
-        
+
         # suicide animations
         elif self.action == 'suicide':
             if self.renderer._animations and self.settings.bot_suicide_animation:
@@ -160,7 +160,7 @@ class RobotSprite:
             elif self.overlay is not None and not self.renderer.show_arrows.get():
                 self.renderer.remove_object(self.overlay)
                 self.overlay = None
-        
+
         # DRAW BOTS WITH HP
         bot_hex = rgb_to_hex(*bot_rgb)
         self.draw_bot(delta, (x, y), bot_hex, bot_size)
@@ -195,8 +195,10 @@ class RobotSprite:
         if self.text is None:
             self.text = self.renderer.draw_text(self.location, val, tex_hex)
         self.renderer._win.itemconfig(self.text, text=val, fill=tex_hex)
-        self.renderer._win.coords(self.text, (x+ox+(self.renderer._blocksize-self.renderer.cell_border_width)/2,
-            y+oy+(self.renderer._blocksize-self.renderer.cell_border_width)/2))
+        self.renderer._win.coords(
+            self.text,
+            (x+ox+(self.renderer._blocksize-self.renderer.cell_border_width)/2,
+             y+oy+(self.renderer._blocksize-self.renderer.cell_border_width)/2))
 
     def clear(self):
         self.renderer.remove_object(self.square)
@@ -209,8 +211,8 @@ class RobotSprite:
 
 class Render:
     def __init__(self, game_inst, settings, animations, names=["Red", "Blue"]):
-        self.size_changed=False
-        self.init=True
+        self.size_changed = False
+        self.init = True
 
         self._settings = settings
         self._animations = animations
@@ -237,16 +239,18 @@ class Render:
         self._board_frame.pack(side=Tkinter.TOP, fill=Tkinter.BOTH, expand=True)
 
         #tkinter problem: 'pack' distributes space according to which widgets have
-        # expand set to true, not to which directions they can actually expand to. 
-        self._info_frame.pack(side=Tkinter.BOTTOM)#,fill=Tkinter.X, expand=True)
+        # expand set to true, not to which directions they can actually expand to.
+        self._info_frame.pack(side=Tkinter.BOTTOM)  # ,fill=Tkinter.X, expand=True)
 
         self._control_frame.pack(side=Tkinter.RIGHT)
 
         #tkinter problem: highlightthickness supposedly defaults to 0, but doesn't
-        self._win = Tkinter.Canvas(self._board_frame, width=width, height=height,
-            background="#555",highlightthickness=0)
-        self._info = Tkinter.Canvas(self._info_frame, width=300, height=95,
-            background="#333",highlightthickness=0)
+        self._win = Tkinter.Canvas(
+            self._board_frame, width=width, height=height,
+            background="#555", highlightthickness=0)
+        self._info = Tkinter.Canvas(
+            self._info_frame, width=300, height=95,
+            background="#333", highlightthickness=0)
 
         self._win.pack()
         self._info.pack(side=Tkinter.LEFT)
@@ -290,7 +294,7 @@ class Render:
         self._master.mainloop()
 
     def on_resize(self, event):
-        self.size_changed=True
+        self.size_changed = True
 
     def loc_robot_hp_color(self, loc):
         for index, color in enumerate(('red', 'blue')):
@@ -317,14 +321,14 @@ class Render:
             if self.init:
                 self.init = False
                 return
-            
-            self.size_changed=False
+
+            self.size_changed = False
             self._win.delete("all")
             # print "Size changed, adjusting cell size..."
 
-            self._winsize = max(min(self._board_frame.winfo_width(),self._board_frame.winfo_height()),250)
+            self._winsize = max(min(self._board_frame.winfo_width(), self._board_frame.winfo_height()), 250)
             self._blocksize = (self._winsize-40)/self._settings.board_size
-            self._win.configure(width=self._winsize,height=self._winsize)
+            self._win.configure(width=self._winsize, height=self._winsize)
 
             self.draw_background()
 

@@ -10,7 +10,7 @@ settings = {
     'max_turns': 100,
 
     # rendering
-    # commented out lines are the settings used for the old animated mode 
+    # commented out lines are the settings used for the old animated mode
     'FPS': 60,  # frames per second
     'turn_interval': 300,  # milliseconds per turn
 
@@ -18,9 +18,9 @@ settings = {
     'colors': [(0.49, 0.14, 0.14), (0.14, 0.14, 0.49)],
     # 'colors': [(0.9, 0, 0.2), (0, 0.9, 0.2)],
     'obstacle_color': (.2, .2, .2),
-    'text_color': (0.6, 0.6, 0.6), # for labelling rows/columns
-    'text_color_dark': (0.1, 0.1, 0.1), # HP color when bots are bright
-    'text_color_bright': (0.9, 0.9, 0.9), # HP color when bots are dark
+    'text_color': (0.6, 0.6, 0.6),  # for labelling rows/columns
+    'text_color_dark': (0.1, 0.1, 0.1),  # HP color when bots are bright
+    'text_color_bright': (0.9, 0.9, 0.9),  # HP color when bots are dark
     'normal_color': (.9, .9, .9),
     'highlight_color': (0.6, 0.6, 0.6),
     'target_color': (0.6, 0.6, 1),

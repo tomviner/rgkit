@@ -12,12 +12,12 @@ class TestMove(unittest.TestCase):
         state = GameState(settings)
         state.add_robot((10, 10), 0)
         state.add_robot((8, 10), 0)
-        
+
         actions = {
             (10, 10): ['move', (11, 10)],
             (8, 10): ['move', (7, 10)]
         }
-        
+
         state2 = state.apply_actions(actions, spawn=False)
 
         self.assertTrue(state2.is_robot((11, 10)))
@@ -29,7 +29,7 @@ class TestMove(unittest.TestCase):
         state = GameState(settings)
         state.add_robot((10, 10), 0)
         state.add_robot((8, 10), 1)
-        
+
         actions = {
             (10, 10): ['move', (9, 10)],
             (8, 10): ['move', (9, 10)]
@@ -46,7 +46,7 @@ class TestMove(unittest.TestCase):
         state = GameState(settings)
         state.add_robot((10, 10), 0)
         state.add_robot((9, 10), 1)
-        
+
         actions = {
             (10, 10): ['move', (9, 10)],
             (9, 10): ['guard']
@@ -64,7 +64,7 @@ class TestMove(unittest.TestCase):
         state.add_robot((10, 10), 0)
         state.add_robot((11, 10), 0)
         state.add_robot((12, 10), 0)
-        
+
         actions = {
             (10, 10): ['move', (9, 10)],
             (11, 10): ['move', (10, 10)],
@@ -86,7 +86,7 @@ class TestMove(unittest.TestCase):
         state.add_robot((11, 10), 1)
         state.add_robot((12, 10), 0)
         state.add_robot((8, 10), 1)
-        
+
         actions = {
             (10, 10): ['move', (9, 10)],
             (11, 10): ['move', (10, 10)],
@@ -109,7 +109,7 @@ class TestMove(unittest.TestCase):
         state = GameState(settings)
         state.add_robot((9, 9), 0)
         state.add_robot((8, 9), 1)
-        
+
         actions = {
             (9, 9): ['move', (8, 9)],
             (8, 9): ['move', (9, 9)]
@@ -132,7 +132,7 @@ class TestMove(unittest.TestCase):
         state.add_robot((9, 8), 1)
         state.add_robot((9, 9), 0)
         state.add_robot((8, 9), 1)
-        
+
         actions = {
             (8, 8): ['move', (9, 8)],
             (9, 8): ['move', (9, 9)],
@@ -161,7 +161,7 @@ class TestMove(unittest.TestCase):
         state.add_robot((9, 12), 1)
         state.add_robot((9, 11), 0)
         state.add_robot((11, 11), 1)
-        
+
         actions = {
             (9, 10): ['move', (9, 11)],
             (9, 12): ['move', (9, 11)],
@@ -185,7 +185,7 @@ class TestMove(unittest.TestCase):
         state.add_robot((9, 10), 0)
         state.add_robot((10, 11), 0)
         state.add_robot((11, 10), 1)
-        
+
         actions = {
             (9, 10): ['move', (10, 10)],
             (10, 11): ['move', (10, 10)],
