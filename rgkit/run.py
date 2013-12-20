@@ -118,7 +118,7 @@ def test_runs_sequentially(args):
                  match_seed=match_seed,
                  names=names)
         )
-        # print scores[-1]
+        print scores[-1]
     return scores
 
 
