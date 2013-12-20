@@ -61,5 +61,7 @@ class SuicideTest(base.BaseTestCase):
             [(11, 10)], [(11, 10)])
 
         self.assertEqual(len(self._game._robots), 1)
-        self.assertEqual(bot2.hp, settings['robot_hp'] -
-                settings['suicide_damage'] - settings['collision_damage'])
+        self.assertEqual(
+            bot2.hp,
+            settings['robot_hp'] -
+            settings['suicide_damage'] - settings['collision_damage'])
