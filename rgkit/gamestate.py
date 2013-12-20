@@ -62,7 +62,7 @@ class GameState:
             if len(locations) < self._settings.spawn_per_player*2:
                 locations.append(loc)
             else:
-                s = int(random.random()*n)
+                s = int(self._random.random()*n)
                 if s < self._settings.spawn_per_player*2:
                     locations[s] = loc
 
@@ -151,7 +151,7 @@ class GameState:
 
             if actions[loc][0] == 'attack':
                 target = actions[loc][1]
-                damage = random.randint(*self._settings.attack_range)
+                damage = self._random.randint(*self._settings.attack_range)
                 damage_map[target][actor_id] += damage
 
             if actions[loc][0] == 'suicide':
