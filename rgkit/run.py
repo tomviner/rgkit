@@ -94,7 +94,7 @@ def play(players, print_info=True, animate_render=False, play_in_thread=False,
         from rgkit import render
 
         g.run_all_turns()
-        print "rendering %s animations" % ("with" if animate_render else "without")
+        # print "rendering %s animations" % ("with" if animate_render else "without")
         render.Render(g, game.settings, animate_render, names=names)
 
     return g.get_scores()
@@ -118,7 +118,7 @@ def test_runs_sequentially(args):
                  match_seed=match_seed,
                  names=names)
         )
-        print scores[-1]
+        # print scores[-1]
     return scores
 
 
