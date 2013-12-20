@@ -11,6 +11,7 @@ except ImportError:
 
 
 from rgkit import rg, defaultrobots
+from rgkit.gamestate import GameState
 from rgkit.settings import settings, AttrDict
 
 sys.modules['rg'] = rg  # preserve backwards compatible robot imports
@@ -198,12 +199,13 @@ class Field:
 
 class AbstractGame(object):
     def __init__(self, player1, player2, record_actions=False,
-                 record_history=False, unit_testing=False, print_info=False,
+                 record_history=False, print_info=False,
                  seed=None):
+        global settings
         self._players = (player1, player2)
+        self._state = GameState(settings, seed)
         self._record_actions = record_actions
         self._record_history = record_history
-        self._unit_testing = unit_testing
         self._print_info = print_info
         self._robots = []
         self._field = Field(settings.board_size)
@@ -260,8 +262,7 @@ class AbstractGame(object):
                 y.location,
                 AttrDict(dict((x, getattr(y, x)) for x in props))
             ) for y in self._robots),
-            'turn': self.turns,
-            'seed': 0, # To be set per robot
+            'turn': self.turns
         })
 
     def build_players_game_info(self):
@@ -403,10 +404,9 @@ class AbstractGame(object):
 
         actions = self.make_robots_act()
 
-        if not self._unit_testing:
-            if self.turns % settings.spawn_every == 0:
-                self.clear_spawn_points()
-                self.spawn_robot_batch()
+        if self.turns % settings.spawn_every == 0:
+            self.clear_spawn_points()
+            self.spawn_robot_batch()
 
         if self._record_history:
             round_history = self.make_history(actions)
@@ -462,10 +462,10 @@ class AbstractGame(object):
 
 class Game(AbstractGame):
     def __init__(self, player1, player2, record_actions=False,
-                 record_history=False, unit_testing=False, print_info=False,
+                 record_history=False, print_info=False,
                  seed=None):
         super(Game, self).__init__(
-            player1, player2, record_actions, record_history, unit_testing,
+            player1, player2, record_actions, record_history,
             print_info, seed)
 
         if self._record_history:
@@ -500,10 +500,10 @@ class PatientList(list):
 
 class ThreadedGame(AbstractGame):
     def __init__(self, player1, player2, record_actions=False,
-                 record_history=False, unit_testing=False, print_info=False,
+                 record_history=False, print_info=False,
                  seed=None):
         super(ThreadedGame, self).__init__(
-            player1, player2, record_actions, record_history, unit_testing,
+            player1, player2, record_actions, record_history,
             print_info, seed)
 
         self.turns_running_lock = _threading.Lock()
