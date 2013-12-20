@@ -1,67 +1,105 @@
-import base
+import ast
+import pkg_resources
 import unittest
-from bots import *
 from rgkit import game
-from rgkit.settings import settings
+from rgkit.gamestate import GameState
 
+map_data = ast.literal_eval(open(pkg_resources.resource_filename('rgkit', 'maps/default.py')).read())
+settings = game.init_settings(map_data)
 
-class SuicideTest(base.BaseTestCase):
+class TestSuicide(unittest.TestCase):
     def test_basic_suicide(self):
-        _, [bot2] = self.simulate(
-            [RobotSuicide, RobotGuard],
-            [(10, 10)], [],
-            [(11, 10)], [(11, 10)])
+        state = GameState(settings)
+        state.add_robot((10, 10), 0)
+        state.add_robot((9, 10), 1)
 
-        assert(not self._game.robot_at_loc((10, 10)))
-        self.assertEqual(bot2.hp, settings['robot_hp'] - settings['suicide_damage'] / 2)
+        actions = {
+            (10, 10): ['attack', (9, 10)],
+            (9, 10): ['suicide']
+        }
 
-    def test_move_out_of_suicide_range(self):
-        _, [bot2] = self.simulate(
-            [RobotSuicide, RobotMoveRight],
-            [(10, 10)], [],
-            [(11, 10)], [(12, 10)])
+        state2 = state.apply_actions(actions, spawn=False)
 
-        assert(not self._game.robot_at_loc((10, 10)))
-        self.assertEqual(bot2.hp, settings['robot_hp'])
+        self.assertTrue(state2.is_robot((10, 10)))
+        self.assertEqual(state2.robots[10, 10].hp, settings.robot_hp - settings.suicide_damage)
 
-    def test_move_into_suicide_range(self):
-        _, [bot2] = self.simulate(
-            [RobotSuicide, RobotMoveLeft],
-            [(10, 10)], [],
-            [(12, 10)], [(11, 10)])
+        self.assertFalse(state2.is_robot((9, 10)))
 
-        assert(not self._game.robot_at_loc((10, 10)))
-        self.assertEqual(bot2.hp, settings['robot_hp'] - settings['suicide_damage'])
+    def test_guarding_reduces_damage(self):
+        state = GameState(settings)
+        state.add_robot((10, 10), 0)
+        state.add_robot((9, 10), 1)
 
-    def test_collide_and_stay_out_of_suicide_range(self):
-        _, [bot2, bot3] = self.simulate(
-            [RobotSuicide, RobotMoveRightAndGuard],
-            [(10, 10)], [],
-            [(8, 10), (9, 10)], [(8, 10), (9, 10)])
+        actions = {
+            (10, 10): ['guard'],
+            (9, 10): ['suicide']
+        }
 
-        assert(not self._game.robot_at_loc((10, 10)))
-        self.assertEqual(bot2.hp, settings['robot_hp'])
-        self.assertEqual(bot3.hp, settings['robot_hp'] - settings['suicide_damage'] / 2)
+        state2 = state.apply_actions(actions, spawn=False)
 
-    def test_collide_and_stay_in_suicide_range(self):
-        _, [bot2, bot3] = self.simulate(
-            [RobotSuicide, RobotMoveRightAndGuard],
-            [(9, 10)], [],
-            [(10, 10), (11, 10)], [(10, 10), (11, 10)])
+        self.assertTrue(state2.is_robot((10, 10)))
+        self.assertEqual(state2.robots[10, 10].hp, settings.robot_hp - settings.suicide_damage/2)
+        self.assertFalse(state2.is_robot((9, 10)))
 
-        assert(not self._game.robot_at_loc((9, 10)))
-        self.assertEqual(bot2.hp, settings['robot_hp'] - settings['suicide_damage'])
-        self.assertEqual(bot3.hp, settings['robot_hp'])
+    def test_suicide_does_no_damage_to_teammates(self):
+        state = GameState(settings)
+        state.add_robot((10, 10), 0)
+        state.add_robot((9, 10), 0)
+
+        actions = {
+            (10, 10): ['guard'],
+            (9, 10): ['suicide']
+        }
+
+        state2 = state.apply_actions(actions, spawn=False)
+
+        self.assertTrue(state2.is_robot((10, 10)))
+        self.assertEqual(state2.robots[10, 10].hp, settings.robot_hp)
+        self.assertFalse(state2.is_robot((9, 10)))
+
+    def test_suicide_dodge(self):
+        state = GameState(settings)
+        state.add_robot((10, 10), 0)
+        state.add_robot((9, 10), 1)
+
+        actions = {
+            (10, 10): ['sucide'],
+            (9, 10): ['move', (8, 10)]
+        }
+
+        state2 = state.apply_actions(actions, spawn=False)
+
+        self.assertTrue(state2.is_robot((8, 10)))
+        self.assertEqual(state2.robots[8, 10].hp, settings.robot_hp)
+
+    def test_suicide_dodge_fail(self):
+        state = GameState(settings)
+        state.add_robot((10, 10), 0)
+        state.add_robot((9, 10), 1)
+        state.add_robot((7, 10), 1)
+
+        actions = {
+            (10, 10): ['suicide'],
+            (9, 10): ['move', (8, 10)],
+            (7, 10): ['move', (8, 10)]
+        }
+
+        state2 = state.apply_actions(actions, spawn=False)
+
+        self.assertTrue(state2.is_robot((9, 10)))
+        self.assertEqual(state2.robots[9, 10].hp, settings.robot_hp - settings.suicide_damage)
 
     def test_move_into_suicide_bot(self):
-        # Note, recent change to suicide blocking move.
-        _, [bot2] = self.simulate(
-            [RobotSuicide, RobotMoveLeft],
-            [(10, 10)], [],
-            [(11, 10)], [(11, 10)])
+        state = GameState(settings)
+        state.add_robot((10, 10), 0)
+        state.add_robot((9, 10), 1)
 
-        self.assertEqual(len(self._game._robots), 1)
-        self.assertEqual(
-            bot2.hp,
-            settings['robot_hp'] -
-            settings['suicide_damage'] - settings['collision_damage'])
+        actions = {
+            (10, 10): ['suicide'],
+            (9, 10): ['move', (10, 10)]
+        }
+
+        state2 = state.apply_actions(actions, spawn=False)
+
+        self.assertTrue(state2.is_robot((9, 10)))
+        self.assertEqual(state2.robots[9, 10].hp, settings.robot_hp - settings.collision_damage - settings.suicide_damage)
