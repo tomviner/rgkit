@@ -18,6 +18,7 @@ color_mapping = {
     'r': ('darkred', None),
 }
 
+
 def print_instructions():
     print '''
 usage: python mapeditor.py <starting map file>
@@ -45,6 +46,7 @@ Other functions
 [i] invert black and white colors
 '''
 
+
 class MapEditor:
     def __init__(self, blocksize, padding, map_file):
         global settings
@@ -58,7 +60,8 @@ class MapEditor:
         global settings
 
         root = Tkinter.Tk()
-        size = (self._blocksize + self._padding) * settings.board_size + self._padding * 2 + 40
+        size = (self._blocksize + self._padding) * settings.board_size + \
+            self._padding * 2 + 40
 
         self._canvas = Tkinter.Canvas(root, width=size, height=size)
         self._rect_items = []
@@ -78,8 +81,10 @@ class MapEditor:
         for y in range(settings.board_size):
             for x in range(settings.board_size):
                 item = self._canvas.create_rectangle(
-                    x * (self._blocksize + self._padding) + self._padding + 20, y * (self._blocksize + self._padding) + self._padding + 20,
-                    (x+1) * (self._blocksize + self._padding) + 20, (y+1) * (self._blocksize + self._padding) + 20,
+                    x * (self._blocksize + self._padding) + self._padding + 20,
+                    y * (self._blocksize + self._padding) + self._padding + 20,
+                    (x+1) * (self._blocksize + self._padding) + 20,
+                    (y+1) * (self._blocksize + self._padding) + 20,
                     fill='#ddd',
                     width=0)
                 self._colors.append('#ddd')
@@ -108,7 +113,8 @@ class MapEditor:
                 return
 
         if 0 <= item_id < len(self._rect_items):
-            self._canvas.itemconfigure(self._rect_items[item_id], fill=self._current_color)
+            self._canvas.itemconfigure(self._rect_items[item_id],
+                                       fill=self._current_color)
             self._colors[item_id] = self._current_color
 
     def click_handler(self, event):
@@ -133,7 +139,8 @@ class MapEditor:
 
         map_data = ast.literal_eval(open(self._map_file).read())
 
-        label_mapping = dict((v, k) for k, v in color_mapping.values() if v is not None)
+        label_mapping = dict((v, k) for k, v in color_mapping.values()
+                             if v is not None)
 
         for label, color in label_mapping.iteritems():
             if label not in map_data:
@@ -141,7 +148,8 @@ class MapEditor:
 
             self.set_color(color)
             for coord in map_data[label]:
-                self.paint_square(item_id=coord[0] + settings.board_size * coord[1])
+                self.paint_square(item_id=coord[0] +
+                                  settings.board_size * coord[1])
 
     def save_map(self):
         global settings
@@ -155,7 +163,8 @@ class MapEditor:
 
         for i, color in enumerate(self._colors):
             if color in label_mapping and label_mapping[color] is not None:
-                coords[label_mapping[color]].append((i % settings.board_size, int(i / settings.board_size)))
+                coords[label_mapping[color]].append((i % settings.board_size,
+                                                     i / settings.board_size))
 
         with open(self._map_file, 'w') as f:
             f.write(str(coords))
@@ -187,6 +196,7 @@ class MapEditor:
 
         if event.char in func_map:
             func_map[event.char]()
+
 
 def main():
     if len(sys.argv) > 1:

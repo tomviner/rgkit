@@ -94,7 +94,8 @@ def play(players, print_info=True, animate_render=False, play_in_thread=False,
         from rgkit import render
 
         g.run_all_turns()
-        print "rendering %s animations" % ("with" if animate_render else "without")
+        print "rendering %s animations" % ("with"
+                                           if animate_render else "without")
         render.Render(g, game.settings, animate_render, names=names)
 
     return g.get_scores()
@@ -167,8 +168,10 @@ def test_runs_concurrently(args):
         num_cpu = 1
     return multiprocessing.Pool(num_cpu).map(task, data, 1)
 
+
 def bot_name(path_to_bot):
     return os.path.splitext(os.path.basename(path_to_bot))[0]
+
 
 def main():
     args = parser.parse_args()

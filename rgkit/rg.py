@@ -3,10 +3,12 @@ from math import sqrt
 settings = None
 CENTER_POINT = None
 
+
 def after_settings():
     global CENTER_POINT
     global settings
     CENTER_POINT = (int(settings.board_size / 2), int(settings.board_size / 2))
+
 
 def set_settings(s):
     global settings
@@ -15,11 +17,14 @@ def set_settings(s):
 
 #################################################
 
+
 def dist(p1, p2):
     return sqrt((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2)
 
+
 def wdist(p1, p2):
     return abs(p2[0] - p1[0]) + abs(p2[1] - p1[1])
+
 
 def memodict(f):
     """ Memoization decorator for a function taking a single argument """
@@ -28,6 +33,7 @@ def memodict(f):
             ret = self[key] = f(key)
             return ret
     return memodict().__getitem__
+
 
 @memodict
 def loc_types(loc):
@@ -42,15 +48,19 @@ def loc_types(loc):
         types.add('obstacle')
     return types
 
+
 @memodict
 def _locs_around(loc):
     x, y = loc
     offsets = ((0, 1), (1, 0), (0, -1), (-1, 0))
     return [(x + dx, y + dy) for dx, dy in offsets]
 
+
 def locs_around(loc, filter_out=None):
     filter_out = set(filter_out or [])
-    return [loc for loc in _locs_around(loc) if len(filter_out & loc_types(loc)) == 0]
+    return [loc for loc in _locs_around(loc)
+            if len(filter_out & loc_types(loc)) == 0]
+
 
 def toward(curr, dest):
     if curr == dest:
