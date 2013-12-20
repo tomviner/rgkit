@@ -4,7 +4,7 @@ rgkit -- Testing kit for [Robot Game](http://robotgame.net/)
 [![Build Status](https://travis-ci.org/WhiteHalmos/rgkit.png?branch=master)]
 (https://travis-ci.org/WhiteHalmos/rgkit)
 
-Please see this [link](http://robotgame.whitehalmos.org/kit) for the
+Please see this [link](http://robotgame.net/rules) for the
 instructions to the game.
 
 Here are some excellent tools made by fellow players!
