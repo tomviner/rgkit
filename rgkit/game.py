@@ -17,12 +17,14 @@ sys.modules['rg'] = rg  # preserve backwards compatible robot imports
 
 
 def init_settings(map_data):
+    # I'll get rid of the globals. I promise. 
     global settings
     settings.spawn_coords = map_data['spawn']
     settings.obstacles = map_data['obstacle']
     settings.start1 = map_data['start1']
     settings.start2 = map_data['start2']
     rg.set_settings(settings)
+    return settings
 
 class Player:
     def __init__(self, code=None, robot=None):
