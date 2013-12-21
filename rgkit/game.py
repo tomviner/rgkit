@@ -112,7 +112,7 @@ class AbstractGame(object):
                 if not self.state.is_valid_action(loc, action):
                     raise Exception(
                         'Bot {0}: {1} is not a valid action from {2}'.format(
-                            robot.player_id + 1, next_action, robot.location))
+                            robot.player_id + 1, action, robot.location))
             except Exception:
                 traceback.print_exc(file=sys.stdout)
                 action = ['guard']
