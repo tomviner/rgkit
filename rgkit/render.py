@@ -331,6 +331,8 @@ class Render:
             self._win.configure(width=self._winsize, height=self._winsize)
 
             self.draw_background()
+            return True
+        return False
 
     def step_turn(self, turns):
         # if past the end, step back extra
@@ -544,6 +546,7 @@ class Render:
     def tick(self):
         now = millis()
         # check if frame-update
+        updated = self.update_block_size()
         if self._animations:
             if not self._paused:
                 self._sub_turn = max(0.0, float((now - self._t_frame_start)) / float(self._slider_delay))
@@ -563,7 +566,10 @@ class Render:
             self.update_frame_start_time(self._t_next_frame)
             self.turn_changed()
             self.paint(0, 0)
-        self.update_block_size()
+        elif updated:
+            self.update_frame_start_time(self._t_next_frame)
+            self.turn_changed()
+            self.paint(0, 0)
 
     def determine_bg_color(self, loc):
         if loc in self._settings.obstacles:
