@@ -4,14 +4,17 @@ import math
 
 from rgkit import rg
 
+
 def millis():
     return int(time.time() * 1000)
+
 
 def rgb_to_hex(r, g, b, normalized=True):
     if normalized:
         return '#%02x%02x%02x' % (r*255, g*255, b*255)
     else:
         return '#%02x%02x%02x' % (r, g, b)
+
 
 def blend_colors(color1, color2, weight):
     r1, g1, b1 = color1
@@ -20,6 +23,7 @@ def blend_colors(color1, color2, weight):
     g = g1 * weight + g2 * (1-weight)
     b = b1 * weight + b2 * (1-weight)
     return (r, g, b)
+
 
 class HighlightSprite:
     def __init__(self, loc, target, render):
@@ -66,6 +70,7 @@ class HighlightSprite:
                 color = self.settings.target_color
                 color = self.get_mixed_color(color, self.target)
                 self.target_square = self.renderer.draw_grid_object(self.target, fill=color, layer=3, width=0)
+
 
 class RobotSprite:
     def __init__(self, action_info, render):

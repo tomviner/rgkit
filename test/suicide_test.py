@@ -7,6 +7,7 @@ from rgkit.gamestate import GameState
 map_data = ast.literal_eval(open(pkg_resources.resource_filename('rgkit', 'maps/default.py')).read())
 settings = game.init_settings(map_data)
 
+
 class TestSuicide(unittest.TestCase):
     def test_basic_suicide(self):
         state = GameState(settings)
