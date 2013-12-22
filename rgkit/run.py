@@ -47,15 +47,15 @@ parser.add_argument("-c", "--count", type=int,
 parser.add_argument("-A", "--animate", action="store_true",
                     default=False,
                     help="Enable animations in rendering.")
-group = parser.add_mutually_exclusive_group()
-group.add_argument("-H", "--headless", action="store_true",
-                   default=False,
-                   help="Disable rendering game output.")
-group.add_argument("-q", "--quiet", action="count",
+parser.add_argument("-q", "--quiet", action="count",
                    help="Quiet execution.\n\
 -q : suppresses bot stdout\n\
 -qq: suppresses bot stdout and stderr\n\
 -qqq: supresses all rgkit and bot output")
+group = parser.add_mutually_exclusive_group()
+group.add_argument("-H", "--headless", action="store_true",
+                   default=False,
+                   help="Disable rendering game output.")
 group.add_argument("-T", "--play-in-thread", action="store_true",
                    default=False,
                    help="Separate GUI thread from robot move calculations.")
@@ -65,6 +65,15 @@ parser.add_argument("--game-seed",
 parser.add_argument("--match-seeds", nargs='*',
                     help="Used for random seed of the first matches in order.")
 
+
+def mute_all():
+    sys.stdout = NullDevice()
+    sys.stderr = NullDevice()
+
+
+def unmute_all():
+    sys.stdout = sys.__stdout__
+    sys.stderr = sys.__stderr__
 
 def make_player(fname):
     try:
@@ -123,6 +132,8 @@ def test_runs_sequentially(args):
                       match_seed=match_seed,
                       names=names, quiet=args.quiet)
         scores.append(result)
+        if args.quiet >= 3:
+            unmute_all()
         print '{0} - seed: {1}'.format(result, match_seed)
     return scores
 
@@ -149,6 +160,8 @@ def task(data, quiet=0):
             bot_name(player2)
         ],
     )
+    if args.quiet >= 3:
+        unmute_all()
     print '{0} - seed: {1}'.format(result, match_seed)
     return result
 
@@ -180,8 +193,7 @@ def bot_name(path_to_bot):
 def main():
     args = parser.parse_args()
     if args.quiet >= 3:
-        sys.stdout = NullDevice()
-        sys.stderr = NullDevice()
+        mute_all()
 
     map_data = ast.literal_eval(args.map.read())
     game.init_settings(map_data)
