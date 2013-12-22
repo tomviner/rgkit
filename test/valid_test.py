@@ -32,6 +32,11 @@ class TestValid(unittest.TestCase):
         state.add_robot((9, 9), 0)
         self.assertFalse(state.is_valid_action((9, 9), ['exterminate']))
 
+    def test_too_long(self):
+        state = GameState(settings)
+        state.add_robot((9, 9), 0)
+        self.assertFalse(state.is_valid_action((9, 9), ['guard', 'foo']))
+
     def test_move_to_self(self):
         state = GameState(settings)
         state.add_robot((9, 9), 0)
