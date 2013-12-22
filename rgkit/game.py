@@ -71,7 +71,8 @@ class Player:
 
         for loc, robot in game_state.robots.iteritems():
             if robot.player_id == self._player_id:
-                actions[loc] = self._get_action(game_state, game_info, robot, seed)
+                actions[loc] = self._get_action(game_state,
+                                                game_info, robot, seed)
 
         return actions
 
@@ -122,8 +123,10 @@ class AbstractGame(object):
         return [self.state.get_game_info(0), self.state.get_game_info(1)]
 
     def get_robots_actions(self):
-        actions = self._player1.get_actions(self.state, self._random.randint(0, sys.maxint))
-        actions2 = self._player2.get_actions(self.state, self._random.randint(0, sys.maxint))
+        seed1 = self._random.randint(0, sys.maxint)
+        actions = self._player1.get_actions(self.state, seed1)
+        seed2 = self._random.randint(0, sys.maxint)
+        actions2 = self._player2.get_actions(self.state, seed2)
         actions.update(actions2)
 
         return actions

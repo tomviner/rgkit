@@ -231,7 +231,8 @@ class GameState:
                 else:
                     robot_id = None
 
-                new_state.add_robot(delta_info.loc_end, delta_info.player_id, delta_info.hp_end, robot_id)
+                new_state.add_robot(delta_info.loc_end, delta_info.player_id,
+                                    delta_info.hp_end, robot_id)
 
         return new_state
 
