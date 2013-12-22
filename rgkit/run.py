@@ -28,7 +28,6 @@ except ImportError:
     sys.path.insert(0, parentdir)
 
 from rgkit import game
-from game import NullDevice
 
 parser = argparse.ArgumentParser(description="Robot game execution script.",
                                  formatter_class=RawTextHelpFormatter)
@@ -180,8 +179,8 @@ def bot_name(path_to_bot):
 def main():
     args = parser.parse_args()
     if args.quiet >= 3:
-        sys.stdout = NullDevice()
-        sys.stderr = NullDevice()
+        sys.stdout = game.NullDevice()
+        sys.stderr = game.NullDevice()
 
     map_data = ast.literal_eval(args.map.read())
     game.init_settings(map_data)
