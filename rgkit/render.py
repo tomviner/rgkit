@@ -240,8 +240,8 @@ class Render:
 
         #tkinter problem: 'pack' distributes space according to which widgets have
         # expand set to true, not to which directions they can actually expand to.
-        self._info_frame.pack(side=Tkinter.BOTTOM, fill=Tkinter.X, 
-            expand=True, padx=5)
+        self._info_frame.pack(side=Tkinter.BOTTOM, fill=Tkinter.X,
+                              expand=True, padx=5)
 
         self._control_frame.pack(side=Tkinter.RIGHT)
 
