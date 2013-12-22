@@ -54,6 +54,12 @@ class TestValid(unittest.TestCase):
         action = long_action(['guard'])
         self.assertFalse(state.is_valid_action((9, 9), action))
 
+    def test_additional_info(self):
+        state = GameState(settings)
+        state.add_robot((9, 9), 0)
+
+        self.assertTrue(state.is_valid_action((9, 9), ['guard', 'additional info']))
+
     def test_move_to_self(self):
         state = GameState(settings)
         state.add_robot((9, 9), 0)
