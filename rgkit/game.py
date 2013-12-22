@@ -29,28 +29,51 @@ def init_settings(map_data):
 
 
 class Player:
-    def __init__(self, code=None, robot=None):
-        if code is not None:
-            self._mod = imp.new_module('usercode%d' % id(self))
-            exec code in self._mod.__dict__
-            self._robot = None
-        elif robot is not None:
-            self._mod = None
-            self._robot = robot
-        else:
-            raise Exception('you need to provide code or a robot')
+    def __init__(self, code):
+        self._module = imp.new_module('usercode%d' % id(self))
+        exec code in self._module.__dict__
+        self._robot = self._module.__dict__['Robot']()
 
-    def get_robot(self):
-        if self._robot is not None:
-            return self._robot
+    def set_player_id(self, player_id):
+        self._player_id = player_id
 
-        mod = defaultrobots
-        if self._mod is not None:
-            if 'Robot' in self._mod.__dict__:
-                mod = self._mod
+    def reload(self):
+        self._robot = self._module.__dict__['Robot']()
 
-        self._robot = mod.__dict__['Robot']()
-        return self._robot
+    def _get_action(self, game_state, game_info, robot, seed):
+        try:
+            random.seed(seed)
+
+            self._robot.location = robot.location
+            self._robot.hp = robot.hp
+            self._robot.player_id = robot.player_id
+            self._robot.robot_id = robot.robot_id
+            action = self._robot.act(game_info)
+
+            if not game_state.is_valid_action(robot.location, action):
+                raise Exception(
+                    'Bot {0}: {1} is not a valid action from {2}'.format(
+                        robot.robot_id + 1, action, robot.location)
+                )
+
+        except Exception:
+            traceback.print_exc(file=sys.stdout)
+            action = ['guard']
+
+        return action
+
+    # returns map (loc) -> (action) for all bots of this player
+    # 'fixes' invalid actions
+    def get_actions(self, game_state, seed):
+        game_info = game_state.get_game_info(self._player_id)
+
+        actions = {}
+
+        for loc, robot in game_state.robots.iteritems():
+            if robot.player_id == self._player_id:
+                actions[loc] = self._get_action(game_state, game_info, robot, seed)
+
+        return actions
 
 
 class AbstractGame(object):
@@ -59,7 +82,10 @@ class AbstractGame(object):
                  seed=None):
         global settings
         self._settings = settings
-        self._players = (player1, player2)
+        self._player1 = player1
+        self._player1.set_player_id(0)
+        self._player2 = player2
+        self._player2.set_player_id(1)
         self.state = GameState(self._settings, use_start=True, seed=seed)
         self._record_actions = record_actions
         self._record_history = record_history
@@ -96,35 +122,10 @@ class AbstractGame(object):
         return [self.state.get_game_info(0), self.state.get_game_info(1)]
 
     def get_robots_actions(self):
-        game_info_copies = self.build_players_game_info()
-        actions = {}
+        actions = self._player1.get_actions(self.state, self._random.randint(0, sys.maxint))
+        actions2 = self._player2.get_actions(self.state, self._random.randint(0, sys.maxint))
+        actions.update(actions2)
 
-        for loc, robot in self.state.robots.iteritems():
-            user_robot = self._players[robot.player_id].get_robot()
-            props = (settings.exposed_properties +
-                     settings.player_only_properties)
-            for prop in props:
-                setattr(user_robot, prop, getattr(robot, prop))
-
-            try:
-                random.seed(self._random.randint(0, sys.maxint))
-                action = user_robot.act(game_info_copies[robot.player_id])
-                if not self.state.is_valid_action(loc, action):
-                    raise Exception(
-                        'Bot {0}: {1} is not a valid action from {2}'.format(
-                            robot.player_id + 1, action, robot.location))
-            except Exception:
-                traceback.print_exc(file=sys.stdout)
-                action = ['guard']
-
-            actions[loc] = action
-
-        return actions
-
-    def make_robots_act(self):
-        actions = self.get_robots_actions()
-
-        self.state = self.state.apply_actions(actions)
         return actions
 
     def make_history(self, actions):
