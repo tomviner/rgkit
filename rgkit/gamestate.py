@@ -270,7 +270,7 @@ class GameState:
     # action = well, action
     def is_valid_action(self, actor, action):
         try:
-            if not isinstance(action, list):
+            if type(action) != list:
                 return False
 
             if action[0] in ['move', 'attack']:
