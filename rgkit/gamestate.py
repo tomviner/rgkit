@@ -219,7 +219,7 @@ class GameState:
         new_state = GameState(self._settings,
                               next_robot_id=self._next_robot_id,
                               turn=self.turn + 1,
-                              seed=self._seed)
+                              seed=self._random.randint(0, sys.maxint))
 
         for delta_info in delta:
             if delta_info.hp_end > 0:
