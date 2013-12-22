@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 
 import argparse
+from argparse import RawTextHelpFormatter
 import ast
 import imp
 import inspect
@@ -29,7 +30,8 @@ except ImportError:
 from rgkit import game
 from game import NullDevice
 
-parser = argparse.ArgumentParser(description="Robot game execution script.")
+parser = argparse.ArgumentParser(description="Robot game execution script.",
+                                 formatter_class=RawTextHelpFormatter)
 parser.add_argument("player1",
                     help="File containing first robot class definition.")
 parser.add_argument("player2",
@@ -49,7 +51,11 @@ group = parser.add_mutually_exclusive_group()
 group.add_argument("-H", "--headless", action="store_true",
                    default=False,
                    help="Disable rendering game output.")
-group.add_argument("-q", "--quiet", action="count")
+group.add_argument("-q", "--quiet", action="count",
+                   help="Quiet execution.\n\
+-q : suppresses bot stdout\n\
+-qq: suppresses bot stdout and stderr\n\
+-qqq: supresses all rgkit and bot output")
 group.add_argument("-T", "--play-in-thread", action="store_true",
                    default=False,
                    help="Separate GUI thread from robot move calculations.")
