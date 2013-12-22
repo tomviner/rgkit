@@ -16,6 +16,9 @@ from rgkit.settings import settings, AttrDict
 
 sys.modules['rg'] = rg  # preserve backwards compatible robot imports
 
+class NullDevice():
+    def write(self, asdf):
+        pass
 
 def init_settings(map_data):
     # I'll get rid of the globals. I promise.
@@ -80,7 +83,7 @@ class Player:
 class AbstractGame(object):
     def __init__(self, player1, player2, record_actions=False,
                  record_history=False, print_info=False,
-                 seed=None):
+                 seed=None, quiet=0):
         global settings
         self._settings = settings
         self._player1 = player1
@@ -96,6 +99,7 @@ class AbstractGame(object):
             seed = random.randint(0, sys.maxint)
         self.seed = seed
         self._random = random.Random(seed)
+        self._quiet = quiet
 
         self.actions_on_turn = {}  # {turn: {loc: action}}
 
@@ -123,11 +127,16 @@ class AbstractGame(object):
         return [self.state.get_game_info(0), self.state.get_game_info(1)]
 
     def get_robots_actions(self):
+        if self._quiet >= 1 and self._quiet < 3: sys.stdout = NullDevice()
+        if self._quiet >= 2 and self._quiet < 3: sys.stderr = NullDevice()
         seed1 = self._random.randint(0, sys.maxint)
         actions = self._player1.get_actions(self.state, seed1)
         seed2 = self._random.randint(0, sys.maxint)
         actions2 = self._player2.get_actions(self.state, seed2)
         actions.update(actions2)
+        if self._quiet >= 1 and self._quiet < 3: sys.stdout = sys.__stdout__
+        if self._quiet >= 2 and self._quiet < 3: sys.stderr = sys.__stderr__
+        # sys.stderr = sys.__stderr__;
 
         return actions
 
@@ -240,10 +249,10 @@ class AbstractGame(object):
 class Game(AbstractGame):
     def __init__(self, player1, player2, record_actions=False,
                  record_history=False, print_info=False,
-                 seed=None):
+                 seed=None, quiet=0):
         super(Game, self).__init__(
             player1, player2, record_actions, record_history,
-            print_info, seed)
+            print_info, seed, quiet)
 
         if self._record_history:
             self.history = [list() for i in range(2)]
@@ -279,10 +288,10 @@ class PatientList(list):
 class ThreadedGame(AbstractGame):
     def __init__(self, player1, player2, record_actions=False,
                  record_history=False, print_info=False,
-                 seed=None):
+                 seed=None, quiet=0):
         super(ThreadedGame, self).__init__(
             player1, player2, record_actions, record_history,
-            print_info, seed)
+            print_info, seed, quiet)
 
         self.turn_running_lock = _threading.Lock()
         self.per_turn_events = [_threading.Event()

@@ -27,7 +27,7 @@ except ImportError:
     sys.path.insert(0, parentdir)
 
 from rgkit import game
-
+from game import NullDevice
 
 parser = argparse.ArgumentParser(description="Robot game execution script.")
 parser.add_argument("player1",
@@ -49,6 +49,7 @@ group = parser.add_mutually_exclusive_group()
 group.add_argument("-H", "--headless", action="store_true",
                    default=False,
                    help="Disable rendering game output.")
+group.add_argument("-q", "--quiet", action="count")
 group.add_argument("-T", "--play-in-thread", action="store_true",
                    default=False,
                    help="Separate GUI thread from robot move calculations.")
@@ -57,7 +58,6 @@ parser.add_argument("--game-seed",
                     help="Appended with game countfor per-match seeds.")
 parser.add_argument("--match-seeds", nargs='*',
                     help="Used for random seed of the first matches in order.")
-
 
 def make_player(fname):
     try:
@@ -71,19 +71,19 @@ def make_player(fname):
 
 
 def play(players, print_info=True, animate_render=False, play_in_thread=False,
-         match_seed=None, names=["Red", "Green"]):
+         match_seed=None, names=["Red", "Green"], quiet=0):
     if play_in_thread:
         g = game.ThreadedGame(*players,
                               print_info=print_info,
                               record_actions=True,
                               record_history=True,
-                              seed=match_seed)
+                              seed=match_seed, quiet=quiet)
     else:
         g = game.Game(*players,
                       print_info=print_info,
                       record_actions=True,
                       record_history=True,
-                      seed=match_seed)
+                      seed=match_seed, quiet=quiet)
 
     if print_info:
         print('Match seed: {}'.format(g.seed))
@@ -117,13 +117,13 @@ def test_runs_sequentially(args):
                  args.animate,
                  args.play_in_thread,
                  match_seed=match_seed,
-                 names=names)
+                 names=names, quiet=args.quiet)
         )
         # print scores[-1]
     return scores
 
 
-def task(data):
+def task(data, quiet=0):
     (player1,
      player2,
      headless,
@@ -166,7 +166,7 @@ def test_runs_concurrently(args):
     num_cpu = multiprocessing.cpu_count() - 1
     if num_cpu == 0:
         num_cpu = 1
-    return multiprocessing.Pool(num_cpu).map(task, data, 1)
+    return multiprocessing.Pool(num_cpu).map(task, data, args.quiet, 1)
 
 
 def bot_name(path_to_bot):
@@ -175,6 +175,9 @@ def bot_name(path_to_bot):
 
 def main():
     args = parser.parse_args()
+    if args.quiet >= 3:
+        sys.stdout = NullDevice()
+        sys.stderr = NullDevice()
 
     map_data = ast.literal_eval(args.map.read())
     game.init_settings(map_data)
