@@ -8,6 +8,7 @@ settings = {
     'collision_damage': 5,
     'suicide_damage': 15,
     'max_turns': 100,
+    'str_limit': 50,  # limit on length of representation of action
 
     # rendering
     # commented out lines are the settings used for the old animated mode

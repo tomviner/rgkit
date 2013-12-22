@@ -270,19 +270,16 @@ class GameState:
     # action = well, action
     def is_valid_action(self, actor, action):
         try:
-            if type(action) != list:
+            if len(str(action)) > self._settings.str_limit:
+                return False
+
+            if len(repr(action)) > self._settings.str_limit:
                 return False
 
             if action[0] in ['move', 'attack']:
-                if len(action) != 2:
-                    return False
-
                 return action[1] in rg.locs_around(
                     actor, filter_out=['invalid', 'obstacle'])
             elif action[0] in ['guard', 'suicide']:
-                if len(action) != 1:
-                    return False
-
                 return True
             else:
                 return False

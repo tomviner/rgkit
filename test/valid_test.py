@@ -32,10 +32,27 @@ class TestValid(unittest.TestCase):
         state.add_robot((9, 9), 0)
         self.assertFalse(state.is_valid_action((9, 9), ['exterminate']))
 
-    def test_too_long(self):
+    def test_str_too_long(self):
         state = GameState(settings)
         state.add_robot((9, 9), 0)
-        self.assertFalse(state.is_valid_action((9, 9), ['guard', 'foo']))
+
+        class long_action(list):
+            def __str__(self):
+                return 'leethaxxor' * 100
+
+        action = long_action(['guard'])
+        self.assertFalse(state.is_valid_action((9, 9), action))
+
+    def test_repr_too_long(self):
+        state = GameState(settings)
+        state.add_robot((9, 9), 0)
+
+        class long_action(list):
+            def __repr__(self):
+                return 'leethaxxor' * 100
+
+        action = long_action(['guard'])
+        self.assertFalse(state.is_valid_action((9, 9), action))
 
     def test_move_to_self(self):
         state = GameState(settings)
