@@ -281,7 +281,7 @@ class ThreadedGame(AbstractGame):
             player1, player2, record_actions, record_history,
             print_info, seed)
 
-        self.state.turn_running_lock = _threading.Lock()
+        self.turn_running_lock = _threading.Lock()
         self.per_turn_events = [_threading.Event()
                                 for x in xrange(settings.max_turns)]
         self.per_turn_events[0].set()
@@ -318,6 +318,6 @@ class ThreadedGame(AbstractGame):
         self.turn_runner.start()
 
     def finish_running_turns_if_necessary(self):
-        with self.state.turn_running_lock:
+        with self.turn_running_lock:
             while self.state.turn < settings.max_turns:
                 self.run_turn()
