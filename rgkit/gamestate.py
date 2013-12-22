@@ -53,22 +53,22 @@ class GameState:
             if self.is_robot(loc):
                 self.remove_robot(loc)
 
-    def _spawn_robots(self):
+    def _get_spawn_locations(self):
         # see http://stackoverflow.com/questions/2612648/reservoir-sampling
         locations = []
+        per_player = self._settings.spawn_per_player
+        count = per_player*2
         n = 0
         for loc in self._settings.spawn_coords:
             n += 1
-            if len(locations) < self._settings.spawn_per_player*2:
+            if len(locations) < count:
                 locations.append(loc)
             else:
                 s = int(self._random.random()*n)
-                if s < self._settings.spawn_per_player*2:
+                if s < count:
                     locations[s] = loc
 
-        for i in xrange(self._settings.spawn_per_player):
-            self.add_robot(locations[i], 0)
-            self.add_robot(locations[i + self._settings.spawn_per_player], 1)
+        return locations[:per_player], locations[per_player:]
 
     def _clear_dead(self):
         dead = filter(lambda loc: self.robots[loc].hp <= 0, self.robots)
@@ -76,13 +76,17 @@ class GameState:
         for loc in dead:
             self.remove_robot(loc)
 
-    # actions = map (loc) -> (action)
+    # actions = {loc: action}
     # all actions must be valid
-    # returns new GameState
-    def apply_actions(self, actions, spawn=True):
-        new_state = GameState(self._settings,
-                              next_robot_id=self._next_robot_id,
-                              turn=self.turn + 1)
+    # delta = [AttrDict{
+    #    'loc': loc,
+    #    'hp': hp,
+    #    'player_id': player_id,
+    #    'loc_end': loc_end,
+    #    'hp_end': hp_end
+    # }]
+    def get_delta(self, actions, spawn=True):
+        delta = []
 
         def dest(loc):
             if actions[loc][0] == 'move':
@@ -126,24 +130,22 @@ class GameState:
             else:
                 new_loc = dest(loc)
 
-            new_state.add_robot(new_loc,
-                                robot.player_id, robot.hp, robot.robot_id)
+            delta.append(AttrDict({
+                'loc': loc,
+                'hp': robot.hp,
+                'player_id': robot.player_id,
+                'loc_end': new_loc,
+                'hp_end': robot.hp  # will be adjusted later
+            }))
 
-        collisions = set()
+        # {loc: set(robots collided with loc}
+        collisions = defaultdict(lambda: set())
         for loc in self.robots:
-            for target in hitpoints[dest(loc)]:
-                if (target, loc) not in collisions:
-                    collisions.add((loc, target))
+            for loc2 in hitpoints[dest(loc)]:
+                collisions[loc].add(loc2)
+                collisions[loc2].add(loc)
 
-        # apply collision damage
-        for (loc, loc2) in collisions:
-            if self.robots[loc].player_id != self.robots[loc2].player_id:
-                damage = self._settings.collision_damage
-                if actions[loc][0] != 'guard':
-                    new_state.robots[loc].hp -= damage
-                if actions[loc2][0] != 'guard':
-                    new_state.robots[loc2].hp -= damage
-
+        # {loc: [damage_dealt_by_player_0, damage_dealt_by_player_1]}
         damage_map = defaultdict(lambda: [0, 0])
 
         for loc, robot in self.robots.iteritems():
@@ -162,21 +164,84 @@ class GameState:
                     damage_map[target][actor_id] += damage
 
         # apply damage
-        for loc, robot in new_state.robots.iteritems():
-            damage_taken = damage_map[loc][1-robot.player_id]
-            if self.is_robot(loc) and actions[loc][0] == 'guard':
-                damage_taken /= 2
-            robot.hp -= damage_taken
+        for delta_info in delta:
+            loc = delta_info.loc
+            loc_end = delta_info.loc_end
+            robot = self.robots[loc]
 
-        # clear dead bots
-        new_state._clear_dead()
+            # apply collision damage
+            if actions[loc][0] != 'guard':
+                damage = self._settings.collision_damage
+
+                for loc2 in collisions[delta_info.loc]:
+                    if robot.player_id != self.robots[loc2].player_id:
+                        delta_info.hp_end -= damage
+
+            # apply other damage
+            damage_taken = damage_map[loc_end][1-robot.player_id]
+            if actions[loc][0] == 'guard':
+                damage_taken /= 2
+
+            delta_info.hp_end -= damage_taken
 
         if spawn:
             if self.turn % self._settings.spawn_every == 0:
-                new_state._clear_spawn()
-                new_state._spawn_robots()
+                # clear bots on spawn
+                for delta_info in delta:
+                    loc_end = delta_info.loc_end
+
+                    if loc_end in self._settings.spawn_coords:
+                        delta_info.hp_end = 0
+
+                # spawn bots
+                locations = self._get_spawn_locations()
+                for player_id, locs in enumerate(locations):
+                    for loc in locs:
+                        delta.append(AttrDict({
+                            'loc': loc,
+                            'hp': 0,
+                            'player_id': player_id,
+                            'loc_end': loc,
+                            'hp_end': self._settings.robot_hp
+                        }))
+
+        return delta
+
+    # delta = [AttrDict{
+    #    'loc': loc,
+    #    'hp': hp,
+    #    'player_id': player_id,
+    #    'loc_end': loc_end,
+    #    'hp_end': hp_end
+    # }]
+    # returns new GameState
+    def apply_delta(self, delta):
+        new_state = GameState(self._settings,
+                              next_robot_id=self._next_robot_id,
+                              turn=self.turn + 1,
+                              seed=self._seed)
+
+        for delta_info in delta:
+            if delta_info.hp_end > 0:
+                loc = delta_info.loc
+
+                # is this a new robot?
+                if delta_info.hp > 0:
+                    robot_id = self.robots[loc].robot_id
+                else:
+                    robot_id = None
+
+                new_state.add_robot(delta_info.loc_end, delta_info.player_id, delta_info.hp_end, robot_id)
 
         return new_state
+
+    # actions = {loc: action}
+    # all actions must be valid
+    # returns new GameState
+    def apply_actions(self, actions, spawn=True):
+        delta = self.get_delta(actions, spawn)
+
+        return self.apply_delta(delta)
 
     def get_scores(self):
         scores = [0, 0]
