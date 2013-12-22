@@ -93,8 +93,6 @@ def play(players, print_info=True, animate_render=False, play_in_thread=False,
                       seed=match_seed, quiet=quiet)
 
     if print_info:
-        print('Match seed: {}'.format(g.seed))
-
         # only import render if we need to render the game;
         # this way, people who don't have tkinter can still
         # run headless
@@ -118,15 +116,14 @@ def test_runs_sequentially(args):
         match_seed = str(args.game_seed) + '-' + str(i)
         if args.match_seeds and i < len(args.match_seeds):
             match_seed = args.match_seeds[i]
-        scores.append(
-            play(players,
-                 not args.headless,
-                 args.animate,
-                 args.play_in_thread,
-                 match_seed=match_seed,
-                 names=names, quiet=args.quiet)
-        )
-        # print scores[-1]
+        result = play(players,
+                      not args.headless,
+                      args.animate,
+                      args.play_in_thread,
+                      match_seed=match_seed,
+                      names=names, quiet=args.quiet)
+        scores.append(result)
+        print '{0} - seed: {1}'.format(result, match_seed)
     return scores
 
 
@@ -173,7 +170,7 @@ def test_runs_concurrently(args):
     num_cpu = multiprocessing.cpu_count() - 1
     if num_cpu == 0:
         num_cpu = 1
-    return multiprocessing.Pool(num_cpu).map(task, data, args.quiet, 1)
+    return multiprocessing.Pool(num_cpu).map(task, data, args.quiet)
 
 
 def bot_name(path_to_bot):
