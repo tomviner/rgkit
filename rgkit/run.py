@@ -59,6 +59,7 @@ parser.add_argument("--game-seed",
 parser.add_argument("--match-seeds", nargs='*',
                     help="Used for random seed of the first matches in order.")
 
+
 def make_player(fname):
     try:
         with open(fname) as f:

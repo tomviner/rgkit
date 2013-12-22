@@ -16,9 +16,11 @@ from rgkit.settings import settings, AttrDict
 
 sys.modules['rg'] = rg  # preserve backwards compatible robot imports
 
+
 class NullDevice():
     def write(self, asdf):
         pass
+
 
 def init_settings(map_data):
     # I'll get rid of the globals. I promise.
@@ -127,16 +129,21 @@ class AbstractGame(object):
         return [self.state.get_game_info(0), self.state.get_game_info(1)]
 
     def get_robots_actions(self):
-        if self._quiet >= 1 and self._quiet < 3: sys.stdout = NullDevice()
-        if self._quiet >= 2 and self._quiet < 3: sys.stderr = NullDevice()
+        if self._quiet < 3:
+            if self._quiet >= 1:
+                sys.stdout = NullDevice()
+            if self._quiet >= 2:
+                sys.stderr = NullDevice()
         seed1 = self._random.randint(0, sys.maxint)
         actions = self._player1.get_actions(self.state, seed1)
         seed2 = self._random.randint(0, sys.maxint)
         actions2 = self._player2.get_actions(self.state, seed2)
         actions.update(actions2)
-        if self._quiet >= 1 and self._quiet < 3: sys.stdout = sys.__stdout__
-        if self._quiet >= 2 and self._quiet < 3: sys.stderr = sys.__stderr__
-        # sys.stderr = sys.__stderr__;
+        if self._quiet < 3:
+            if self._quiet >= 1:
+                sys.stdout = sys.__stdout__
+            if self._quiet >= 2:
+                sys.stderr = sys.__stderr__
 
         return actions
 
