@@ -133,7 +133,7 @@ def test_runs_sequentially(args):
                       match_seed=match_seed,
                       names=names, quiet=args.quiet)
         scores.append(result)
-        if args.quiet >= 3:
+        if args.quiet >= 3 and args.headless:
             unmute_all()
         print '{0} - seed: {1}'.format(result, match_seed)
     return scores
@@ -161,7 +161,7 @@ def task(data, quiet=0):
             bot_name(player2)
         ],
     )
-    if args.quiet >= 3:
+    if args.quiet >= 3 and args.headless:
         unmute_all()
     print '{0} - seed: {1}'.format(result, match_seed)
     return result
