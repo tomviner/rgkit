@@ -336,11 +336,6 @@ class Render:
             self.paint()
 
     def step_turn(self, turns):
-        # if past the end, step back extra
-        if self._turn >= self._settings.max_turns:
-            turns -= 1
-        if self._sub_turn > 0 and turns < 0:
-            turns += 1
         self._turn = self.current_turn_int() + turns
         self._turn = min(max(self._turn, 1.0), self._game.state.turn)
         self._sub_turn = 0.0
@@ -369,9 +364,6 @@ class Render:
     def create_controls(self, win, width, height):
         def step_turn(turns):
             if not self._paused:
-                # if halfway through an animation, changing turn negative really means go back to the start of that turn
-                if turns < 0:
-                    turns += 1
                 self.toggle_pause()
             self.step_turn(turns)
 
