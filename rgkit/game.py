@@ -10,7 +10,7 @@ except ImportError:
     import dummy_threading as _threading
 
 
-from rgkit import rg, defaultrobots
+from rgkit import rg
 from rgkit.gamestate import GameState
 from rgkit.settings import settings, AttrDict
 
