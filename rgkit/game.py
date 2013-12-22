@@ -17,8 +17,8 @@ from rgkit.settings import settings, AttrDict
 sys.modules['rg'] = rg  # preserve backwards compatible robot imports
 
 
-class NullDevice():
-    def write(self, asdf):
+class NullDevice(object):
+    def write(self, msg):
         pass
 
 

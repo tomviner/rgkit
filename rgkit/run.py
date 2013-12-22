@@ -28,7 +28,6 @@ except ImportError:
     sys.path.insert(0, parentdir)
 
 from rgkit import game
-from game import NullDevice
 
 parser = argparse.ArgumentParser(description="Robot game execution script.",
                                  formatter_class=RawTextHelpFormatter)
@@ -67,8 +66,8 @@ parser.add_argument("--match-seeds", nargs='*',
 
 
 def mute_all():
-    sys.stdout = NullDevice()
-    sys.stderr = NullDevice()
+    sys.stdout = game.NullDevice()
+    sys.stderr = game.NullDevice()
 
 
 def unmute_all():
