@@ -22,7 +22,7 @@ Robot Game's original creator is
 __pip__
 
 The easiest way to install the kit is with
-`[pip](http://www.pip-installer.org/en/latest/)`. From the terminal, run:
+[pip](http://www.pip-installer.org/en/latest/). From the terminal, run:
 
     pip install rgkit
 
