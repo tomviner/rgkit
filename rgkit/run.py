@@ -161,6 +161,7 @@ def task(data):
             bot_name(player1),
             bot_name(player2)
         ],
+        quiet=quiet,
     )
     if quiet >= 3 and headless:
         unmute_all()
