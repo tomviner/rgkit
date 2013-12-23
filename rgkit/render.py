@@ -248,8 +248,8 @@ class Render:
         self._settings = settings
         self._animations = animations
         self._blocksize = 25
-        self._winsize = (self._blocksize * self._settings.board_size 
-            + self.board_margin)
+        self._winsize = (self._blocksize * self._settings.board_size
+                         + self.board_margin)
         self._game = game_inst
         self._paused = True
         self._names = names
@@ -366,8 +366,8 @@ class Render:
                                     self.info_frame_height),
                                 250)
 
-            self._blocksize = ((self._winsize - self.board_margin) / 
-                self._settings.board_size)
+            self._blocksize = ((self._winsize - self.board_margin) /
+                               self._settings.board_size)
             self._win.configure(width=self._winsize, height=self._winsize)
 
             self.draw_background()
