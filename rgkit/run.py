@@ -28,7 +28,6 @@ except ImportError:
     sys.path.insert(0, parentdir)
 
 from rgkit import game
-from game import NullDevice
 
 parser = argparse.ArgumentParser(description="Robot game execution script.",
                                  formatter_class=RawTextHelpFormatter)
@@ -47,15 +46,15 @@ parser.add_argument("-c", "--count", type=int,
 parser.add_argument("-A", "--animate", action="store_true",
                     default=False,
                     help="Enable animations in rendering.")
+parser.add_argument("-q", "--quiet", action="count",
+                    help="Quiet execution.\n\
+-q : suppresses bot stdout\n\
+-qq: suppresses bot stdout and stderr\n\
+-qqq: supresses all rgkit and bot output")
 group = parser.add_mutually_exclusive_group()
 group.add_argument("-H", "--headless", action="store_true",
                    default=False,
                    help="Disable rendering game output.")
-group.add_argument("-q", "--quiet", action="count",
-                   help="Quiet execution.\n\
--q : suppresses bot stdout\n\
--qq: suppresses bot stdout and stderr\n\
--qqq: supresses all rgkit and bot output")
 group.add_argument("-T", "--play-in-thread", action="store_true",
                    default=False,
                    help="Separate GUI thread from robot move calculations.")
@@ -64,6 +63,16 @@ parser.add_argument("--game-seed",
                     help="Appended with game countfor per-match seeds.")
 parser.add_argument("--match-seeds", nargs='*',
                     help="Used for random seed of the first matches in order.")
+
+
+def mute_all():
+    sys.stdout = game.NullDevice()
+    sys.stderr = game.NullDevice()
+
+
+def unmute_all():
+    sys.stdout = sys.__stdout__
+    sys.stderr = sys.__stderr__
 
 
 def make_player(fname):
@@ -121,19 +130,23 @@ def test_runs_sequentially(args):
                       args.animate,
                       args.play_in_thread,
                       match_seed=match_seed,
-                      names=names, quiet=args.quiet)
+                      names=names,
+                      quiet=args.quiet)
         scores.append(result)
+        if args.quiet >= 3 and args.headless:
+            unmute_all()
         print '{0} - seed: {1}'.format(result, match_seed)
     return scores
 
 
-def task(data, quiet=0):
+def task(data):
     (player1,
      player2,
      headless,
      animate,
      play_in_thread,
-     match_seed) = data
+     match_seed,
+     quiet) = data
 
     result = play(
         [
@@ -148,7 +161,10 @@ def task(data, quiet=0):
             bot_name(player1),
             bot_name(player2)
         ],
+        quiet=quiet,
     )
+    if quiet >= 3 and headless:
+        unmute_all()
     print '{0} - seed: {1}'.format(result, match_seed)
     return result
 
@@ -166,11 +182,12 @@ def test_runs_concurrently(args):
             args.animate,
             args.play_in_thread,
             match_seed,
+            args.quiet,
         ])
     num_cpu = multiprocessing.cpu_count() - 1
     if num_cpu == 0:
         num_cpu = 1
-    return multiprocessing.Pool(num_cpu).map(task, data, args.quiet)
+    return multiprocessing.Pool(num_cpu).map(task, data)
 
 
 def bot_name(path_to_bot):
@@ -180,8 +197,7 @@ def bot_name(path_to_bot):
 def main():
     args = parser.parse_args()
     if args.quiet >= 3:
-        sys.stdout = NullDevice()
-        sys.stderr = NullDevice()
+        mute_all()
 
     map_data = ast.literal_eval(args.map.read())
     game.init_settings(map_data)
