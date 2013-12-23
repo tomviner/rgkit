@@ -34,10 +34,16 @@ def init_settings(map_data):
 
 
 class Player:
-    def __init__(self, code):
-        self._module = imp.new_module('usercode%d' % id(self))
-        exec code in self._module.__dict__
-        self._robot = self._module.__dict__['Robot']()
+    def __init__(self, code=None, robot=None):
+        if code is not None:
+            self._module = imp.new_module('usercode%d' % id(self))
+            exec code in self._module.__dict__
+            self._robot = self._module.__dict__['Robot']()
+        elif robot is not None:
+            self._module = None
+            self._robot = robot
+        else:
+            raise Exception('you need to provide code or a robot')
 
     def set_player_id(self, player_id):
         self._player_id = player_id
@@ -147,17 +153,23 @@ class AbstractGame(object):
 
         return actions
 
-    def make_history(self, actions):
+    def make_history(self, delta, new_state, actions):
         robots = [[] for i in range(2)]
-        for loc, robot in self.state.robots.iteritems():
-            robot_info = {}
-            props = (self._settings.exposed_properties +
-                     self._settings.player_only_properties)
-            for prop in props:
-                robot_info[prop] = getattr(robot, prop)
-            if loc in actions:
-                robot_info['action'] = actions[loc]
-            robots[robot.player_id].append(robot_info)
+        for delta_info in delta:
+            if (delta_info.loc_end not in new_state.robots or
+                    delta_info.hp_end <= 0):
+                # Robot died this turn, to prevent spawning bots from
+                # overwriting dead bots we don't record these at all.
+                continue
+            robot_info = {
+                'location': delta_info.loc_end,
+                'hp': delta_info.hp_end,
+                'player_id': delta_info.player_id,
+                'robot_id': new_state.robots[delta_info.loc_end].robot_id
+            }
+            if delta_info.loc in actions:
+                robot_info['action'] = actions[delta_info.loc]
+            robots[delta_info.player_id].append(robot_info)
         return robots
 
     # format delta in the format renderer wants
@@ -204,7 +216,7 @@ class AbstractGame(object):
         self.capture_actions(delta, actions)
 
         if self._record_history:
-            round_history = self.make_history(actions)
+            round_history = self.make_history(delta, new_state, actions)
             for i in (0, 1):
                 self.history[i].append(round_history[i])
 
