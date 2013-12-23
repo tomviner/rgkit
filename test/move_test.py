@@ -4,7 +4,8 @@ import unittest
 from rgkit import game
 from rgkit.gamestate import GameState
 
-map_data = ast.literal_eval(open(pkg_resources.resource_filename('rgkit', 'maps/default.py')).read())
+map_data = ast.literal_eval(
+    open(pkg_resources.resource_filename('rgkit', 'maps/default.py')).read())
 settings = game.init_settings(map_data)
 
 
@@ -39,9 +40,11 @@ class TestMove(unittest.TestCase):
         state2 = state.apply_actions(actions, spawn=False)
 
         self.assertTrue(state2.is_robot((10, 10)))
-        self.assertEqual(state2.robots[10, 10].hp, settings.robot_hp - settings.collision_damage)
+        self.assertEqual(state2.robots[10, 10].hp,
+                         settings.robot_hp - settings.collision_damage)
         self.assertTrue(state2.is_robot((8, 10)))
-        self.assertEqual(state2.robots[8, 10].hp, settings.robot_hp - settings.collision_damage)
+        self.assertEqual(state2.robots[8, 10].hp,
+                         settings.robot_hp - settings.collision_damage)
 
     def test_guarding_ingnores_collisions(self):
         state = GameState(settings)
@@ -56,7 +59,8 @@ class TestMove(unittest.TestCase):
         state2 = state.apply_actions(actions, spawn=False)
 
         self.assertTrue(state2.is_robot((10, 10)))
-        self.assertEqual(state2.robots[10, 10].hp, settings.robot_hp - settings.collision_damage)
+        self.assertEqual(state2.robots[10, 10].hp,
+                         settings.robot_hp - settings.collision_damage)
         self.assertTrue(state2.is_robot((9, 10)))
         self.assertEqual(state2.robots[9, 10].hp, settings.robot_hp)
 
@@ -98,13 +102,17 @@ class TestMove(unittest.TestCase):
         state2 = state.apply_actions(actions, spawn=False)
 
         self.assertTrue(state2.is_robot((10, 10)))
-        self.assertEqual(state2.robots[10, 10].hp, settings.robot_hp - settings.collision_damage*2)
+        self.assertEqual(state2.robots[10, 10].hp,
+                         settings.robot_hp - settings.collision_damage*2)
         self.assertTrue(state2.is_robot((11, 10)))
-        self.assertEqual(state2.robots[11, 10].hp, settings.robot_hp - settings.collision_damage*2)
+        self.assertEqual(state2.robots[11, 10].hp,
+                         settings.robot_hp - settings.collision_damage*2)
         self.assertTrue(state2.is_robot((12, 10)))
-        self.assertEqual(state2.robots[12, 10].hp, settings.robot_hp - settings.collision_damage)
+        self.assertEqual(state2.robots[12, 10].hp,
+                         settings.robot_hp - settings.collision_damage)
         self.assertTrue(state2.is_robot((8, 10)))
-        self.assertEqual(state2.robots[8, 10].hp, settings.robot_hp - settings.collision_damage)
+        self.assertEqual(state2.robots[8, 10].hp,
+                         settings.robot_hp - settings.collision_damage)
 
     def test_try_swap(self):
         state = GameState(settings)
@@ -120,12 +128,16 @@ class TestMove(unittest.TestCase):
 
         self.assertTrue(state2.is_robot((9, 9)))
         self.assertEqual(state2.robots[9, 9].player_id, 0)
-        self.assertEqual(state2.robots[9, 9].robot_id, state.robots[9, 9].robot_id)
-        self.assertEqual(state2.robots[9, 9].hp, settings.robot_hp - settings.collision_damage)
+        self.assertEqual(state2.robots[9, 9].robot_id,
+                         state.robots[9, 9].robot_id)
+        self.assertEqual(state2.robots[9, 9].hp,
+                         settings.robot_hp - settings.collision_damage)
         self.assertTrue(state2.is_robot((8, 9)))
         self.assertEqual(state2.robots[8, 9].player_id, 1)
-        self.assertEqual(state2.robots[8, 9].robot_id, state.robots[8, 9].robot_id)
-        self.assertEqual(state2.robots[8, 9].hp, settings.robot_hp - settings.collision_damage)
+        self.assertEqual(state2.robots[8, 9].robot_id,
+                         state.robots[8, 9].robot_id)
+        self.assertEqual(state2.robots[8, 9].hp,
+                         settings.robot_hp - settings.collision_damage)
 
     def test_try_move_in_circle(self):
         state = GameState(settings)
@@ -175,11 +187,14 @@ class TestMove(unittest.TestCase):
         self.assertTrue(state2.is_robot((9, 10)))
         self.assertEqual(state2.robots[9, 10].hp, settings.robot_hp)
         self.assertTrue(state2.is_robot((9, 12)))
-        self.assertEqual(state2.robots[9, 12].hp, settings.robot_hp - settings.collision_damage)
+        self.assertEqual(state2.robots[9, 12].hp,
+                         settings.robot_hp - settings.collision_damage)
         self.assertTrue(state2.is_robot((9, 11)))
-        self.assertEqual(state2.robots[9, 11].hp, settings.robot_hp - settings.collision_damage*2)
+        self.assertEqual(state2.robots[9, 11].hp,
+                         settings.robot_hp - settings.collision_damage*2)
         self.assertTrue(state2.is_robot((11, 11)))
-        self.assertEqual(state2.robots[11, 11].hp, settings.robot_hp - settings.collision_damage)
+        self.assertEqual(state2.robots[11, 11].hp,
+                         settings.robot_hp - settings.collision_damage)
 
     def test_double_collision(self):
         state = GameState(settings)
@@ -196,8 +211,11 @@ class TestMove(unittest.TestCase):
         state2 = state.apply_actions(actions, spawn=False)
 
         self.assertTrue(state2.is_robot((9, 10)))
-        self.assertEqual(state2.robots[9, 10].hp, settings.robot_hp - settings.collision_damage)
+        self.assertEqual(state2.robots[9, 10].hp,
+                         settings.robot_hp - settings.collision_damage)
         self.assertTrue(state2.is_robot((10, 11)))
-        self.assertEqual(state2.robots[10, 11].hp, settings.robot_hp - settings.collision_damage)
+        self.assertEqual(state2.robots[10, 11].hp,
+                         settings.robot_hp - settings.collision_damage)
         self.assertTrue(state2.is_robot((11, 10)))
-        self.assertEqual(state2.robots[11, 10].hp, settings.robot_hp - settings.collision_damage*2)
+        self.assertEqual(state2.robots[11, 10].hp,
+                         settings.robot_hp - settings.collision_damage*2)

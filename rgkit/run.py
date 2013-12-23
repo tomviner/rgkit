@@ -78,11 +78,11 @@ def unmute_all():
 def make_player(fname):
     try:
         with open(fname) as f:
-            return game.Player(f.read())
+            return game.Player(code=f.read())
     except IOError, msg:
         if pkg_resources.resource_exists('rgkit', fname):
             with open(pkg_resources.resource_filename('rgkit', fname)) as f:
-                return game.Player(f.read())
+                return game.Player(code=f.read())
         raise IOError(msg)
 
 
@@ -93,13 +93,15 @@ def play(players, print_info=True, animate_render=False, play_in_thread=False,
                               print_info=print_info,
                               record_actions=True,
                               record_history=True,
-                              seed=match_seed, quiet=quiet)
+                              seed=match_seed,
+                              quiet=quiet)
     else:
         g = game.Game(*players,
                       print_info=print_info,
                       record_actions=True,
                       record_history=True,
-                      seed=match_seed, quiet=quiet)
+                      seed=match_seed,
+                      quiet=quiet)
 
     if print_info:
         # only import render if we need to render the game;
