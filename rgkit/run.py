@@ -160,7 +160,7 @@ def task(data, quiet=0):
             bot_name(player2)
         ],
     )
-    if args.quiet >= 3 and args.headless:
+    if quiet >= 3 and headless:
         unmute_all()
     print '{0} - seed: {1}'.format(result, match_seed)
     return result
