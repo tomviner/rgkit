@@ -241,17 +241,18 @@ class Render:
         self.size_changed = False
         self.init = True
 
+        self.cell_border_width = 2
+        self.info_frame_height = 95
+        self.board_margin = 0
+
         self._settings = settings
         self._animations = animations
         self._blocksize = 25
-        self._winsize = self._blocksize * self._settings.board_size + 40
+        self._winsize = self._blocksize * self._settings.board_size + self.board_margin
         self._game = game_inst
         self._paused = True
         self._names = names
         self._layers = {}
-
-        self.cell_border_width = 2
-        self.info_frame_height = 95
 
         self._master = Tkinter.Tk()
         self._master.configure(background="#333")
@@ -364,7 +365,7 @@ class Render:
                                     self.info_frame_height),
                                 250)
 
-            self._blocksize = (self._winsize-self.board_margin)/self._settings.board_size
+            self._blocksize = (self._winsize - self.board_margin) / self._settings.board_size
             self._win.configure(width=self._winsize, height=self._winsize)
 
             self.draw_background()
@@ -418,8 +419,8 @@ class Render:
             self.update_info_frame()
 
         def onclick(event):
-            x = (event.x - self.board_margin/2) / self._blocksize
-            y = (event.y - self.board_margin/2) / self._blocksize
+            x = (event.x - self.board_margin / 2) / self._blocksize
+            y = (event.y - self.board_margin / 2) / self._blocksize
             loc = (x, y)
             if (loc[0] >= 0 and
                     loc[1] >= 0 and
