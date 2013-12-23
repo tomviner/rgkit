@@ -219,17 +219,18 @@ class Render:
         self.size_changed = False
         self.init = True
 
+        self.cell_border_width = 2
+        self.info_frame_height = 95
+        self.board_margin = 0
+
         self._settings = settings
         self._animations = animations
         self._blocksize = 25
-        self._winsize = self._blocksize * self._settings.board_size + 40
+        self._winsize = self._blocksize * self._settings.board_size + self.board_margin
         self._game = game_inst
         self._paused = True
         self._names = names
         self._layers = {}
-
-        self.cell_border_width = 2
-        self.info_frame_height = 95
 
         self._master = Tkinter.Tk()
         self._master.configure(background="#333")
@@ -336,7 +337,7 @@ class Render:
             self._winsize = min(self._board_frame.winfo_width(), self._board_frame.winfo_height())
             self._winsize = max(min(self._winsize, self._master.winfo_height()-self.info_frame_height), 250)
             
-            self._blocksize = (self._winsize-40)/self._settings.board_size
+            self._blocksize = (self._winsize-self.board_margin)/self._settings.board_size
             self._win.configure(width=self._winsize, height=self._winsize)
 
             self.draw_background()
@@ -389,8 +390,8 @@ class Render:
             self.update_info_frame()
 
         def onclick(event):
-            x = (event.x - 20) / self._blocksize
-            y = (event.y - 20) / self._blocksize
+            x = (event.x - self.board_margin/2) / self._blocksize
+            y = (event.y - self.board_margin/2) / self._blocksize
             loc = (x, y)
             if loc[0] >= 0 and loc[1] >= 0 and loc[0] < self._settings.board_size and loc[1] < self._settings.board_size:
                 if loc == self._highlighted:
@@ -621,7 +622,7 @@ class Render:
 
     def grid_to_xy(self, loc):
         x, y = loc
-        return (x * self._blocksize + 20, y * self._blocksize + 20)
+        return (x * self._blocksize + self.board_margin/2, y * self._blocksize + self.board_margin/2)
 
     def square_bottom_corner(self, square_topleft):
         x, y = square_topleft
