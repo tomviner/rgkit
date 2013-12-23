@@ -160,67 +160,34 @@ class AbstractGame(object):
             robots[robot.player_id].append(robot_info)
         return robots
 
-    # record actions between current state and new state using actions
+    # format delta in the format renderer wants
     # append them to self.actions_on_turn
-    def capture_actions(self, actions, new_state):
-
-        def is_new_loc(robot, loc):
-            if new_state.is_robot(loc):
-                new_robot = new_state.robots[loc]
-
-                if new_robot.robot_id == robot.robot_id:
-                    return True
-
-            return False
-
+    def capture_actions(self, delta, actions):
         log = {}
 
-        for loc, robot in self.state.robots.iteritems():
-            log_item = {}
+        for delta_info in delta:
+            loc = delta_info.loc
 
-            log_item['name'] = actions[loc][0]
-            if len(actions[loc]) > 1:
-                log_item['target'] = actions[loc][1]
-            else:
-                log_item['target'] = None
-            log_item['hp'] = robot.hp
-            log_item['loc'] = loc
-            log_item['player'] = robot.player_id
-
-            # TODO: think of a cleaner approach
-            if actions[loc][0] != 'move':
-                loc_end = loc
-            else:
-                destination = actions[loc][1]
-
-                if is_new_loc(robot, destination):
-                    loc_end = destination
+            if loc in actions:
+                name = actions[loc][0]
+                if name in ['move', 'attack']:
+                    target = actions[loc][1]
                 else:
-                    loc_end = loc
-
-            # robot could have died and get replaced by a spawned one
-            if is_new_loc(robot, loc_end):
-                log_item['hp_end'] = new_state.robots[loc_end].hp
+                    target = None
             else:
-                log_item['hp_end'] = 0
+                name = 'spawn'
+                target = None
 
-            log_item['loc_end'] = loc_end
-
-            log[loc] = log_item
-
-        if self.state.turn % self._settings.spawn_every == 0:
-            for loc, robot in new_state.robots.iteritems():
-                if loc in self._settings.spawn_coords:
-                    log_item = {}
-                    log_item['name'] = 'spawn'
-                    log_item['target'] = loc
-                    log_item['hp'] = robot.hp
-                    log_item['hp_end'] = robot.hp
-                    log_item['loc'] = loc
-                    log_item['loc_end'] = loc
-                    log_item['player'] = robot.player_id
-
-                    log[loc] = log_item
+            # note that a spawned bot may overwrite an existing bot
+            log[loc] = {
+                'name': name,
+                'target': target,
+                'loc': loc,
+                'hp': delta_info.hp,
+                'player': delta_info.player_id,
+                'loc_end': delta_info.loc_end,
+                'hp_end': delta_info.hp_end
+            }
 
         self.actions_on_turn[self.state.turn] = log
 
@@ -230,9 +197,11 @@ class AbstractGame(object):
 
         actions = self.get_robots_actions()
 
-        new_state = self.state.apply_actions(actions)
+        delta = self.state.get_delta(actions)
 
-        self.capture_actions(actions, new_state)
+        new_state = self.state.apply_delta(delta)
+
+        self.capture_actions(delta, actions)
 
         if self._record_history:
             round_history = self.make_history(actions)
