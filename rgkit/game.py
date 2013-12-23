@@ -158,6 +158,12 @@ class AbstractGame(object):
         return actions
 
     def make_history(self, delta, new_state, actions):
+        '''An aggregate of all bots and their actions this turn.
+
+        Stores a list of each player's current bots at the end of this turn and
+        the actions they each performed this turn. Newly spawned bots have no
+        actions.
+        '''
         robots = [[] for i in range(2)]
         for delta_info in delta:
             if (delta_info.loc_end not in new_state.robots or
@@ -176,9 +182,11 @@ class AbstractGame(object):
             robots[delta_info.player_id].append(robot_info)
         return robots
 
-    # format delta in the format renderer wants
-    # append them to self.actions_on_turn
     def capture_actions(self, delta, actions):
+        '''
+        Format delta in the format renderer wants.
+        Append them to self.actions_on_turn.
+        '''
         log = {}
 
         for delta_info in delta:
