@@ -130,7 +130,8 @@ def test_runs_sequentially(args):
                       args.animate,
                       args.play_in_thread,
                       match_seed=match_seed,
-                      names=names, quiet=args.quiet)
+                      names=names,
+                      quiet=args.quiet)
         scores.append(result)
         if args.quiet >= 3 and args.headless:
             unmute_all()
@@ -138,13 +139,14 @@ def test_runs_sequentially(args):
     return scores
 
 
-def task(data, quiet=0):
+def task(data):
     (player1,
      player2,
      headless,
      animate,
      play_in_thread,
-     match_seed) = data
+     match_seed,
+     quiet) = data
 
     result = play(
         [
@@ -179,11 +181,12 @@ def test_runs_concurrently(args):
             args.animate,
             args.play_in_thread,
             match_seed,
+            args.quiet,
         ])
     num_cpu = multiprocessing.cpu_count() - 1
     if num_cpu == 0:
         num_cpu = 1
-    return multiprocessing.Pool(num_cpu).map(task, data, args.quiet)
+    return multiprocessing.Pool(num_cpu).map(task, data)
 
 
 def bot_name(path_to_bot):
