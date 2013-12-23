@@ -4,7 +4,8 @@ import unittest
 from rgkit import game
 from rgkit.gamestate import GameState
 
-map_data = ast.literal_eval(open(pkg_resources.resource_filename('rgkit', 'maps/default.py')).read())
+map_data = ast.literal_eval(
+    open(pkg_resources.resource_filename('rgkit', 'maps/default.py')).read())
 settings = game.init_settings(map_data)
 
 
@@ -25,7 +26,8 @@ class TestValid(unittest.TestCase):
     def test_strange(self):
         state = GameState(settings)
         state.add_robot((9, 9), 0)
-        self.assertFalse(state.is_valid_action((9, 9), "ALL YOUR BASE ARE BELONG TO US"))
+        self.assertFalse(state.is_valid_action((9, 9),
+                         "ALL YOUR BASE ARE BELONG TO US"))
 
     def test_wrong_command(self):
         state = GameState(settings)
@@ -58,7 +60,8 @@ class TestValid(unittest.TestCase):
         state = GameState(settings)
         state.add_robot((9, 9), 0)
 
-        self.assertTrue(state.is_valid_action((9, 9), ['guard', 'additional info']))
+        self.assertTrue(state.is_valid_action((9, 9),
+                        ['guard', 'additional info']))
 
     def test_move_to_self(self):
         state = GameState(settings)

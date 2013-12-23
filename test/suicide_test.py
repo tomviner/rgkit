@@ -4,7 +4,8 @@ import unittest
 from rgkit import game
 from rgkit.gamestate import GameState
 
-map_data = ast.literal_eval(open(pkg_resources.resource_filename('rgkit', 'maps/default.py')).read())
+map_data = ast.literal_eval(
+    open(pkg_resources.resource_filename('rgkit', 'maps/default.py')).read())
 settings = game.init_settings(map_data)
 
 
@@ -22,7 +23,8 @@ class TestSuicide(unittest.TestCase):
         state2 = state.apply_actions(actions, spawn=False)
 
         self.assertTrue(state2.is_robot((10, 10)))
-        self.assertEqual(state2.robots[10, 10].hp, settings.robot_hp - settings.suicide_damage)
+        self.assertEqual(state2.robots[10, 10].hp,
+                         settings.robot_hp - settings.suicide_damage)
 
         self.assertFalse(state2.is_robot((9, 10)))
 
@@ -39,7 +41,8 @@ class TestSuicide(unittest.TestCase):
         state2 = state.apply_actions(actions, spawn=False)
 
         self.assertTrue(state2.is_robot((10, 10)))
-        self.assertEqual(state2.robots[10, 10].hp, settings.robot_hp - settings.suicide_damage/2)
+        self.assertEqual(state2.robots[10, 10].hp,
+                         settings.robot_hp - settings.suicide_damage/2)
         self.assertFalse(state2.is_robot((9, 10)))
 
     def test_suicide_does_no_damage_to_teammates(self):
@@ -88,7 +91,8 @@ class TestSuicide(unittest.TestCase):
         state2 = state.apply_actions(actions, spawn=False)
 
         self.assertTrue(state2.is_robot((9, 10)))
-        self.assertEqual(state2.robots[9, 10].hp, settings.robot_hp - settings.suicide_damage)
+        self.assertEqual(state2.robots[9, 10].hp,
+                         settings.robot_hp - settings.suicide_damage)
 
     def test_move_into_suicide_bot(self):
         state = GameState(settings)
@@ -103,4 +107,7 @@ class TestSuicide(unittest.TestCase):
         state2 = state.apply_actions(actions, spawn=False)
 
         self.assertTrue(state2.is_robot((9, 10)))
-        self.assertEqual(state2.robots[9, 10].hp, settings.robot_hp - settings.collision_damage - settings.suicide_damage)
+        self.assertEqual(state2.robots[9, 10].hp,
+                         settings.robot_hp -
+                         settings.collision_damage -
+                         settings.suicide_damage)

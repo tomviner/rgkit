@@ -4,15 +4,18 @@ import unittest
 from rgkit import game
 from rgkit.gamestate import GameState
 
-map_data = ast.literal_eval(open(pkg_resources.resource_filename('rgkit', 'maps/default.py')).read())
+map_data = ast.literal_eval(
+    open(pkg_resources.resource_filename('rgkit', 'maps/default.py')).read())
 settings = game.init_settings(map_data)
 
 
 class TestSeeding(unittest.TestCase):
     def test_seeding_saves_spawning(self):
         seed = 42
-        code1 = open(pkg_resources.resource_filename('rgkit', 'bots/guardbot.py')).read()
-        code2 = open(pkg_resources.resource_filename('rgkit', 'bots/guardbot.py')).read()
+        code1 = open(pkg_resources.resource_filename(
+            'rgkit', 'bots/guardbot.py')).read()
+        code2 = open(pkg_resources.resource_filename(
+            'rgkit', 'bots/guardbot.py')).read()
 
         player1 = game.Player(code1)
         player2 = game.Player(code2)
@@ -38,8 +41,10 @@ class TestSeeding(unittest.TestCase):
 
     def test_seeding_saves_random(self):
         seed = 42
-        code1 = open(pkg_resources.resource_filename('rgkit', 'bots/randombot.py')).read()
-        code2 = open(pkg_resources.resource_filename('rgkit', 'bots/randombot.py')).read()
+        code1 = open(pkg_resources.resource_filename(
+            'rgkit', 'bots/randombot.py')).read()
+        code2 = open(pkg_resources.resource_filename(
+            'rgkit', 'bots/randombot.py')).read()
 
         player1 = game.Player(code1)
         player2 = game.Player(code2)

@@ -4,7 +4,8 @@ import unittest
 from rgkit import game
 from rgkit.gamestate import GameState
 
-map_data = ast.literal_eval(open(pkg_resources.resource_filename('rgkit', 'maps/default.py')).read())
+map_data = ast.literal_eval(
+    open(pkg_resources.resource_filename('rgkit', 'maps/default.py')).read())
 settings = game.init_settings(map_data)
 
 
@@ -23,10 +24,12 @@ class TestAttack(unittest.TestCase):
 
         self.assertTrue(state2.is_robot((10, 10)))
         damage = settings.robot_hp - state2.robots[10, 10].hp
-        self.assertTrue(settings.attack_range[0] <= damage <= settings.attack_range[1])
+        self.assertTrue(
+            settings.attack_range[0] <= damage <= settings.attack_range[1])
         self.assertTrue(state2.is_robot((9, 10)))
         damage = settings.robot_hp - state2.robots[9, 10].hp
-        self.assertTrue(settings.attack_range[0] <= damage <= settings.attack_range[1])
+        self.assertTrue(
+            settings.attack_range[0] <= damage <= settings.attack_range[1])
 
     def test_attack_kills(self):
         state = GameState(settings)
@@ -57,7 +60,8 @@ class TestAttack(unittest.TestCase):
 
         self.assertTrue(state2.is_robot((9, 10)))
         damage = settings.robot_hp - state2.robots[9, 10].hp
-        self.assertTrue(settings.attack_range[0]/2 <= damage <= settings.attack_range[1]/2)
+        self.assertTrue(
+            settings.attack_range[0]/2 <= damage <= settings.attack_range[1]/2)
 
     def test_attack_does_no_damage_to_teammates(self):
         state = GameState(settings)
@@ -107,7 +111,8 @@ class TestAttack(unittest.TestCase):
 
         self.assertTrue(state2.is_robot((9, 10)))
         damage = settings.robot_hp - state2.robots[9, 10].hp
-        self.assertTrue(settings.attack_range[0] <= damage <= settings.attack_range[1])
+        self.assertTrue(
+            settings.attack_range[0] <= damage <= settings.attack_range[1])
 
     def test_attack_hop_in(self):
         state = GameState(settings)
@@ -123,4 +128,5 @@ class TestAttack(unittest.TestCase):
 
         self.assertTrue(state2.is_robot((9, 10)))
         damage = settings.robot_hp - state2.robots[9, 10].hp
-        self.assertTrue(settings.attack_range[0] <= damage <= settings.attack_range[1])
+        self.assertTrue(
+            settings.attack_range[0] <= damage <= settings.attack_range[1])

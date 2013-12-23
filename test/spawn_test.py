@@ -4,7 +4,8 @@ import unittest
 from rgkit import game
 from rgkit.gamestate import GameState
 
-map_data = ast.literal_eval(open(pkg_resources.resource_filename('rgkit', 'maps/default.py')).read())
+map_data = ast.literal_eval(
+    open(pkg_resources.resource_filename('rgkit', 'maps/default.py')).read())
 settings = game.init_settings(map_data)
 
 
@@ -16,7 +17,9 @@ class TestSpawn(unittest.TestCase):
 
         state2 = state.apply_actions(actions)
 
-        self.assertEqual(state2.get_scores(), [settings.spawn_per_player, settings.spawn_per_player])
+        self.assertEqual(state2.get_scores(),
+                         [settings.spawn_per_player,
+                          settings.spawn_per_player])
 
     def test_spawn_kills(self):
         state = GameState(settings)
@@ -29,7 +32,9 @@ class TestSpawn(unittest.TestCase):
 
         state2 = state.apply_actions(actions)
 
-        self.assertTrue(not state2.is_robot((4, 3)) or state2.robots[(4, 3)].robot_id != state.robots[4, 3].robot_id)
+        self.assertTrue(not state2.is_robot((4, 3)) or
+                        state2.robots[(4, 3)].robot_id !=
+                        state.robots[4, 3].robot_id)
 
     def test_spawn_dodge(self):
         state = GameState(settings)
@@ -55,4 +60,6 @@ class TestSpawn(unittest.TestCase):
 
         state2 = state.apply_actions(actions)
 
-        self.assertTrue(not state2.is_robot((4, 3)) or state2.robots[(4, 3)].robot_id != state.robots[4, 4].robot_id)
+        self.assertTrue(not state2.is_robot((4, 3)) or
+                        state2.robots[(4, 3)].robot_id !=
+                        state.robots[4, 4].robot_id)

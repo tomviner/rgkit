@@ -16,7 +16,6 @@ class TestCodeFormat(unittest.TestCase):
         files = glob('test/*.py')
 
         pep8style = pep8.StyleGuide()
-        pep8style.options.ignore += ('E501',)
         result = pep8style.check_files(files)
         self.assertEqual(
             result.total_errors, 0, "Found code style errors (and warnings).")
