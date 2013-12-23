@@ -229,6 +229,7 @@ class Render:
         self._layers = {}
 
         self.cell_border_width = 2
+        self.info_frame_height = 95
 
         self._master = Tkinter.Tk()
         self._master.configure(background="#333")
@@ -245,8 +246,7 @@ class Render:
 
         #tkinter problem: 'pack' distributes space according to which widgets have
         # expand set to true, not to which directions they can actually expand to.
-        self._info_frame.pack(side=Tkinter.BOTTOM, fill=Tkinter.X,
-                              expand=True, padx=5)
+        self._info_frame.pack(side=Tkinter.BOTTOM)
 
         self._control_frame.pack(side=Tkinter.RIGHT)
 
@@ -255,11 +255,11 @@ class Render:
             self._board_frame, width=width, height=height,
             background="#555", highlightthickness=0)
         self._info = Tkinter.Canvas(
-            self._info_frame, width=300, height=95,
+            self._info_frame, width=300, height=self.info_frame_height,
             background="#333", highlightthickness=0)
 
         self._win.pack()
-        self._info.pack(side=Tkinter.LEFT, fill=Tkinter.X, expand=True)
+        self._info.pack(side=Tkinter.LEFT)
 
         self._master.bind('<Configure>', self.on_resize)
 
@@ -332,7 +332,10 @@ class Render:
             self._win.delete("all")
             # print "Size changed, adjusting cell size..."
 
-            self._winsize = max(min(self._board_frame.winfo_width(), self._board_frame.winfo_height()), 250)
+
+            self._winsize = min(self._board_frame.winfo_width(), self._board_frame.winfo_height())
+            self._winsize = max(min(self._winsize, self._master.winfo_height()-self.info_frame_height), 250)
+            
             self._blocksize = (self._winsize-40)/self._settings.board_size
             self._win.configure(width=self._winsize, height=self._winsize)
 
