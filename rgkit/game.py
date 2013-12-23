@@ -36,20 +36,24 @@ def init_settings(map_data):
 class Player:
     def __init__(self, code=None, robot=None):
         if code is not None:
-            self._module = imp.new_module('usercode%d' % id(self))
-            exec code in self._module.__dict__
-            self._robot = self._module.__dict__['Robot']()
+            self._code = code
+            self._load_code()
         elif robot is not None:
             self._module = None
             self._robot = robot
         else:
             raise Exception('you need to provide code or a robot')
 
-    def set_player_id(self, player_id):
-        self._player_id = player_id
+    def _load_code(self):
+        self._module = imp.new_module('usercode%d' % id(self))
+        exec self._code in self._module.__dict__
+        self._robot = self._module.__dict__['Robot']()
 
     def reload(self):
-        self._robot = self._module.__dict__['Robot']()
+        self._load_code()
+
+    def set_player_id(self, player_id):
+        self._player_id = player_id
 
     def _get_action(self, game_state, game_info, robot, seed):
         try:
