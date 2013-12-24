@@ -1,5 +1,4 @@
 import imp
-import inspect
 import random
 import sys
 import traceback
@@ -106,7 +105,6 @@ class AbstractGame(object):
         self._record_actions = record_actions
         self._record_history = record_history
         self._print_info = print_info
-        self._id_inc = 0
         if seed is None:
             seed = random.randint(0, sys.maxint)
         self.seed = seed
