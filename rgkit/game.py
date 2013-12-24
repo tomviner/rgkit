@@ -107,7 +107,7 @@ class Game(object):
         self._print_info = print_info
         if seed is None:
             seed = random.randint(0, sys.maxint)
-        self.seed = seed
+        self.seed = str(seed)
         self._random = random.Random(seed)
         self._quiet = quiet
 

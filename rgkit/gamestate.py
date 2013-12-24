@@ -13,8 +13,9 @@ class GameState:
 
         if seed is None:
             seed = random.randint(0, sys.maxint)
-        self._seed = seed
-        self._random = random.Random(self._seed)
+        self._seed = str(seed)
+        self._spawn_random = random.Random(self._seed + 's')
+        self._attack_random = random.Random(self._seed + 'a')
 
         self.robots = {}
         self.turn = turn
@@ -64,7 +65,7 @@ class GameState:
             if len(locations) < count:
                 locations.append(loc)
             else:
-                s = int(self._random.random()*n)
+                s = int(self._spawn_random.random()*n)
                 if s < count:
                     locations[s] = loc
 
@@ -153,7 +154,8 @@ class GameState:
 
             if actions[loc][0] == 'attack':
                 target = actions[loc][1]
-                damage = self._random.randint(*self._settings.attack_range)
+                damage = self._attack_random.randint(
+                    *self._settings.attack_range)
                 damage_map[target][actor_id] += damage
 
             if actions[loc][0] == 'suicide':
@@ -219,7 +221,7 @@ class GameState:
         new_state = GameState(self._settings,
                               next_robot_id=self._next_robot_id,
                               turn=self.turn + 1,
-                              seed=self._random.randint(0, sys.maxint))
+                              seed=self._spawn_random.randint(0, sys.maxint))
 
         for delta_info in delta:
             if delta_info.hp_end > 0:
