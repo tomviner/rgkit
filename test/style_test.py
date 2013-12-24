@@ -5,7 +5,7 @@ from glob import glob
 
 class TestCodeFormat(unittest.TestCase):
     def test_pep8_conformance_core(self):
-        files = glob('rgkit/*.py')
+        files = glob('rgkit/*.py') + glob('rgkit/render/*.py')
 
         pep8style = pep8.StyleGuide()
         result = pep8style.check_files(files)
