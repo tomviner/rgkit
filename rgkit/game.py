@@ -168,7 +168,7 @@ class Game(object):
         actions.
         '''
         robots = [[] for i in range(2)]
-        for loc, robot in self.state.robots.iteritems():
+        for loc, robot in self._state.robots.iteritems():
             robot_info = {
                 'location': loc,
                 'hp': robot.hp,
