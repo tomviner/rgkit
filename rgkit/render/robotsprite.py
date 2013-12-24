@@ -112,7 +112,7 @@ class RobotSprite:
         if self.settings.bot_hp_animation:
             self.draw_bot_hp(delta, (x, y), bot_rgb, alpha_hack)
         else:
-            self.draw_bot_hp(delta, (x, y), bot_rgb, alpha_hack)
+            self.draw_bot_hp(0, (x, y), bot_rgb, alpha_hack)
 
     @staticmethod
     def compute_color(self, player, hp):
