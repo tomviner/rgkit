@@ -152,29 +152,24 @@ class AbstractGame(object):
 
         return actions
 
-    def _make_history(self, delta, new_state, actions):
+    def _make_history(self, actions):
         '''An aggregate of all bots and their actions this turn.
 
-        Stores a list of each player's current bots at the end of this turn and
+        Stores a list of each player's bots at the start of this turn and
         the actions they each performed this turn. Newly spawned bots have no
         actions.
         '''
         robots = [[] for i in range(2)]
-        for delta_info in delta:
-            if (delta_info.loc_end not in new_state.robots or
-                    delta_info.hp_end <= 0):
-                # Robot died this turn, to prevent spawning bots from
-                # overwriting dead bots we don't record these at all.
-                continue
+        for loc, robot in self.state.robots.iteritems():
             robot_info = {
-                'location': delta_info.loc_end,
-                'hp': delta_info.hp_end,
-                'player_id': delta_info.player_id,
-                'robot_id': new_state.robots[delta_info.loc_end].robot_id
+                'location': loc,
+                'hp': robot.hp,
+                'player_id': robot.player_id,
+                'robot_id': robot.robot_id,
             }
-            if delta_info.loc in actions:
-                robot_info['action'] = actions[delta_info.loc]
-            robots[delta_info.player_id].append(robot_info)
+            if loc in actions:
+                robot_info['action'] = actions[loc]
+            robots[robot.player_id].append(robot_info)
         return robots
 
     def _capture_actions(self, delta, actions):
@@ -223,7 +218,7 @@ class AbstractGame(object):
         self._capture_actions(delta, actions)
 
         if self._record_history:
-            round_history = self._make_history(delta, new_state, actions)
+            round_history = self._make_history(actions)
             for i in (0, 1):
                 self.history[i].append(round_history[i])
 
