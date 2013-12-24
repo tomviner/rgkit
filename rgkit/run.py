@@ -213,7 +213,7 @@ def main():
     if args.count > 1:
         p1won = sum(p1 > p2 for p1, p2 in scores)
         p2won = sum(p2 > p1 for p1, p2 in scores)
-        print[p1won, p2won, args.count - p1won - p2won]
+        print [p1won, p2won, args.count - p1won - p2won]
 
 
 if __name__ == '__main__':
