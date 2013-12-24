@@ -42,7 +42,7 @@ parser.add_argument("-m", "--map",
                                                             'maps/default.py'))
 parser.add_argument("-c", "--count", type=int,
                     default=1,
-                    help="Game count, default: 1")
+                    help="Game count, default: 1, multithreading if >1")
 parser.add_argument("-A", "--animate", action="store_true",
                     default=False,
                     help="Enable animations in rendering.")
