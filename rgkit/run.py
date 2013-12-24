@@ -107,7 +107,7 @@ def play(players, print_info=True, animate_render=False, play_in_thread=False,
         # only import render if we need to render the game;
         # this way, people who don't have tkinter can still
         # run headless
-        from rgkit import render
+        from rgkit.render import render
 
         g.run_all_turns()
         #print "rendering %s animations" % ("with"
@@ -213,7 +213,7 @@ def main():
     if args.count > 1:
         p1won = sum(p1 > p2 for p1, p2 in scores)
         p2won = sum(p2 > p1 for p1, p2 in scores)
-        print [p1won, p2won, args.count - p1won - p2won]
+        print[p1won, p2won, args.count - p1won - p2won]
 
 
 if __name__ == '__main__':
