@@ -236,6 +236,10 @@ class Game(object):
         while self._state.turn < self._settings.max_turns:
             self.run_turn()
 
+        # create last turn's state for server history
+        if self._record_history:
+            self.history.append(self._make_history({}))
+
         # create dummy data for last turn
         # TODO: render should be cleverer
         actions_on_turn = {}
