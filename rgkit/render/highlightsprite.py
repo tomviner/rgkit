@@ -1,5 +1,5 @@
 from rgkit.render.robotsprite import RobotSprite
-from rgkit.render.renderutils import rgb_to_hex, blend_colors
+from rgkit.render.utils import rgb_to_hex, blend_colors
 
 
 class HighlightSprite:
