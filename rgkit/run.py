@@ -91,14 +91,14 @@ def play(players, print_info=True, animate_render=False, play_in_thread=False,
     if play_in_thread:
         g = game.ThreadedGame(*players,
                               print_info=print_info,
-                              record_actions=True,
+                              record_actions=print_info,
                               record_history=True,
                               seed=match_seed,
                               quiet=quiet)
     else:
         g = game.Game(*players,
                       print_info=print_info,
-                      record_actions=True,
+                      record_actions=print_info,
                       record_history=True,
                       seed=match_seed,
                       quiet=quiet)
@@ -109,7 +109,9 @@ def play(players, print_info=True, animate_render=False, play_in_thread=False,
         # run headless
         from rgkit.render import render
 
-        g.run_all_turns()
+    g.run_all_turns()
+
+    if print_info:
         #print "rendering %s animations" % ("with"
         #                                   if animate_render else "without")
         render.Render(g, game.settings, animate_render, names=names)
