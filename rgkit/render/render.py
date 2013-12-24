@@ -100,14 +100,6 @@ class Render:
     def on_resize(self, event):
         self.size_changed = True
 
-    def loc_robot_hp_color(self, loc):
-        for index, color in enumerate(('red', 'blue')):
-            self._game.get_actions_on_turn(self._turn)
-            for robot in self._game.history[index][self._turn - 1]:
-                if robot[0] == loc:
-                    return (robot[1], index)
-        return None
-
     def remove_object(self, obj):
         if obj is not None:
             self._win.delete(obj)
@@ -147,7 +139,7 @@ class Render:
 
     def step_turn(self, turns):
         self._turn = self.current_turn_int() + turns
-        self._turn = min(max(self._turn, 1.0), self._game.state.turn)
+        self._turn = min(max(self._turn, 1.0), self._settings.max_turns)
         self._sub_turn = 0.0
         self.update_frame_start_time()
         self.turn_changed()
@@ -304,8 +296,7 @@ class Render:
             count_turn = self._settings.max_turns
         if count_turn < 0:
             count_turn = 0
-        red = len(self._game.history[0][count_turn-1])
-        blue = len(self._game.history[1][count_turn-1])
+        red, blue = self._game.get_state(count_turn).get_scores()
         info = ''
         currentAction = ''
         if self._highlighted is not None:

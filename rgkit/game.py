@@ -91,7 +91,7 @@ class Player:
         return actions
 
 
-class AbstractGame(object):
+class Game(object):
     def __init__(self, player1, player2, record_actions=False,
                  record_history=False, print_info=False,
                  seed=None, quiet=0):
@@ -101,7 +101,7 @@ class AbstractGame(object):
         self._player1.set_player_id(0)
         self._player2 = player2
         self._player2.set_player_id(1)
-        self.state = GameState(self._settings, use_start=True, seed=seed)
+        self._state = GameState(self._settings, use_start=True, seed=seed)
         self._record_actions = record_actions
         self._record_history = record_history
         self._print_info = print_info
@@ -111,27 +111,34 @@ class AbstractGame(object):
         self._random = random.Random(seed)
         self._quiet = quiet
 
-        self.actions_on_turn = {}  # {turn: {loc: action}}
+        self._actions_on_turn = {}
+        self._states = {}
+        self.history = [[], []]  # TODO: make private
 
+    # actions_on_turn = {loc: log_item}
+    # log_item = {
+    #     'name': action_name,
+    #     'target': action_target or None,
+    #     'loc': loc,
+    #     'hp': hp,
+    #     'player': player_id,
+    #     'loc_end': loc_end,
+    #     'hp_end': hp_end
+    # }
+    #
+    # or dummy if turn == settings.max_turn
     def get_actions_on_turn(self, turn):
-        if turn in self.actions_on_turn:
-            return self.actions_on_turn[turn]
-        elif turn < 0:
-            return self.actions_on_turn[0]
-        elif turn == self._settings.max_turns:
-            # get or make dummy data for last turn
-            end_turn = self._settings.max_turns
-            if end_turn not in self.actions_on_turn:
-                self.actions_on_turn[end_turn] = {}
-                for loc, log in self.actions_on_turn[end_turn-1].items():
-                    dummy = {}
-                    dummy['name'] = ''
-                    dummy['target'] = None
-                    dummy['hp'] = dummy['hp_end'] = log['hp_end']
-                    dummy['loc'] = dummy['loc_end'] = log['loc_end']
-                    dummy['player'] = log['player']
-                    self.actions_on_turn[end_turn][log['loc_end']] = dummy
-            return self.actions_on_turn[end_turn]
+        assert(self._record_actions)
+        return self._actions_on_turn[turn]
+
+    def get_state(self, turn):
+        return self._states[turn]
+
+    def _save_actions_on_turn(self, actions_on_turn, turn):
+        self._actions_on_turn[turn] = actions_on_turn
+
+    def _save_state(self, state, turn):
+        self._states[turn] = state
 
     def _get_robots_actions(self):
         if self._quiet < 3:
@@ -140,9 +147,9 @@ class AbstractGame(object):
             if self._quiet >= 2:
                 sys.stderr = NullDevice()
         seed1 = self._random.randint(0, sys.maxint)
-        actions = self._player1.get_actions(self.state, seed1)
+        actions = self._player1.get_actions(self._state, seed1)
         seed2 = self._random.randint(0, sys.maxint)
-        actions2 = self._player2.get_actions(self.state, seed2)
+        actions2 = self._player2.get_actions(self._state, seed2)
         actions.update(actions2)
         if self._quiet < 3:
             if self._quiet >= 1:
@@ -153,7 +160,8 @@ class AbstractGame(object):
         return actions
 
     def _make_history(self, actions):
-        '''An aggregate of all bots and their actions this turn.
+        '''
+        An aggregate of all bots and their actions this turn.
 
         Stores a list of each player's bots at the start of this turn and
         the actions they each performed this turn. Newly spawned bots have no
@@ -172,12 +180,8 @@ class AbstractGame(object):
             robots[robot.player_id].append(robot_info)
         return robots
 
-    def _capture_actions(self, delta, actions):
-        '''
-        Format delta in the format renderer wants.
-        Append them to self.actions_on_turn.
-        '''
-        log = {}
+    def _calculate_actions_on_turn(self, delta, actions):
+        actions_on_turn = {}
 
         for delta_info in delta:
             loc = delta_info.loc
@@ -193,7 +197,7 @@ class AbstractGame(object):
                 target = None
 
             # note that a spawned bot may overwrite an existing bot
-            log[loc] = {
+            actions_on_turn[loc] = {
                 'name': name,
                 'target': target,
                 'loc': loc,
@@ -203,79 +207,61 @@ class AbstractGame(object):
                 'hp_end': delta_info.hp_end
             }
 
-        self.actions_on_turn[self.state.turn] = log
+        return actions_on_turn
 
     def run_turn(self):
         if self._print_info:
-            print (' running turn %d ' % (self.state.turn + 1)).center(70, '-')
+            print (' running turn %d ' % (self._state.turn)).center(70, '-')
 
         actions = self._get_robots_actions()
 
-        delta = self.state.get_delta(actions)
+        delta = self._state.get_delta(actions)
 
-        new_state = self.state.apply_delta(delta)
+        actions_on_turn = self._calculate_actions_on_turn(delta, actions)
+        if self._record_actions:
+            self._save_actions_on_turn(actions_on_turn, self._state.turn)
 
-        self._capture_actions(delta, actions)
+        new_state = self._state.apply_delta(delta)
+        self._save_state(new_state, new_state.turn)
 
         if self._record_history:
             round_history = self._make_history(actions)
             for i in (0, 1):
                 self.history[i].append(round_history[i])
 
-        self.state = new_state
+        self._state = new_state
 
     def run_all_turns(self):
-        self.finish_running_turns_if_necessary()
+        assert(self._state.turn == 0)
+        self._save_state(self._state, 0)
 
-    def finish_running_turns_if_necessary(self):
-        while self.state.turn < settings.max_turns:
+        while self._state.turn < self._settings.max_turns:
             self.run_turn()
 
+        # create dummy data for last turn
+        # TODO: render should be cleverer
+        actions_on_turn = {}
+
+        for loc, robot in self._state.robots.iteritems():
+            log_item = {
+                'name': '',
+                'target': None,
+                'loc': loc,
+                'hp': robot.hp,
+                'player': robot.player_id,
+                'loc_end': loc,
+                'hp_end': robot.hp
+            }
+
+            actions_on_turn[loc] = log_item
+
+        self._save_actions_on_turn(actions_on_turn, self._settings.max_turns)
+
     def get_scores(self):
-        self.finish_running_turns_if_necessary()
-        return self.state.get_scores()
+        return self.get_state(self._settings.max_turns).get_scores()
 
 
-class Game(AbstractGame):
-    def __init__(self, player1, player2, record_actions=False,
-                 record_history=False, print_info=False,
-                 seed=None, quiet=0):
-        super(Game, self).__init__(
-            player1, player2, record_actions, record_history,
-            print_info, seed, quiet)
-
-        if self._record_history:
-            self.history = [list() for i in range(2)]
-
-        if self._record_actions:
-            records = [{} for i in range(settings.max_turns)]
-            self.actions_on_turn = dict(zip(range(settings.max_turns),
-                                            records))
-            self.last_locs = {}
-            self.last_hps = {}
-
-
-class PatientList(list):
-    """ A list which blocks access to unset items until they are set."""
-    def __init__(self, _events):
-        self._events = _events
-
-    def forced_get(self, *args):
-        return super(PatientList, self).__getitem__(*args)
-
-    def __getitem__(self, key):
-        if key >= len(self._events):
-            # should raise an IndexError
-            super(PatientList, self).__getitem__(key)
-            assert False, ("If you see this, then {0} has been misused. " +
-                           "The event list contained less items than the " +
-                           "current length of the list: {1}".format(
-                               self.__class__.__name__, len(self)))
-        self._events[key].wait()
-        return super(PatientList, self).__getitem__(key)
-
-
-class ThreadedGame(AbstractGame):
+class ThreadedGame(Game):
     def __init__(self, player1, player2, record_actions=False,
                  record_history=False, print_info=False,
                  seed=None, quiet=0):
@@ -283,43 +269,37 @@ class ThreadedGame(AbstractGame):
             player1, player2, record_actions, record_history,
             print_info, seed, quiet)
 
-        self.turn_running_lock = _threading.Lock()
-        self.per_turn_events = [_threading.Event()
-                                for x in xrange(settings.max_turns)]
-        self.per_turn_events[0].set()
-        self.turn_runner = None
+        # events set when actions_on_turn are calculated
+        self._has_actions_on_turn = [_threading.Event()
+                                     for x in xrange(settings.max_turns + 1)]
 
-        if self._record_history:
-            self.history = [PatientList(self.per_turn_events)
-                            for i in range(2)]
-
-        if self._record_actions:
-            self.actions_on_turn = PatientList(self.per_turn_events)
-            unsafe_actions_on_turn = [dict()
-                                      for x in xrange(settings.max_turns)]
-            self.actions_on_turn.extend(unsafe_actions_on_turn)
-            self.last_locs = {}
-            self.last_hps = {}
+        # events set when state are calculated
+        self._has_state = [_threading.Event()
+                           for x in xrange(settings.max_turns + 1)]
 
     def get_actions_on_turn(self, turn):
-        # print "threaded get-action"
-        if turn < 0:
-            turn = 0
-        elif turn > self._settings.max_turns:
-            turn = self._settings.max_turns
-        return self.actions_on_turn.forced_get(turn)
+        self._has_actions_on_turn[turn].wait()
+        return super(ThreadedGame, self).get_actions_on_turn(turn)
 
-    def run_turn(self):
-        super(ThreadedGame, self).run_turn()
-        self.per_turn_events[self.state.turn-1].set()
+    def get_state(self, turn):
+        self._has_state[turn].wait()
+        return super(ThreadedGame, self).get_state(turn)
+
+    def _save_actions_on_turn(self, actions_on_turn, turn):
+        super(ThreadedGame, self)._save_actions_on_turn(actions_on_turn, turn)
+        self._has_actions_on_turn[turn].set()
+
+    def _save_state(self, state, turn):
+        super(ThreadedGame, self)._save_state(state, turn)
+        self._has_state[turn].set()
 
     def run_all_turns(self):
-        self.turn_runner = _threading.Thread(
-            target=self.finish_running_turns_if_necessary)
+        lock = _threading.Lock()
+
+        def task():
+            with lock:
+                super(ThreadedGame, self).run_all_turns()
+
+        self.turn_runner = _threading.Thread(target=task)
         self.turn_runner.daemon = True
         self.turn_runner.start()
-
-    def finish_running_turns_if_necessary(self):
-        with self.turn_running_lock:
-            while self.state.turn < settings.max_turns:
-                self.run_turn()
