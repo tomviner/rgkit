@@ -113,7 +113,7 @@ class Game(object):
 
         self._actions_on_turn = {}
         self._states = {}
-        self.history = [[], []]  # TODO: make private
+        self.history = []  # TODO: make private
 
     # actions_on_turn = {loc: log_item}
     # log_item = {
@@ -167,7 +167,7 @@ class Game(object):
         the actions they each performed this turn. Newly spawned bots have no
         actions.
         '''
-        robots = [[] for i in range(2)]
+        robots = []
         for loc, robot in self._state.robots.iteritems():
             robot_info = {
                 'location': loc,
@@ -177,7 +177,7 @@ class Game(object):
             }
             if loc in actions:
                 robot_info['action'] = actions[loc]
-            robots[robot.player_id].append(robot_info)
+            robots.append(robot_info)
         return robots
 
     def _calculate_actions_on_turn(self, delta, actions):
@@ -225,9 +225,7 @@ class Game(object):
         self._save_state(new_state, new_state.turn)
 
         if self._record_history:
-            round_history = self._make_history(actions)
-            for i in (0, 1):
-                self.history[i].append(round_history[i])
+            self.history.append(self._make_history(actions))
 
         self._state = new_state
 
