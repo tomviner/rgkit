@@ -107,12 +107,12 @@ def play(players, print_info=True, animate_render=False, play_in_thread=False,
         # only import render if we need to render the game;
         # this way, people who don't have tkinter can still
         # run headless
-        from rgkit.render.render import Render
+        from rgkit.render import render
 
         g.run_all_turns()
         #print "rendering %s animations" % ("with"
         #                                   if animate_render else "without")
-        Render(g, game.settings, animate_render, names=names)
+        render.Render(g, game.settings, animate_render, names=names)
 
     return g.get_scores()
 
