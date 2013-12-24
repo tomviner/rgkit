@@ -125,7 +125,7 @@ class Game(object):
     #     'loc_end': loc_end,
     #     'hp_end': hp_end
     # }
-    # 
+    #
     # or dummy if turn == settings.max_turn
     def get_actions_on_turn(self, turn):
         assert(self._record_actions)
@@ -216,7 +216,7 @@ class Game(object):
 
     def run_turn(self):
         if self._print_info:
-            print (' running turn %d ' % (self._state.turn + 1)).center(70, '-')
+            print (' running turn %d ' % (self._state.turn)).center(70, '-')
 
         actions = self._get_robots_actions()
 
@@ -265,6 +265,7 @@ class Game(object):
     def get_scores(self):
         return self.get_state(self._settings.max_turns).get_scores()
 
+
 class ThreadedGame(Game):
     def __init__(self, player1, player2, record_actions=False,
                  record_history=False, print_info=False,
@@ -275,11 +276,11 @@ class ThreadedGame(Game):
 
         # events set when actions_on_turn are calculated
         self._has_actions_on_turn = [_threading.Event()
-                                for x in xrange(settings.max_turns + 1)]
+                                     for x in xrange(settings.max_turns + 1)]
 
         # events set when state are calculated
         self._has_state = [_threading.Event()
-                                for x in xrange(settings.max_turns + 1)]
+                           for x in xrange(settings.max_turns + 1)]
 
     def get_actions_on_turn(self, turn):
         self._has_actions_on_turn[turn].wait()
