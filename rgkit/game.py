@@ -133,10 +133,7 @@ class AbstractGame(object):
                     self.actions_on_turn[end_turn][log['loc_end']] = dummy
             return self.actions_on_turn[end_turn]
 
-    def build_players_game_info(self):
-        return [self.state.get_game_info(0), self.state.get_game_info(1)]
-
-    def get_robots_actions(self):
+    def _get_robots_actions(self):
         if self._quiet < 3:
             if self._quiet >= 1:
                 sys.stdout = NullDevice()
@@ -155,7 +152,7 @@ class AbstractGame(object):
 
         return actions
 
-    def make_history(self, delta, new_state, actions):
+    def _make_history(self, delta, new_state, actions):
         '''An aggregate of all bots and their actions this turn.
 
         Stores a list of each player's current bots at the end of this turn and
@@ -180,7 +177,7 @@ class AbstractGame(object):
             robots[delta_info.player_id].append(robot_info)
         return robots
 
-    def capture_actions(self, delta, actions):
+    def _capture_actions(self, delta, actions):
         '''
         Format delta in the format renderer wants.
         Append them to self.actions_on_turn.
@@ -217,16 +214,16 @@ class AbstractGame(object):
         if self._print_info:
             print (' running turn %d ' % (self.state.turn + 1)).center(70, '-')
 
-        actions = self.get_robots_actions()
+        actions = self._get_robots_actions()
 
         delta = self.state.get_delta(actions)
 
         new_state = self.state.apply_delta(delta)
 
-        self.capture_actions(delta, actions)
+        self._capture_actions(delta, actions)
 
         if self._record_history:
-            round_history = self.make_history(delta, new_state, actions)
+            round_history = self._make_history(delta, new_state, actions)
             for i in (0, 1):
                 self.history[i].append(round_history[i])
 
