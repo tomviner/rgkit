@@ -11,7 +11,7 @@ except ImportError:
 
 from rgkit import rg
 from rgkit.gamestate import GameState
-from rgkit.settings import settings, AttrDict
+from rgkit.settings import settings
 
 sys.modules['rg'] = rg  # preserve backwards compatible robot imports
 

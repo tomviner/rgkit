@@ -5,7 +5,6 @@ from argparse import RawTextHelpFormatter
 import ast
 import imp
 import inspect
-import itertools
 import pkg_resources
 import random
 import sys
