@@ -423,6 +423,7 @@ class Render:
     def paint_highlight_sprite(self, subframe_hlt=0):
         if self._highlight_sprite is not None:
             self._highlight_sprite.animate(subframe_hlt)
+            self.update_layers()
 
     def paint(self, subframe=0, subframe_hlt=0):
         for sprite in self._sprites:
