@@ -6,7 +6,7 @@ from rgkit import rg
 from rgkit.settings import AttrDict
 
 
-class GameState:
+class GameState(object):
     def __init__(self, settings, use_start=False,
                  turn=0, next_robot_id=0, seed=None):
         self._settings = settings
@@ -72,7 +72,7 @@ class GameState:
         return locations[:per_player], locations[per_player:]
 
     def _clear_dead(self):
-        dead = filter(lambda loc: self.robots[loc].hp <= 0, self.robots)
+        dead = [loc for loc in self.robots if self.robots[loc].hp <= 0]
 
         for loc in dead:
             self.remove_robot(loc)
@@ -99,10 +99,6 @@ class GameState:
 
         def add(loc, target):
             hitpoints[target].add(loc)
-
-        def remove(loc, target):
-            if loc in hitpoints[target]:
-                hitpoints[target].remove(loc)
 
         def stuck(loc):
             # we are not moving anywhere
@@ -249,7 +245,7 @@ class GameState:
     def get_scores(self):
         scores = [0, 0]
 
-        for loc, robot in self.robots.iteritems():
+        for robot in self.robots.itervalues():
             scores[robot.player_id] += 1
 
         return scores
@@ -260,7 +256,7 @@ class GameState:
 
         game_info.robots = dict((loc, AttrDict(robot))
                                 for loc, robot in self.robots.iteritems())
-        for loc, robot in game_info.robots.iteritems():
+        for robot in game_info.robots.itervalues():
             if robot.player_id != player_id:
                 del robot.robot_id
 
@@ -286,5 +282,5 @@ class GameState:
             else:
                 return False
 
-        except Exception:
+        except:
             return False

@@ -86,7 +86,7 @@ def make_player(fname):
 
 
 def play(players, print_info=True, animate_render=False, play_in_thread=False,
-         match_seed=None, names=["Red", "Green"], quiet=0):
+         match_seed=None, names=["Red", "Blue"], quiet=0):
     if play_in_thread:
         g = game.ThreadedGame(*players,
                               print_info=print_info,

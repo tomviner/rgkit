@@ -6,7 +6,6 @@ CENTER_POINT = None
 
 def after_settings():
     global CENTER_POINT
-    global settings
     CENTER_POINT = (int(settings.board_size / 2), int(settings.board_size / 2))
 
 
@@ -26,16 +25,16 @@ def wdist(p1, p2):
     return abs(p2[0] - p1[0]) + abs(p2[1] - p1[1])
 
 
-def memodict(f):
+def memoize(f):
     """ Memoization decorator for a function taking a single argument """
-    class memodict(dict):
+    class MemoDict(dict):
         def __missing__(self, key):
             ret = self[key] = f(key)
             return ret
-    return memodict().__getitem__
+    return MemoDict().__getitem__
 
 
-@memodict
+@memoize
 def loc_types(loc):
     for i in range(2):
         if not 0 <= loc[i] < settings.board_size:
@@ -49,15 +48,15 @@ def loc_types(loc):
     return types
 
 
-@memodict
+@memoize
 def _locs_around(loc):
     x, y = loc
     offsets = ((0, 1), (1, 0), (0, -1), (-1, 0))
     return [(x + dx, y + dy) for dx, dy in offsets]
 
 
-def locs_around(loc, filter_out=[]):
-    filter_out = set(filter_out)
+def locs_around(loc, filter_out=None):
+    filter_out = set(filter_out or [])
     return [l for l in _locs_around(loc)
             if len(filter_out & loc_types(l)) == 0]
 
