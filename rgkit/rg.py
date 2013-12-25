@@ -57,8 +57,8 @@ def _locs_around(loc):
 
 def locs_around(loc, filter_out=None):
     filter_out = set(filter_out or [])
-    return [l for l in _locs_around(loc)
-            if len(filter_out & loc_types(l)) == 0]
+    return [a_loc for a_loc in _locs_around(loc)
+            if len(filter_out & loc_types(a_loc)) == 0]
 
 
 def toward(curr, dest):
