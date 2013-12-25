@@ -303,9 +303,6 @@ class Render(object):
             if 'obstacle' in squareinfo:
                 info = 'Obstacle'
             elif 'bot' in squareinfo:
-                actioninfo = squareinfo[1]
-                hp = actioninfo['hp']
-                team = actioninfo['player']
                 robot_id = self._game.get_state(display_turn) \
                     .robots[self._highlighted].robot_id
                 info = 'Bot %d ' % (robot_id,)
