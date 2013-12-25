@@ -6,7 +6,7 @@ from rgkit.render.highlightsprite import HighlightSprite
 from rgkit.render.utils import millis, rgb_to_hex
 
 
-class Render:
+class Render(object):
     def __init__(self, game_inst, settings, animations, names=["Red", "Blue"]):
         self.size_changed = False
         self.init = True

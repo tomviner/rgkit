@@ -2,7 +2,7 @@ import Tkinter
 from rgkit.render.utils import rgb_to_hex, blend_colors
 
 
-class RobotSprite:
+class RobotSprite(object):
     def __init__(self, action_info, render):
         self.location = action_info['loc']
         self.location_next = action_info['loc_end']
@@ -29,7 +29,7 @@ class RobotSprite:
         """
         # fix delta to between 0 and 1
         delta = max(0, min(delta, 1))
-        bot_rgb_base = self.compute_color(self, self.id, self.hp)
+        bot_rgb_base = self.compute_color(self.id, self.hp)
 
         # default settings
         alpha_hack = 1
@@ -108,13 +108,12 @@ class RobotSprite:
 
         # DRAW BOTS WITH HP
         bot_hex = rgb_to_hex(*bot_rgb)
-        self.draw_bot(delta, (x, y), bot_hex, bot_size)
+        self.draw_bot((x, y), bot_hex, bot_size)
         if self.settings.bot_hp_animation:
             self.draw_bot_hp(delta, (x, y), bot_rgb, alpha_hack)
         else:
             self.draw_bot_hp(0, (x, y), bot_rgb, alpha_hack)
 
-    @staticmethod
     def compute_color(self, player, hp):
         r, g, b = self.settings.colors[player]
         maxclr = min(hp, 50)
@@ -123,7 +122,7 @@ class RobotSprite:
         b += (100 - maxclr * 1.75) / 255
         return (r, g, b)
 
-    def draw_bot(self, delta, loc, color, size):
+    def draw_bot(self, loc, color, size):
         x, y, rx, ry = self.renderer.grid_bbox(loc, size-2)
         ox, oy = self.animation_offset
         if self.square is None:

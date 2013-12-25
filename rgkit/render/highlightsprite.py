@@ -2,7 +2,7 @@ from rgkit.render.robotsprite import RobotSprite
 from rgkit.render.utils import rgb_to_hex, blend_colors
 
 
-class HighlightSprite:
+class HighlightSprite(object):
     def __init__(self, loc, target, render):
         self.location = loc
         self.target = target
