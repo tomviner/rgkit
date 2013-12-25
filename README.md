@@ -62,18 +62,33 @@ After installing the package, the script is executable from the command line
 (if you're using virtualenv, remember to activate the environment). There are
 two entry points provided: `rgrun` and `rgmap`. The general usage of run is:
 
-    usage: rgrun [-h] [-m MAP] [-H] usercode1 usercode2
-
+    usage: rgrun [-h] [-m MAP] [-c COUNT] [-A] [-q] [-H | -T]
+                 [--game-seed GAME_SEED]
+                 [--match-seeds [MATCH_SEEDS [MATCH_SEEDS ...]]]
+                 player1 player2
+    
     Robot game execution script.
-
+    
     positional arguments:
-    usercode1          File containing first robot class definition.
-    usercode2          File containing second robot class definition.
-
+      player1               File containing first robot class definition.
+      player2               File containing second robot class definition.
+    
     optional arguments:
-    -h, --help         show this help message and exit
-    -m MAP, --map MAP  User-specified map file.
-    -H, --headless     Disable rendering game output.
+      -h, --help            show this help message and exit
+      -m MAP, --map MAP     User-specified map file.
+      -c COUNT, --count COUNT
+                            Game count, default: 1, multithreading if >1
+      -A, --animate         Enable animations in rendering.
+      -q, --quiet           Quiet execution.
+                            -q : suppresses bot stdout
+                            -qq: suppresses bot stdout and stderr
+                            -qqq: supresses all rgkit and bot output
+      -H, --headless        Disable rendering game output.
+      -T, --play-in-thread  Separate GUI thread from robot move calculations.
+      --game-seed GAME_SEED
+                            Appended with game countfor per-match seeds.
+      --match-seeds [MATCH_SEEDS [MATCH_SEEDS ...]]
+                            Used for random seed of the first matches in order.
 
 So, from a directory containing your_robot.py, you can run a game against the
 default robot and suppress GUI output with the following command:
