@@ -2,7 +2,6 @@ import ast
 import pkg_resources
 import unittest
 from rgkit import game
-from rgkit.gamestate import GameState
 
 map_data = ast.literal_eval(
     open(pkg_resources.resource_filename('rgkit', 'maps/default.py')).read())

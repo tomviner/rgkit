@@ -3,15 +3,14 @@ import random
 import sys
 import traceback
 try:
-    import threading as _threading
-    _threading  # for pyflakes
+    import threading
 except ImportError:
-    import dummy_threading as _threading
+    import dummy_threading as threading
 
 
 from rgkit import rg
 from rgkit.gamestate import GameState
-from rgkit.settings import settings, AttrDict
+from rgkit.settings import settings
 
 sys.modules['rg'] = rg  # preserve backwards compatible robot imports
 
@@ -32,8 +31,10 @@ def init_settings(map_data):
     return settings
 
 
-class Player:
+class Player(object):
     def __init__(self, code=None, robot=None):
+        self._player_id = None  # must be set using set_player_id
+
         if code is not None:
             self._code = code
             self._load_code()
@@ -70,7 +71,7 @@ class Player:
                         robot.robot_id + 1, action, robot.location)
                 )
 
-        except Exception:
+        except:
             traceback.print_exc(file=sys.stdout)
             action = ['guard']
 
@@ -95,7 +96,6 @@ class Game(object):
     def __init__(self, player1, player2, record_actions=False,
                  record_history=False, print_info=False,
                  seed=None, quiet=0):
-        global settings
         self._settings = settings
         self._player1 = player1
         self._player1.set_player_id(0)
@@ -128,7 +128,7 @@ class Game(object):
     #
     # or dummy if turn == settings.max_turn
     def get_actions_on_turn(self, turn):
-        assert(self._record_actions)
+        assert self._record_actions
         return self._actions_on_turn[turn]
 
     def get_state(self, turn):
@@ -230,7 +230,7 @@ class Game(object):
         self._state = new_state
 
     def run_all_turns(self):
-        assert(self._state.turn == 0)
+        assert self._state.turn == 0
         self._save_state(self._state, 0)
 
         while self._state.turn < self._settings.max_turns:
@@ -264,20 +264,18 @@ class Game(object):
 
 
 class ThreadedGame(Game):
-    def __init__(self, player1, player2, record_actions=False,
-                 record_history=False, print_info=False,
-                 seed=None, quiet=0):
-        super(ThreadedGame, self).__init__(
-            player1, player2, record_actions, record_history,
-            print_info, seed, quiet)
+    def __init__(self, *args, **kwargs):
+        super(ThreadedGame, self).__init__(*args, **kwargs)
+
+        max_turn = self._settings.max_turns
 
         # events set when actions_on_turn are calculated
-        self._has_actions_on_turn = [_threading.Event()
-                                     for x in xrange(settings.max_turns + 1)]
+        self._has_actions_on_turn = [threading.Event()
+                                     for _ in xrange(max_turn + 1)]
 
         # events set when state are calculated
-        self._has_state = [_threading.Event()
-                           for x in xrange(settings.max_turns + 1)]
+        self._has_state = [threading.Event()
+                           for _ in xrange(max_turn + 1)]
 
     def get_actions_on_turn(self, turn):
         self._has_actions_on_turn[turn].wait()
@@ -296,12 +294,12 @@ class ThreadedGame(Game):
         self._has_state[turn].set()
 
     def run_all_turns(self):
-        lock = _threading.Lock()
+        lock = threading.Lock()
 
         def task():
             with lock:
                 super(ThreadedGame, self).run_all_turns()
 
-        self.turn_runner = _threading.Thread(target=task)
-        self.turn_runner.daemon = True
-        self.turn_runner.start()
+        turn_runner = threading.Thread(target=task)
+        turn_runner.daemon = True
+        turn_runner.start()

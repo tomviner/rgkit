@@ -1,8 +1,8 @@
-from rgkit.render.robotsprite import RobotSprite
+from rgkit.render.robotsprite import compute_color
 from rgkit.render.utils import rgb_to_hex, blend_colors
 
 
-class HighlightSprite:
+class HighlightSprite(object):
     def __init__(self, loc, target, render):
         self.location = loc
         self.target = target
@@ -16,8 +16,8 @@ class HighlightSprite:
         # print squareinfo
         if 'bot' in squareinfo:
             bot = squareinfo[1]
-            bot_color = RobotSprite.compute_color(
-                self, bot['player'], bot['hp'])
+            bot_color = compute_color(self.settings,
+                                      bot['player'], bot['hp'])
             return bot_color
         return None
 

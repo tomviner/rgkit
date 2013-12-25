@@ -47,18 +47,14 @@ Other functions
 '''
 
 
-class MapEditor:
+class MapEditor(object):
     def __init__(self, blocksize, padding, map_file):
-        global settings
-
         self._blocksize = blocksize
         self._padding = padding
         self._map_file = map_file
         self.make_canvas()
 
     def make_canvas(self):
-        global settings
-
         root = Tkinter.Tk()
         size = (self._blocksize + self._padding) * settings.board_size + \
             self._padding * 2 + 40
@@ -183,8 +179,6 @@ class MapEditor:
         self._current_color = old_color
 
     def key_handler(self, event):
-        global color_mapping
-
         if event.char in color_mapping:
             self.set_color(color_mapping[event.char][0])
 
