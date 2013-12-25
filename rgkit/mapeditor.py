@@ -83,8 +83,8 @@ class MapEditor:
                 item = self._canvas.create_rectangle(
                     x * (self._blocksize + self._padding) + self._padding + 20,
                     y * (self._blocksize + self._padding) + self._padding + 20,
-                    (x+1) * (self._blocksize + self._padding) + 20,
-                    (y+1) * (self._blocksize + self._padding) + 20,
+                    (x + 1) * (self._blocksize + self._padding) + 20,
+                    (y + 1) * (self._blocksize + self._padding) + 20,
                     fill='#ddd',
                     width=0)
                 self._colors.append('#ddd')

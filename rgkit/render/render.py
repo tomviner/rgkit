@@ -177,7 +177,7 @@ class Render:
             step_turn(+1)
 
         def restart():
-            step_turn((-self._turn)+1)
+            step_turn((-self._turn) + 1)
 
         def pause():
             self.toggle_pause()
@@ -269,8 +269,8 @@ class Render:
         self._layers[layer_id] = None
         x, y = self.grid_to_xy(loc)
         item = self._win.create_text(
-            x+(self._blocksize-self.cell_border_width)/2,
-            y+(self._blocksize-self.cell_border_width)/2,
+            x + (self._blocksize - self.cell_border_width) / 2,
+            y + (self._blocksize - self.cell_border_width) / 2,
             text=text, font='TkFixedFont', fill=color, tags=[layer_id])
         return item
 
@@ -285,7 +285,7 @@ class Render:
         dstx, dsty = self.grid_to_xy(dst)
 
         item = self._win.create_line(
-            srcx+ox, srcy+oy, dstx+ox, dsty+oy, **kargs)
+            srcx + ox, srcy + oy, dstx + ox, dsty + oy, **kargs)
         return item
 
     def update_info_frame(self):
@@ -446,7 +446,7 @@ class Render:
         y += (self._blocksize - self.cell_border_width) / 2.
         halfwidth = self._blocksize / 2.
         halfborder = self.cell_border_width / 2.
-        return (int(x-halfwidth+halfborder),
-                int(y-halfwidth+halfborder),
-                int(x+halfwidth-halfborder),
-                int(y+halfwidth-halfborder))
+        return (int(x - halfwidth + halfborder),
+                int(y - halfwidth + halfborder),
+                int(x + halfwidth - halfborder),
+                int(y + halfwidth - halfborder))
