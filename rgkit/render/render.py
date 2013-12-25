@@ -12,7 +12,7 @@ class Render(object):
         self.init = True
 
         self.cell_border_width = 2
-        self.info_frame_height = 95
+        self.info_frame_height = 80
         self.board_margin = 0
 
         self._settings = settings
@@ -62,10 +62,10 @@ class Render(object):
 
         self._labelred = self._info.create_text(
             self._blocksize / 2, self._blocksize * 1 / 4,
-            anchor='nw', font='TkFixedFont', fill='red')
+            anchor='nw', font='TkFixedFont', fill='#ff1a1a')
         self._labelblue = self._info.create_text(
             self._blocksize / 2, self._blocksize * 7 / 8,
-            anchor='nw', font='TkFixedFont', fill='blue')
+            anchor='nw', font='TkFixedFont', fill='#3455ff')
         self._label = self._info.create_text(
             self._blocksize / 2, self._blocksize * 3 / 2,
             anchor='nw', font='TkFixedFont', fill='white')
@@ -176,7 +176,7 @@ class Render(object):
             step_turn(+1)
 
         def restart():
-            step_turn((-self._turn)+1)
+            step_turn((-self._turn) + 1)
 
         def pause():
             self.toggle_pause()
@@ -200,11 +200,11 @@ class Render(object):
                     self._highlighted_target = action.get("target", None)
                 else:
                     self._highlighted_target = None
-                self.update_highlight_sprite()
+                self.update_highlight_sprite(True)
                 self.update_info_frame()
                 self._t_cursor_start = millis()
 
-        self._master.bind("<Button-1>", lambda e: onclick(e))
+        self._win.bind("<Button-1>", lambda e: onclick(e))
         self._master.bind('<Left>', lambda e: prev())
         self._master.bind('<Right>', lambda e: next())
         self._master.bind('<space>', lambda e: pause())
@@ -268,8 +268,8 @@ class Render(object):
         self._layers[layer_id] = None
         x, y = self.grid_to_xy(loc)
         item = self._win.create_text(
-            x+(self._blocksize-self.cell_border_width)/2,
-            y+(self._blocksize-self.cell_border_width)/2,
+            x + (self._blocksize - self.cell_border_width) / 2,
+            y + (self._blocksize - self.cell_border_width) / 2,
             text=text, font='TkFixedFont', fill=color, tags=[layer_id])
         return item
 
@@ -284,7 +284,7 @@ class Render(object):
         dstx, dsty = self.grid_to_xy(dst)
 
         item = self._win.create_line(
-            srcx+ox, srcy+oy, dstx+ox, dsty+oy, **kargs)
+            srcx + ox, srcy + oy, dstx + ox, dsty + oy, **kargs)
         return item
 
     def update_info_frame(self):
@@ -303,15 +303,9 @@ class Render(object):
             if 'obstacle' in squareinfo:
                 info = 'Obstacle'
             elif 'bot' in squareinfo:
-                actioninfo = squareinfo[1]
-                hp = actioninfo['hp']
-                team = actioninfo['player']
-                info = '%s Bot: %d HP' % (['Red', 'Blue'][team], hp)
-                if actioninfo.get('name') is not None:
-                    currentAction += 'Current Action: {0}'.format(
-                        actioninfo['name'])
-                    if self._highlighted_target is not None:
-                        currentAction += ' to %s' % (self._highlighted_target,)
+                robot_id = self._game.get_state(display_turn) \
+                    .robots[self._highlighted].robot_id
+                info = 'Bot %d ' % (robot_id,)
 
         r_text = '%s: %d' % (self._names[0], red)
         g_text = '%s: %d' % (self._names[1], blue)
@@ -412,18 +406,20 @@ class Render(object):
             print "PROBLEM UPDATING SPRITES..? bots at turn {0} {1}:".format(
                 turn_action, bots_activity)
 
-    def update_highlight_sprite(self):
+    def update_highlight_sprite(self, repaint=False):
         need_update = (self._highlight_sprite is not None and
                        self._highlight_sprite.location != self._highlighted)
         if self._highlight_sprite is not None or need_update:
             self._highlight_sprite.clear()
         self._highlight_sprite = HighlightSprite(
             self._highlighted, self._highlighted_target, self)
-        self.paint_highlight_sprite(0)
+        if repaint:
+            self.paint_highlight_sprite()
 
     def paint_highlight_sprite(self, subframe_hlt=0):
         if self._highlight_sprite is not None:
             self._highlight_sprite.animate(subframe_hlt)
+            self.update_layers()
 
     def paint(self, subframe=0, subframe_hlt=0):
         for sprite in self._sprites:
@@ -448,7 +444,7 @@ class Render(object):
         y += (self._blocksize - self.cell_border_width) / 2.
         halfwidth = self._blocksize / 2.
         halfborder = self.cell_border_width / 2.
-        return (int(x-halfwidth+halfborder),
-                int(y-halfwidth+halfborder),
-                int(x+halfwidth-halfborder),
-                int(y+halfwidth-halfborder))
+        return (int(x - halfwidth + halfborder),
+                int(y - halfwidth + halfborder),
+                int(x + halfwidth - halfborder),
+                int(y + halfwidth - halfborder))

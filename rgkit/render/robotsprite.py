@@ -2,6 +2,15 @@ import Tkinter
 from rgkit.render.utils import rgb_to_hex, blend_colors
 
 
+def compute_color(settings, player, hp):
+    r, g, b = settings.colors[player]
+    maxclr = min(hp, 50)
+    r += (100 - maxclr * 1.75) / 255
+    g += (100 - maxclr * 1.75) / 255
+    b += (100 - maxclr * 1.75) / 255
+    return (r, g, b)
+
+
 class RobotSprite(object):
     def __init__(self, action_info, render):
         self.location = action_info['loc']
@@ -29,7 +38,7 @@ class RobotSprite(object):
         """
         # fix delta to between 0 and 1
         delta = max(0, min(delta, 1))
-        bot_rgb_base = self.compute_color(self.id, self.hp)
+        bot_rgb_base = compute_color(self.settings, self.id, self.hp)
 
         # default settings
         alpha_hack = 1
@@ -42,7 +51,7 @@ class RobotSprite(object):
                                        self.settings.normal_color, delta)
             # if dying, fade out
             elif self.hp_next <= 0:
-                alpha_hack = 1-delta
+                alpha_hack = 1 - delta
                 bot_rgb = blend_colors(bot_rgb_base,
                                        self.settings.normal_color, 1 - delta)
 
@@ -69,8 +78,8 @@ class RobotSprite(object):
                     tx, ty = self.location
                 dx = tx - x
                 dy = ty - y
-                off_x = dx*delta*self.renderer._blocksize
-                off_y = dy*delta*self.renderer._blocksize
+                off_x = dx * delta * self.renderer._blocksize
+                off_y = dy * delta * self.renderer._blocksize
                 self.animation_offset = (off_x, off_y)
             if self.settings.draw_movement_arrow:
                 arrow_fill = 'lightblue'
@@ -91,7 +100,7 @@ class RobotSprite(object):
                 # expand size (up to 1.5x original size)
                 bot_size = self.renderer._blocksize * (1 + delta / 2)
                 # color fade to yellow
-                bot_rgb = blend_colors(bot_rgb, (1, 1, 0), 1-delta)
+                bot_rgb = blend_colors(bot_rgb, (1, 1, 0), 1 - delta)
 
         # DRAW ARROWS
         if arrow_fill is not None:
@@ -114,23 +123,16 @@ class RobotSprite(object):
         else:
             self.draw_bot_hp(0, (x, y), bot_rgb, alpha_hack)
 
-    def compute_color(self, player, hp):
-        r, g, b = self.settings.colors[player]
-        maxclr = min(hp, 50)
-        r += (100 - maxclr * 1.75) / 255
-        g += (100 - maxclr * 1.75) / 255
-        b += (100 - maxclr * 1.75) / 255
-        return (r, g, b)
-
     def draw_bot(self, loc, color, size):
-        x, y, rx, ry = self.renderer.grid_bbox(loc, size-2)
+        x, y, rx, ry = self.renderer.grid_bbox(loc, size - 2)
         ox, oy = self.animation_offset
         if self.square is None:
             self.square = self.renderer.draw_grid_object(
                 self.location, type=self.settings.bot_shape, layer=3,
                 fill=color, width=0)
         self.renderer._win.itemconfig(self.square, fill=color)
-        self.renderer._win.coords(self.square, (x+ox, y+oy, rx+ox, ry+oy))
+        self.renderer._win.coords(self.square,
+                                  (x + ox, y + oy, rx + ox, ry + oy))
 
     def draw_bot_hp(self, delta, loc, bot_color, alpha):
         x, y = self.renderer.grid_to_xy(loc)
@@ -140,7 +142,7 @@ class RobotSprite(object):
             else self.settings.text_color_dark
         tex_rgb = blend_colors(tex_rgb, bot_color, alpha)
         tex_hex = rgb_to_hex(*tex_rgb)
-        val = int(self.hp * (1-delta) + self.hp_next * delta)
+        val = int(self.hp * (1 - delta) + self.hp_next * delta)
         if self.text is None:
             self.text = self.renderer.draw_text(self.location, val, tex_hex)
         self.renderer._win.itemconfig(self.text, text=val, fill=tex_hex)

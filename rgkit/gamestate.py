@@ -58,14 +58,14 @@ class GameState(object):
         # see http://stackoverflow.com/questions/2612648/reservoir-sampling
         locations = []
         per_player = self._settings.spawn_per_player
-        count = per_player*2
+        count = per_player * 2
         n = 0
         for loc in self._settings.spawn_coords:
             n += 1
             if len(locations) < count:
                 locations.append(loc)
             else:
-                s = int(self._spawn_random.random()*n)
+                s = int(self._spawn_random.random() * n)
                 if s < count:
                     locations[s] = loc
 
@@ -155,7 +155,7 @@ class GameState(object):
                 damage_map[target][actor_id] += damage
 
             if actions[loc][0] == 'suicide':
-                damage_map[loc][1-actor_id] += self._settings.robot_hp
+                damage_map[loc][1 - actor_id] += self._settings.robot_hp
 
                 damage = self._settings.suicide_damage
                 for target in rg.locs_around(loc):
@@ -176,7 +176,7 @@ class GameState(object):
                         delta_info.hp_end -= damage
 
             # apply other damage
-            damage_taken = damage_map[loc_end][1-robot.player_id]
+            damage_taken = damage_map[loc_end][1 - robot.player_id]
             if actions[loc][0] == 'guard':
                 damage_taken /= 2
 
