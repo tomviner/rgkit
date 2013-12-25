@@ -1,10 +1,9 @@
 import Tkinter
 import math
 
-from rgkit import rg
 from rgkit.render.robotsprite import RobotSprite
 from rgkit.render.highlightsprite import HighlightSprite
-from rgkit.render.utils import millis, rgb_to_hex, blend_colors
+from rgkit.render.utils import millis, rgb_to_hex
 
 
 class Render:

@@ -56,10 +56,10 @@ def _locs_around(loc):
     return [(x + dx, y + dy) for dx, dy in offsets]
 
 
-def locs_around(loc, filter_out=None):
-    filter_out = set(filter_out or [])
-    return [loc for loc in _locs_around(loc)
-            if len(filter_out & loc_types(loc)) == 0]
+def locs_around(loc, filter_out=[]):
+    filter_out = set(filter_out)
+    return [l for l in _locs_around(loc)
+            if len(filter_out & loc_types(l)) == 0]
 
 
 def toward(curr, dest):
