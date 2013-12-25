@@ -90,8 +90,8 @@ class GameState:
         delta = []
 
         def dest(loc):
-            if actions[loc][0] == 'move':
-                return actions[loc][1]
+            if actions[loc][0][0] == 'move':
+                return actions[loc][0][1]
             else:
                 return loc
 
@@ -126,7 +126,7 @@ class GameState:
 
         # calculate new locations
         for loc, robot in self.robots.iteritems():
-            if actions[loc][0] == 'move' and loc in hitpoints[loc]:
+            if actions[loc][0][0] == 'move' and loc in hitpoints[loc]:
                 new_loc = loc
             else:
                 new_loc = dest(loc)
@@ -152,13 +152,13 @@ class GameState:
         for loc, robot in self.robots.iteritems():
             actor_id = robot.player_id
 
-            if actions[loc][0] == 'attack':
-                target = actions[loc][1]
+            if actions[loc][0][0] == 'attack':
+                target = actions[loc][0][1]
                 damage = self._attack_random.randint(
                     *self._settings.attack_range)
                 damage_map[target][actor_id] += damage
 
-            if actions[loc][0] == 'suicide':
+            if actions[loc][0][0] == 'suicide':
                 damage_map[loc][1-actor_id] += self._settings.robot_hp
 
                 damage = self._settings.suicide_damage
@@ -172,7 +172,7 @@ class GameState:
             robot = self.robots[loc]
 
             # apply collision damage
-            if actions[loc][0] != 'guard':
+            if actions[loc][0][0] != 'guard':
                 damage = self._settings.collision_damage
 
                 for loc2 in collisions[delta_info.loc]:
@@ -181,7 +181,7 @@ class GameState:
 
             # apply other damage
             damage_taken = damage_map[loc_end][1-robot.player_id]
-            if actions[loc][0] == 'guard':
+            if actions[loc][0][0] == 'guard':
                 damage_taken /= 2
 
             delta_info.hp_end -= damage_taken

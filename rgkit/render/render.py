@@ -63,10 +63,10 @@ class Render:
 
         self._labelred = self._info.create_text(
             self._blocksize / 2, self._blocksize * 1 / 4,
-            anchor='nw', font='TkFixedFont', fill='red')
+            anchor='nw', font='TkFixedFont', fill='#ff1a1a')
         self._labelblue = self._info.create_text(
             self._blocksize / 2, self._blocksize * 7 / 8,
-            anchor='nw', font='TkFixedFont', fill='blue')
+            anchor='nw', font='TkFixedFont', fill='#3455ff')
         self._label = self._info.create_text(
             self._blocksize / 2, self._blocksize * 3 / 2,
             anchor='nw', font='TkFixedFont', fill='white')
@@ -307,7 +307,7 @@ class Render:
                 actioninfo = squareinfo[1]
                 hp = actioninfo['hp']
                 team = actioninfo['player']
-                info = 'Bot %d: ' % (actioninfo['id'],)
+                info = 'Bot %d ' % (actioninfo['id'],)
 
         r_text = '%s: %d' % (self._names[0], red)
         g_text = '%s: %d' % (self._names[1], blue)
