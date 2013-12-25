@@ -11,7 +11,6 @@ class RobotSprite:
         self.hp = max(0, action_info['hp'])
         self.hp_next = max(0, action_info['hp_end'])
         self.id = action_info['player']
-        self.robot_id = action_info['id']
         self.renderer = render
         self.settings = self.renderer._settings
         self.animation_offset = (0, 0)

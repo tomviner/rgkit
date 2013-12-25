@@ -58,14 +58,14 @@ class GameState:
         # see http://stackoverflow.com/questions/2612648/reservoir-sampling
         locations = []
         per_player = self._settings.spawn_per_player
-        count = per_player*2
+        count = per_player * 2
         n = 0
         for loc in self._settings.spawn_coords:
             n += 1
             if len(locations) < count:
                 locations.append(loc)
             else:
-                s = int(self._spawn_random.random()*n)
+                s = int(self._spawn_random.random() * n)
                 if s < count:
                     locations[s] = loc
 
@@ -90,8 +90,8 @@ class GameState:
         delta = []
 
         def dest(loc):
-            if actions[loc][0][0] == 'move':
-                return actions[loc][0][1]
+            if actions[loc][0] == 'move':
+                return actions[loc][1]
             else:
                 return loc
 
@@ -126,7 +126,7 @@ class GameState:
 
         # calculate new locations
         for loc, robot in self.robots.iteritems():
-            if actions[loc][0][0] == 'move' and loc in hitpoints[loc]:
+            if actions[loc][0] == 'move' and loc in hitpoints[loc]:
                 new_loc = loc
             else:
                 new_loc = dest(loc)
@@ -152,14 +152,14 @@ class GameState:
         for loc, robot in self.robots.iteritems():
             actor_id = robot.player_id
 
-            if actions[loc][0][0] == 'attack':
-                target = actions[loc][0][1]
+            if actions[loc][0] == 'attack':
+                target = actions[loc][1]
                 damage = self._attack_random.randint(
                     *self._settings.attack_range)
                 damage_map[target][actor_id] += damage
 
-            if actions[loc][0][0] == 'suicide':
-                damage_map[loc][1-actor_id] += self._settings.robot_hp
+            if actions[loc][0] == 'suicide':
+                damage_map[loc][1 - actor_id] += self._settings.robot_hp
 
                 damage = self._settings.suicide_damage
                 for target in rg.locs_around(loc):
@@ -172,7 +172,7 @@ class GameState:
             robot = self.robots[loc]
 
             # apply collision damage
-            if actions[loc][0][0] != 'guard':
+            if actions[loc][0] != 'guard':
                 damage = self._settings.collision_damage
 
                 for loc2 in collisions[delta_info.loc]:
@@ -180,8 +180,8 @@ class GameState:
                         delta_info.hp_end -= damage
 
             # apply other damage
-            damage_taken = damage_map[loc_end][1-robot.player_id]
-            if actions[loc][0][0] == 'guard':
+            damage_taken = damage_map[loc_end][1 - robot.player_id]
+            if actions[loc][0] == 'guard':
                 damage_taken /= 2
 
             delta_info.hp_end -= damage_taken

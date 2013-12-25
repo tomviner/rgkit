@@ -307,7 +307,9 @@ class Render:
                 actioninfo = squareinfo[1]
                 hp = actioninfo['hp']
                 team = actioninfo['player']
-                info = 'Bot %d ' % (actioninfo['id'],)
+                robot_id = self._game.get_state(display_turn) \
+                    .robots[self._highlighted].robot_id
+                info = 'Bot %d ' % (robot_id,)
 
         r_text = '%s: %d' % (self._names[0], red)
         g_text = '%s: %d' % (self._names[1], blue)
