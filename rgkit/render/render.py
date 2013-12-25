@@ -201,11 +201,11 @@ class Render:
                     self._highlighted_target = action.get("target", None)
                 else:
                     self._highlighted_target = None
-                self.update_highlight_sprite()
+                self.update_highlight_sprite(True)
                 self.update_info_frame()
                 self._t_cursor_start = millis()
 
-        self._master.bind("<Button-1>", lambda e: onclick(e))
+        self._win.bind("<Button-1>", lambda e: onclick(e))
         self._master.bind('<Left>', lambda e: prev())
         self._master.bind('<Right>', lambda e: next())
         self._master.bind('<space>', lambda e: pause())
@@ -410,14 +410,15 @@ class Render:
             print "PROBLEM UPDATING SPRITES..? bots at turn {0} {1}:".format(
                 turn_action, bots_activity)
 
-    def update_highlight_sprite(self):
+    def update_highlight_sprite(self, repaint=False):
         need_update = (self._highlight_sprite is not None and
                        self._highlight_sprite.location != self._highlighted)
         if self._highlight_sprite is not None or need_update:
             self._highlight_sprite.clear()
         self._highlight_sprite = HighlightSprite(
             self._highlighted, self._highlighted_target, self)
-        self.paint_highlight_sprite(0)
+        if repaint:
+            self.paint_highlight_sprite()
 
     def paint_highlight_sprite(self, subframe_hlt=0):
         if self._highlight_sprite is not None:
