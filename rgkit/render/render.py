@@ -13,7 +13,7 @@ class Render:
         self.init = True
 
         self.cell_border_width = 2
-        self.info_frame_height = 95
+        self.info_frame_height = 80
         self.board_margin = 0
 
         self._settings = settings
@@ -307,12 +307,7 @@ class Render:
                 actioninfo = squareinfo[1]
                 hp = actioninfo['hp']
                 team = actioninfo['player']
-                info = '%s Bot: %d HP' % (['Red', 'Blue'][team], hp)
-                if actioninfo.get('name') is not None:
-                    currentAction += 'Current Action: {0}'.format(
-                        actioninfo['name'])
-                    if self._highlighted_target is not None:
-                        currentAction += ' to %s' % (self._highlighted_target,)
+                info = 'Bot %d: ' % (actioninfo['id'],)
 
         r_text = '%s: %d' % (self._names[0], red)
         g_text = '%s: %d' % (self._names[1], blue)

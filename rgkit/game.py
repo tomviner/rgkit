@@ -74,7 +74,7 @@ class Player:
             traceback.print_exc(file=sys.stdout)
             action = ['guard']
 
-        return action
+        return (action, robot.robot_id)
 
     # returns map (loc) -> (action) for all bots of this player
     # 'fixes' invalid actions
@@ -185,15 +185,16 @@ class Game(object):
 
         for delta_info in delta:
             loc = delta_info.loc
-
             if loc in actions:
-                name = actions[loc][0]
+                name = actions[loc][0][0]
                 if name in ['move', 'attack']:
-                    target = actions[loc][1]
+                    target = actions[loc][0][1]
                 else:
                     target = None
+                robot_id = actions[loc][1]
             else:
                 name = 'spawn'
+                robot_id = None
                 target = None
 
             # note that a spawned bot may overwrite an existing bot
@@ -204,7 +205,8 @@ class Game(object):
                 'hp': delta_info.hp,
                 'player': delta_info.player_id,
                 'loc_end': delta_info.loc_end,
-                'hp_end': delta_info.hp_end
+                'hp_end': delta_info.hp_end,
+                'id': robot_id
             }
 
         return actions_on_turn
@@ -252,7 +254,8 @@ class Game(object):
                 'hp': robot.hp,
                 'player': robot.player_id,
                 'loc_end': loc,
-                'hp_end': robot.hp
+                'hp_end': robot.hp,
+                'id': robot.robot_id
             }
 
             actions_on_turn[loc] = log_item
