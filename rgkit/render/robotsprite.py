@@ -2,8 +2,12 @@ import Tkinter
 from rgkit.render.utils import rgb_to_hex, blend_colors
 
 
-def compute_color(settings, player, hp):
+def compute_color(settings, player, hp, guard=False):
     r, g, b = settings.colors[player]
+    if guard:
+        r += settings.color_guard[0]
+        g += settings.color_guard[1]
+        b += settings.color_guard[2]
     maxclr = min(hp, 50)
     r += (100 - maxclr * 1.75) / 255
     g += (100 - maxclr * 1.75) / 255
@@ -38,7 +42,7 @@ class RobotSprite(object):
         """
         # fix delta to between 0 and 1
         delta = max(0, min(delta, 1))
-        bot_rgb_base = compute_color(self.settings, self.id, self.hp)
+        bot_rgb_base = compute_color(self.settings, self.id, self.hp, self.action == 'guard')
 
         # default settings
         alpha_hack = 1
