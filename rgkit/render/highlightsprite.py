@@ -17,7 +17,10 @@ class HighlightSprite(object):
         if 'bot' in squareinfo:
             bot = squareinfo[1]
             bot_color = compute_color(self.settings,
-                                      bot['player'], bot['hp'], bot['name'] == 'guard')
+                                      bot['player'], bot['hp'])
+            if bot['name'] is 'guard':
+                bot_color = blend_colors(bot_color, self.settings.color_guard,
+                                         0.65)
             return bot_color
         return None
 
