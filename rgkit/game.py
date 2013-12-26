@@ -231,6 +231,10 @@ class Game(object):
 
     def run_all_turns(self):
         assert self._state.turn == 0
+
+        if self._print_info:
+            print ('Match seed: {0}'.format(self.seed))
+
         self._save_state(self._state, 0)
 
         while self._state.turn < self._settings.max_turns:
