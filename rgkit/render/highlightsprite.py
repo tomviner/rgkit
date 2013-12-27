@@ -12,14 +12,12 @@ class HighlightSprite(object):
         self.target_square = None
 
     def get_bot_color(self, loc):
-        squareinfo = self.renderer.get_square_info(loc)
-        # print squareinfo
-        if 'bot' in squareinfo:
-            bot = squareinfo[1]
-            bot_color = compute_color(self.settings,
-                                      bot['player'], bot['hp'])
-            return bot_color
-        return None
+        display_turn = self.renderer.current_turn_int()
+        display_state = self.renderer._game.get_state(display_turn)
+        if display_state.is_robot(loc):
+            robot = display_state.robots[loc]
+            return compute_color(self.settings,
+                                 robot.player_id, robot.hp)
 
     def get_mixed_color(self, color, loc):
         bot_color = self.get_bot_color(loc)

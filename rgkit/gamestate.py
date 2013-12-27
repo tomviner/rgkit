@@ -66,12 +66,6 @@ class GameState(object):
 
         return locations[:per_player], locations[per_player:]
 
-    def _clear_dead(self):
-        dead = [loc for loc in self.robots if self.robots[loc].hp <= 0]
-
-        for loc in dead:
-            self.remove_robot(loc)
-
     # actions = {loc: action}
     # all actions must be valid
     # delta = [AttrDict{

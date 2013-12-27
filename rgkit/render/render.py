@@ -118,7 +118,6 @@ class Render(object):
 
             self.size_changed = False
             self._win.delete("all")
-            # print "Size changed, adjusting cell size..."
 
             self._winsize = min(self._board_frame.winfo_width(),
                                 self._board_frame.winfo_height())
@@ -184,10 +183,8 @@ class Render(object):
             x = (event.x - self.board_margin / 2) / self._blocksize
             y = (event.y - self.board_margin / 2) / self._blocksize
             loc = (x, y)
-            if (loc[0] >= 0 and
-                    loc[1] >= 0 and
-                    loc[0] < self._settings.board_size and
-                    loc[1] < self._settings.board_size):
+            if (0 <= x < self._settings.board_size and
+                    0 <= y < self._settings.board_size):
                 if loc == self._highlighted:
                     self._highlighted = None
                 else:
@@ -287,23 +284,18 @@ class Render(object):
 
     def update_info_frame(self):
         display_turn = self.current_turn_int()
+        display_state = self._game.get_state(display_turn)
         max_turns = self._settings.max_turns
         count_turn = int(math.ceil(self._turn + self._sub_turn))
-        if count_turn > self._settings.max_turns:
-            count_turn = self._settings.max_turns
-        if count_turn < 0:
-            count_turn = 0
         red, blue = self._game.get_state(count_turn).get_scores()
         info = ''
         currentAction = ''
         if self._highlighted is not None:
-            squareinfo = self.get_square_info(self._highlighted)
-            if 'obstacle' in squareinfo:
+            if self._highlighted in self._settings.obstacles:
                 info = 'Obstacle'
-            elif 'bot' in squareinfo:
-                robot_id = self._game.get_state(display_turn) \
-                    .robots[self._highlighted].robot_id
-                info = 'Bot %d ' % (robot_id,)
+            elif display_state.is_robot(self._highlighted):
+                robot = display_state.robots[self._highlighted]
+                info = 'Bot %d ' % (robot.robot_id,)
 
         r_text = '%s: %d' % (self._names[0], red)
         g_text = '%s: %d' % (self._names[1], blue)
@@ -319,16 +311,6 @@ class Render(object):
     def current_turn_int(self):
         return min(int(math.floor(self._turn + self._sub_turn)),
                    self._settings.max_turns)
-
-    def get_square_info(self, loc):
-        if loc in self._settings.obstacles:
-            return ['obstacle']
-
-        all_bots = self._game.get_actions_on_turn(self.current_turn_int())
-        if loc in all_bots:
-            return ['bot', all_bots[loc]]
-
-        return ['normal']
 
     def update_slider_value(self):
         v = -self._time_slider.get()
@@ -371,7 +353,7 @@ class Render(object):
 
         self.update_block_size()
 
-    def determine_bg_color(self, loc):
+    def get_bg_color(self, loc):
         if loc in self._settings.obstacles:
             return rgb_to_hex(*self._settings.obstacle_color)
         return rgb_to_hex(*self._settings.normal_color)
@@ -382,7 +364,7 @@ class Render(object):
             for x in range(self._settings.board_size):
                 loc = (x, y)
                 self.draw_grid_object(
-                    loc, fill=self.determine_bg_color(loc), layer=1, width=0)
+                    loc, fill=self.get_bg_color(loc), layer=1, width=0)
         # draw text labels
         text_color = rgb_to_hex(*self._settings.text_color)
         for y in range(self._settings.board_size):
@@ -401,9 +383,7 @@ class Render(object):
             self._sprites.append(RobotSprite(bot_data, self))
 
     def update_highlight_sprite(self, repaint=False):
-        need_update = (self._highlight_sprite is not None and
-                       self._highlight_sprite.location != self._highlighted)
-        if self._highlight_sprite is not None or need_update:
+        if self._highlight_sprite is not None:
             self._highlight_sprite.clear()
         self._highlight_sprite = HighlightSprite(
             self._highlighted, self._highlighted_target, self)
