@@ -124,7 +124,7 @@ class RobotSprite(object):
             self.draw_bot_hp(0, (x, y), bot_rgb, alpha_hack)
 
     def draw_bot(self, loc, color, size):
-        x, y, rx, ry = self.renderer.grid_bbox(loc, size - 2)
+        x, y, rx, ry = self.renderer.grid_bbox(loc)
         ox, oy = self.animation_offset
         if self.square is None:
             self.square = self.renderer.draw_grid_object(

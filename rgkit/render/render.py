@@ -80,7 +80,6 @@ class Render(object):
         # Animation stuff (also see #render heading in settings.py)
         self._sprites = []
         self._highlight_sprite = None
-        self._t_paused = 0
         self._t_frame_start = 0
         self._t_next_frame = 0
         self._t_cursor_start = 0
@@ -152,7 +151,6 @@ class Render(object):
             text=u'\u25B6' if self._paused else u'\u25FC')
         now = millis()
         if self._paused:
-            self._t_paused = now
             self._sub_turn = 0.0
         else:
             self.update_frame_start_time(now)
@@ -399,12 +397,8 @@ class Render(object):
         self.update_highlight_sprite()
         turn_action = self.current_turn_int()
         bots_activity = self._game.get_actions_on_turn(turn_action)
-        try:
-            for bot_data in bots_activity.values():
-                self._sprites.append(RobotSprite(bot_data, self))
-        except:
-            print "PROBLEM UPDATING SPRITES..? bots at turn {0} {1}:".format(
-                turn_action, bots_activity)
+        for bot_data in bots_activity.values():
+            self._sprites.append(RobotSprite(bot_data, self))
 
     def update_highlight_sprite(self, repaint=False):
         need_update = (self._highlight_sprite is not None and
@@ -438,13 +432,9 @@ class Render(object):
         return (x + self._blocksize - self.cell_border_width,
                 y + self._blocksize - self.cell_border_width)
 
-    def grid_bbox(self, loc, width=25):
+    def grid_bbox(self, loc):
         x, y = self.grid_to_xy(loc)
-        x += (self._blocksize - self.cell_border_width) / 2.
-        y += (self._blocksize - self.cell_border_width) / 2.
-        halfwidth = self._blocksize / 2.
-        halfborder = self.cell_border_width / 2.
-        return (int(x - halfwidth + halfborder),
-                int(y - halfwidth + halfborder),
-                int(x + halfwidth - halfborder),
-                int(y + halfwidth - halfborder))
+        return (int(x),
+                int(y),
+                int(x + self._blocksize - self.cell_border_width),
+                int(y + self._blocksize - self.cell_border_width))
