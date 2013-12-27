@@ -134,14 +134,19 @@ class Render(object):
             self.update_sprites_new_turn()
             self.paint()
 
-    def step_turn(self, turns):
-        self._turn = self.current_turn_int() + turns
-        self._turn = min(max(self._turn, 1.0), self._settings.max_turns)
+    def set_turn(self, new_turn):
+        if not self._paused:
+            self.toggle_pause()
+
+        self._turn = min(max(new_turn, 1.0), self._settings.max_turns)
         self._sub_turn = 0.0
         self.update_frame_start_time()
         self.turn_changed()
         self.update_info_frame()
         self.paint()
+
+    def step_turn(self, step):
+        self.set_turn(self.current_turn_int() + step)
 
     def toggle_pause(self):
         self._paused = not self._paused
@@ -161,23 +166,17 @@ class Render(object):
         self._t_next_frame = tstart + self._slider_delay
 
     def create_controls(self, win, width, height):
-        def step_turn(turns):
-            if not self._paused:
-                self.toggle_pause()
-            self.step_turn(turns)
-
         def prev():
-            step_turn(-1)
+            self.step_turn(-1)
 
         def next():
-            step_turn(+1)
+            self.step_turn(+1)
 
         def restart():
-            step_turn((-self._turn) + 1)
+            self.set_turn(1)
 
         def pause():
             self.toggle_pause()
-            self.update_info_frame()
 
         def onclick(event):
             x = (event.x - self.board_margin / 2) / self._blocksize
@@ -351,7 +350,7 @@ class Render(object):
             self._turn += 1
             self.update_frame_start_time(self._t_next_frame)
             self.turn_changed()
-            self.paint(0, 0)
+            self.paint()
 
         self.update_block_size()
 
