@@ -49,11 +49,6 @@ class GameState(object):
     def is_robot(self, loc):
         return loc in self.robots
 
-    def _clear_spawn(self):
-        for loc in self._settings.spawn_coords:
-            if self.is_robot(loc):
-                self.remove_robot(loc)
-
     def _get_spawn_locations(self):
         # see http://stackoverflow.com/questions/2612648/reservoir-sampling
         locations = []
@@ -97,9 +92,6 @@ class GameState(object):
 
         hitpoints = defaultdict(lambda: set())
 
-        def add(loc, target):
-            hitpoints[target].add(loc)
-
         def stuck(loc):
             # we are not moving anywhere
             # inform others
@@ -111,7 +103,7 @@ class GameState(object):
                     stuck(rival)
 
         for loc in self.robots:
-            add(loc, dest(loc))
+            hitpoints[dest(loc)].add(loc)
 
         for loc in self.robots:
             if len(hitpoints[dest(loc)]) > 1 or (self.is_robot(dest(loc)) and
