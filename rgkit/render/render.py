@@ -285,27 +285,30 @@ class Render(object):
     def update_info_frame(self):
         display_turn = self.current_turn_int()
         display_state = self._game.get_state(display_turn)
-        max_turns = self._settings.max_turns
-        red, blue = display_state.get_scores()
-        info = ''
-        currentAction = ''
+
+        scores = display_state.get_scores()
+        red_text = '%s: %d' % (self._names[0], scores[0])
+        blue_text = '%s: %d' % (self._names[1], scores[1])
+
+        white_text = [
+            'Turn: %d/%d' % (display_turn, self._settings.max_turns)
+        ]
         if self._highlighted is not None:
             if self._highlighted in self._settings.obstacles:
-                info = 'Obstacle'
+                info = 'Obstacle at '
             elif display_state.is_robot(self._highlighted):
                 robot = display_state.robots[self._highlighted]
-                info = 'Bot %d ' % (robot.robot_id,)
+                info = 'Robot #%d at ' % (robot.robot_id,)
+            else:
+                info = ''
 
-        r_text = '%s: %d' % (self._names[0], red)
-        g_text = '%s: %d' % (self._names[1], blue)
-        white_text = [
-            'Turn: %d/%d' % (display_turn, max_turns),
-            'Highlighted: %s; %s' % (self._highlighted, info),
-            currentAction
-        ]
+            white_text.append(
+                'Highlighted: %s%s' % (info, self._highlighted)
+            )
+
         self._info.itemconfig(self._label, text='\n'.join(white_text))
-        self._info.itemconfig(self._labelred, text=r_text)
-        self._info.itemconfig(self._labelblue, text=g_text)
+        self._info.itemconfig(self._labelred, text=red_text)
+        self._info.itemconfig(self._labelblue, text=blue_text)
 
     def current_turn_int(self):
         return min(int(math.floor(self._turn + self._sub_turn)),
