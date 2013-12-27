@@ -34,6 +34,11 @@ def memoize(f):
     return MemoDict().__getitem__
 
 
+def memodict(f):
+    """Backward compatibility."""
+    return memoize(f)
+
+
 @memoize
 def loc_types(loc):
     for i in range(2):
