@@ -286,8 +286,7 @@ class Render(object):
         display_turn = self.current_turn_int()
         display_state = self._game.get_state(display_turn)
         max_turns = self._settings.max_turns
-        count_turn = int(math.ceil(self._turn + self._sub_turn))
-        red, blue = self._game.get_state(count_turn).get_scores()
+        red, blue = display_state.get_scores()
         info = ''
         currentAction = ''
         if self._highlighted is not None:
