@@ -2,13 +2,16 @@ import Tkinter
 from rgkit.render.utils import rgb_to_hex, blend_colors
 
 
-def compute_color(settings, player, hp):
+def compute_color(settings, player, hp, action):
     r, g, b = settings.colors[player]
     maxclr = min(hp, 50)
     r += (100 - maxclr * 1.75) / 255
     g += (100 - maxclr * 1.75) / 255
     b += (100 - maxclr * 1.75) / 255
-    return (r, g, b)
+    color = (r, g, b)
+    if action is 'guard':
+        color = blend_colors(color, settings.color_guard, 0.65)
+    return color
 
 
 class RobotSprite(object):
@@ -38,7 +41,8 @@ class RobotSprite(object):
         """
         # fix delta to between 0 and 1
         delta = max(0, min(delta, 1))
-        bot_rgb_base = compute_color(self.settings, self.id, self.hp)
+        bot_rgb_base = compute_color(self.settings, self.id, self.hp,
+                                     self.action)
 
         # default settings
         alpha_hack = 1
@@ -91,8 +95,7 @@ class RobotSprite(object):
 
         # guard animations
         elif self.action == 'guard':
-            bot_rgb = blend_colors(bot_rgb, self.settings.color_guard,
-                                   0.65)
+            pass
 
         # suicide animations
         elif self.action == 'suicide':
@@ -126,7 +129,7 @@ class RobotSprite(object):
             self.draw_bot_hp(0, (x, y), bot_rgb, alpha_hack)
 
     def draw_bot(self, loc, color, size):
-        x, y, rx, ry = self.renderer.grid_bbox(loc, size - 2)
+        x, y, rx, ry = self.renderer.grid_bbox(loc)
         ox, oy = self.animation_offset
         if self.square is None:
             self.square = self.renderer.draw_grid_object(

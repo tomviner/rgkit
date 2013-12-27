@@ -37,20 +37,17 @@ class Player(object):
 
         if code is not None:
             self._code = code
-            self._load_code()
+            self.reload()
         elif robot is not None:
             self._module = None
             self._robot = robot
         else:
             raise Exception('you need to provide code or a robot')
 
-    def _load_code(self):
+    def reload(self):
         self._module = imp.new_module('usercode%d' % id(self))
         exec self._code in self._module.__dict__
         self._robot = self._module.__dict__['Robot']()
-
-    def reload(self):
-        self._load_code()
 
     def set_player_id(self, player_id):
         self._player_id = player_id
@@ -217,8 +214,8 @@ class Game(object):
 
         delta = self._state.get_delta(actions)
 
-        actions_on_turn = self._calculate_actions_on_turn(delta, actions)
         if self._record_actions:
+            actions_on_turn = self._calculate_actions_on_turn(delta, actions)
             self._save_actions_on_turn(actions_on_turn, self._state.turn)
 
         new_state = self._state.apply_delta(delta)
