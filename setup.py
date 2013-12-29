@@ -7,8 +7,8 @@ setup(
     maintainer='Peter Wen',
     maintainer_email='peter@whitehalmos.org',
     url='https://github.com/WhiteHalmos/rgkit',
-    packages=['rgkit'],
-    package_data={'rgkit': ['bots/*.py', 'render/*.py', 'maps/*.py']},
+    packages=['rgkit', 'rgkit.render'],
+    package_data={'rgkit': ['bots/*.py', 'maps/*.py']},
     license='Unlicense',
     entry_points={
         'console_scripts': [
