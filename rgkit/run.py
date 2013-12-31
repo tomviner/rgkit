@@ -62,6 +62,9 @@ parser.add_argument("--game-seed",
                     help="Appended with game countfor per-match seeds.")
 parser.add_argument("--match-seeds", nargs='*',
                     help="Used for random seed of the first matches in order.")
+parser.add_argument("-s", "--symmetric", action="store_true",
+                    default=False,
+                    help="Bots spawn symmetrically")
 
 
 def mute_all():
@@ -86,21 +89,23 @@ def make_player(fname):
 
 
 def play(players, print_info=True, animate_render=False, play_in_thread=False,
-         match_seed=None, names=["Red", "Blue"], quiet=0):
+         match_seed=None, names=["Red", "Blue"], quiet=0, symmetric=False):
     if play_in_thread:
         g = game.ThreadedGame(*players,
                               print_info=print_info,
                               record_actions=print_info,
                               record_history=True,
                               seed=match_seed,
-                              quiet=quiet)
+                              quiet=quiet,
+                              symmetric=symmetric)
     else:
         g = game.Game(*players,
                       print_info=print_info,
                       record_actions=print_info,
                       record_history=True,
                       seed=match_seed,
-                      quiet=quiet)
+                      quiet=quiet,
+                      symmetric=symmetric)
 
     if print_info:
         # only import render if we need to render the game;
@@ -134,7 +139,8 @@ def test_runs_sequentially(args):
                       args.play_in_thread,
                       match_seed=match_seed,
                       names=names,
-                      quiet=args.quiet)
+                      quiet=args.quiet,
+                      symmetric=args.symmetric)
         scores.append(result)
         if args.quiet >= 3 and args.headless:
             unmute_all()
@@ -149,7 +155,8 @@ def task(data):
      animate,
      play_in_thread,
      match_seed,
-     quiet) = data
+     quiet,
+     symmetric) = data
 
     result = play(
         [
@@ -165,6 +172,7 @@ def task(data):
             bot_name(player2)
         ],
         quiet=quiet,
+        symmetric=symmetric
     )
     if quiet >= 3 and headless:
         unmute_all()
@@ -186,6 +194,7 @@ def test_runs_concurrently(args):
             args.play_in_thread,
             match_seed,
             args.quiet,
+            args.symmetric
         ])
     num_cpu = multiprocessing.cpu_count() - 1
     if num_cpu == 0:
