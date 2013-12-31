@@ -7,7 +7,7 @@ from rgkit.settings import AttrDict
 
 
 class GameState(object):
-    def __init__(self, settings, use_start=False, turn=0, 
+    def __init__(self, settings, use_start=False, turn=0,
                  next_robot_id=0, seed=None, symmetric=False):
         self._settings = settings
 
@@ -26,7 +26,7 @@ class GameState(object):
                 self.add_robot(loc, 0)
             for loc in self._settings.start2:
                 self.add_robot(loc, 1)
-        
+
         self.symmetric = symmetric
         if symmetric:
             self._get_spawn_locations = self._get_spawn_locations_symmetric
@@ -54,10 +54,10 @@ class GameState(object):
 
     def is_robot(self, loc):
         return loc in self.robots
-    
+
     def _get_spawn_locations_symmetric(self):
         def symmetric_loc(loc):
-            return (self._settings.board_size - 1 - loc[0], \
+            return (self._settings.board_size - 1 - loc[0],
                     self._settings.board_size - 1 - loc[1])
         locs1 = []
         locs2 = []
