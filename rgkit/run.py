@@ -213,7 +213,7 @@ def print_score_grid(scores, player1, player2, size):
 
     for s1, s2 in scores:
         grid[to_grid(s1)][to_grid(s2)] += 1
-    
+
     p1won = sum(p1 > p2 for p1, p2 in scores)
     str1 = player1 + " : " + str(p1won)
     if len(str1) + 2 <= 2 * size - len(str1):
