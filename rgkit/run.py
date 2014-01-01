@@ -197,6 +197,34 @@ def bot_name(path_to_bot):
     return os.path.splitext(os.path.basename(path_to_bot))[0]
 
 
+def print_score_grid(scores, size):
+    max_score = 50
+
+    def to_grid(n):
+        return int(round(float(n) / max_score * (size - 1)))
+
+    grid = [[0 for c in xrange(size)] for r in xrange(size)]
+
+    for s1, s2 in scores:
+        grid[to_grid(s1)][to_grid(s2)] += 1
+
+    print "*" + "--" * size + "*"
+    for r in xrange(size - 1, -1, -1):
+        sys.stdout.write("|")
+        for c in xrange(size):
+            if grid[r][c] == 0:
+                if r == c:
+                    sys.stdout.write(". ")
+                else:
+                    sys.stdout.write("  ")
+            elif grid[r][c] < 10:
+                sys.stdout.write(" " + str(grid[r][c]))
+            else:
+                sys.stdout.write(" +")
+        sys.stdout.write("|\n")
+    print "*" + "--" * size + "*"
+
+
 def main():
     args = parser.parse_args()
     if args.quiet >= 3:
@@ -214,6 +242,7 @@ def main():
     if args.count > 1:
         p1won = sum(p1 > p2 for p1, p2 in scores)
         p2won = sum(p2 > p1 for p1, p2 in scores)
+        print_score_grid(scores, 26)
         print [p1won, p2won, args.count - p1won - p2won]
 
 
