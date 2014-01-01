@@ -78,13 +78,14 @@ class Player(object):
     # 'fixes' invalid actions
     def get_actions(self, game_state, seed):
         game_info = game_state.get_game_info(self._player_id)
-
         actions = {}
 
         for loc, robot in game_state.robots.iteritems():
             if robot.player_id == self._player_id:
-                actions[loc] = self._get_action(game_state,
-                                                game_info, robot, seed)
+                # Every act call should get a different random seed
+                actions[loc] = self._get_action(
+                    game_state, game_info, robot,
+                    seed=str(seed) + '-' + str(robot.robot_id))
 
         return actions
 
@@ -102,7 +103,7 @@ class Game(object):
         self._record_history = record_history
         self._print_info = print_info
         if seed is None:
-            seed = random.randint(0, sys.maxint)
+            seed = random.randint(0, self._settings.max_seed)
         self.seed = str(seed)
         self._random = random.Random(self.seed)
         self._quiet = quiet
@@ -144,9 +145,9 @@ class Game(object):
                 sys.stdout = NullDevice()
             if self._quiet >= 2:
                 sys.stderr = NullDevice()
-        seed1 = self._random.randint(0, sys.maxint)
+        seed1 = self._random.randint(0, self._settings.max_seed)
+        seed2 = self._random.randint(0, self._settings.max_seed)
         actions = self._player1.get_actions(self._state, seed1)
-        seed2 = self._random.randint(0, sys.maxint)
         actions2 = self._player2.get_actions(self._state, seed2)
         actions.update(actions2)
         if self._quiet < 3:

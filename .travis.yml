@@ -16,3 +16,5 @@ notifications:
     channels:
       - "chat.freenode.net#robotgame"
     use_notice: true
+    on_success: change
+    on_failure: always

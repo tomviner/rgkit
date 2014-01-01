@@ -27,6 +27,7 @@ except ImportError:
     sys.path.insert(0, parentdir)
 
 from rgkit import game
+from rgkit.settings import settings
 
 parser = argparse.ArgumentParser(description="Robot game execution script.",
                                  formatter_class=RawTextHelpFormatter)
@@ -58,7 +59,7 @@ group.add_argument("-T", "--play-in-thread", action="store_true",
                    default=False,
                    help="Separate GUI thread from robot move calculations.")
 parser.add_argument("--game-seed",
-                    default=random.randint(0, sys.maxint),
+                    default=random.randint(0, settings.max_seed),
                     help="Appended with game countfor per-match seeds.")
 parser.add_argument("--match-seeds", nargs='*',
                     help="Used for random seed of the first matches in order.")

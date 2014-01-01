@@ -9,6 +9,7 @@ settings = {
     'suicide_damage': 15,
     'max_turns': 100,
     'str_limit': 50,  # limit on length of representation of action
+    'max_seed': 2147483647,
 
     # rendering
     # commented out lines are the settings used for the old animated mode
@@ -48,7 +49,7 @@ settings = {
     'bot_hp_animation': False,
 
     # rating systems
-    'rating_range': 150,
+    'rating_range': 100,
     'default_rating': 1200,
 
     # user-scripting

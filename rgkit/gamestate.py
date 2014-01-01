@@ -1,5 +1,4 @@
 import random
-import sys
 from collections import defaultdict
 
 from rgkit import rg
@@ -12,7 +11,7 @@ class GameState(object):
         self._settings = settings
 
         if seed is None:
-            seed = random.randint(0, sys.maxint)
+            seed = random.randint(0, self._settings.max_seed)
         self._seed = str(seed)
         self._spawn_random = random.Random(self._seed + 's')
         self._attack_random = random.Random(self._seed + 'a')
@@ -224,7 +223,8 @@ class GameState(object):
         new_state = GameState(self._settings,
                               next_robot_id=self._next_robot_id,
                               turn=self.turn + 1,
-                              seed=self._spawn_random.randint(0, sys.maxint),
+                              seed=self._spawn_random.randint(
+                                  0, self._settings.max_seed),
                               symmetric=self.symmetric)
 
         for delta_info in delta:
