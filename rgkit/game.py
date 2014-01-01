@@ -55,6 +55,8 @@ class Player(object):
     def _get_action(self, game_state, game_info, robot, seed):
         try:
             random.seed(seed)
+            # Server requires knowledge of seed
+            game_info.seed = seed
 
             self._robot.location = robot.location
             self._robot.hp = robot.hp
