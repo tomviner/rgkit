@@ -104,9 +104,9 @@ class Game(object):
         if seed is None:
             seed = random.randint(0, sys.maxint)
         self.seed = str(seed)
-        self._random = random.Random(seed)
+        self._random = random.Random(self.seed)
         self._quiet = quiet
-        self._state = GameState(self._settings, use_start=True, seed=seed,
+        self._state = GameState(self._settings, use_start=True, seed=self.seed,
                                 symmetric=symmetric)
 
         self._actions_on_turn = {}
