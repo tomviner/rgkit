@@ -98,8 +98,6 @@ class Game(object):
         self._player1.set_player_id(0)
         self._player2 = player2
         self._player2.set_player_id(1)
-        self._state = GameState(self._settings, use_start=True, seed=seed,
-                                symmetric=symmetric)
         self._record_actions = record_actions
         self._record_history = record_history
         self._print_info = print_info
@@ -108,6 +106,8 @@ class Game(object):
         self.seed = str(seed)
         self._random = random.Random(seed)
         self._quiet = quiet
+        self._state = GameState(self._settings, use_start=True, seed=seed,
+                                symmetric=symmetric)
 
         self._actions_on_turn = {}
         self._states = {}
