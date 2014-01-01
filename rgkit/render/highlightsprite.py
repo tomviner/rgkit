@@ -16,8 +16,13 @@ class HighlightSprite(object):
         display_state = self.renderer._game.get_state(display_turn)
         if display_state.is_robot(loc):
             robot = display_state.robots[loc]
-            return compute_color(self.settings,
-                                 robot.player_id, robot.hp)
+            bot_action = self.renderer._game.get_actions_on_turn(
+                display_turn)[loc]['name']
+            robot_color = compute_color(self.settings,
+                                        robot.player_id, robot.hp,
+                                        bot_action)
+            return robot_color
+        return None
 
     def get_mixed_color(self, color, loc):
         bot_color = self.get_bot_color(loc)

@@ -2,13 +2,16 @@ import Tkinter
 from rgkit.render.utils import rgb_to_hex, blend_colors
 
 
-def compute_color(settings, player, hp):
+def compute_color(settings, player, hp, action):
     r, g, b = settings.colors[player]
     maxclr = min(hp, 50)
     r += (100 - maxclr * 1.75) / 255
     g += (100 - maxclr * 1.75) / 255
     b += (100 - maxclr * 1.75) / 255
-    return (r, g, b)
+    color = (r, g, b)
+    if action is 'guard':
+        color = blend_colors(color, settings.color_guard, 0.65)
+    return color
 
 
 class RobotSprite(object):
@@ -38,22 +41,24 @@ class RobotSprite(object):
         """
         # fix delta to between 0 and 1
         delta = max(0, min(delta, 1))
-        bot_rgb_base = compute_color(self.settings, self.id, self.hp)
+        bot_rgb_base = compute_color(self.settings, self.id, self.hp,
+                                     self.action)
 
         # default settings
         alpha_hack = 1
         bot_rgb = bot_rgb_base
+
         # if spawn, fade in
         if self.settings.bot_die_animation:
             if self.action == 'spawn':
                 alpha_hack = delta
                 bot_rgb = blend_colors(bot_rgb_base,
-                                       self.settings.normal_color, delta)
+                                       self.settings.normal_color, alpha_hack)
             # if dying, fade out
             elif self.hp_next <= 0:
                 alpha_hack = 1 - delta
                 bot_rgb = blend_colors(bot_rgb_base,
-                                       self.settings.normal_color, 1 - delta)
+                                       self.settings.normal_color, alpha_hack)
 
         x, y = self.location
         bot_size = self.renderer._blocksize
