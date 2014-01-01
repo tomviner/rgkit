@@ -92,13 +92,14 @@ class Player(object):
 class Game(object):
     def __init__(self, player1, player2, record_actions=False,
                  record_history=False, print_info=False,
-                 seed=None, quiet=0):
+                 seed=None, quiet=0, symmetric=False):
         self._settings = settings
         self._player1 = player1
         self._player1.set_player_id(0)
         self._player2 = player2
         self._player2.set_player_id(1)
-        self._state = GameState(self._settings, use_start=True, seed=seed)
+        self._state = GameState(self._settings, use_start=True, seed=seed,
+                                symmetric=symmetric)
         self._record_actions = record_actions
         self._record_history = record_history
         self._print_info = print_info

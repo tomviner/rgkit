@@ -7,8 +7,8 @@ from rgkit.settings import AttrDict
 
 
 class GameState(object):
-    def __init__(self, settings, use_start=False,
-                 turn=0, next_robot_id=0, seed=None):
+    def __init__(self, settings, use_start=False, turn=0,
+                 next_robot_id=0, seed=None, symmetric=False):
         self._settings = settings
 
         if seed is None:
@@ -26,6 +26,12 @@ class GameState(object):
                 self.add_robot(loc, 0)
             for loc in self._settings.start2:
                 self.add_robot(loc, 1)
+
+        self.symmetric = symmetric
+        if symmetric:
+            self._get_spawn_locations = self._get_spawn_locations_symmetric
+        else:
+            self._get_spawn_locations = self._get_spawn_locations_random
 
     def add_robot(self, loc, player_id, hp=None, robot_id=None):
         if hp is None:
@@ -49,7 +55,22 @@ class GameState(object):
     def is_robot(self, loc):
         return loc in self.robots
 
-    def _get_spawn_locations(self):
+    def _get_spawn_locations_symmetric(self):
+        def symmetric_loc(loc):
+            return (self._settings.board_size - 1 - loc[0],
+                    self._settings.board_size - 1 - loc[1])
+        locs1 = []
+        locs2 = []
+        while len(locs1) < self._settings.spawn_per_player:
+            loc = self._spawn_random.choice(self._settings.spawn_coords)
+            sloc = symmetric_loc(loc)
+            if loc not in locs1 and loc not in locs2:
+                if sloc not in locs1 and sloc not in locs2:
+                    locs1.append(loc)
+                    locs2.append(sloc)
+        return locs1, locs2
+
+    def _get_spawn_locations_random(self):
         # see http://stackoverflow.com/questions/2612648/reservoir-sampling
         locations = []
         per_player = self._settings.spawn_per_player
@@ -203,7 +224,8 @@ class GameState(object):
         new_state = GameState(self._settings,
                               next_robot_id=self._next_robot_id,
                               turn=self.turn + 1,
-                              seed=self._spawn_random.randint(0, sys.maxint))
+                              seed=self._spawn_random.randint(0, sys.maxint),
+                              symmetric=self.symmetric)
 
         for delta_info in delta:
             if delta_info.hp_end > 0:
