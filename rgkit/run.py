@@ -197,18 +197,32 @@ def bot_name(path_to_bot):
     return os.path.splitext(os.path.basename(path_to_bot))[0]
 
 
-def print_score_grid(scores, size):
+def print_score_grid(scores, player1, player2, size):
     max_score = 50
 
     def to_grid(n):
         return int(round(float(n) / max_score * (size - 1)))
 
+    def print_heat(n):
+        if n > 9:
+            sys.stdout.write(" +")
+        else:
+            sys.stdout.write(" " + str(n))
+
     grid = [[0 for c in xrange(size)] for r in xrange(size)]
 
     for s1, s2 in scores:
         grid[to_grid(s1)][to_grid(s2)] += 1
+    
+    p1won = sum(p1 > p2 for p1, p2 in scores)
+    str1 = player1 + " : " + str(p1won)
+    if len(str1) + 2 <= 2 * size - len(str1):
+        str1 = " " + str1 + " "
+        print "*" + str1 + "-" * (2 * size - len(str1)) + "*"
+    else:
+        print str1
+        print "*" + "-" * (2 * size) + "*"
 
-    print "*" + "--" * size + "*"
     for r in xrange(size - 1, -1, -1):
         sys.stdout.write("|")
         for c in xrange(size):
@@ -217,12 +231,18 @@ def print_score_grid(scores, size):
                     sys.stdout.write(". ")
                 else:
                     sys.stdout.write("  ")
-            elif grid[r][c] < 10:
-                sys.stdout.write(" " + str(grid[r][c]))
             else:
-                sys.stdout.write(" +")
+                print_heat(grid[r][c])
         sys.stdout.write("|\n")
-    print "*" + "--" * size + "*"
+
+    p2won = sum(p2 > p1 for p1, p2 in scores)
+    str2 = player2 + " : " + str(p2won)
+    if len(str2) + 2 <= 2 * size - len(str2):
+        str2 = " " + str2 + " "
+        print "*" + "-" * (2 * size - len(str2)) + str2 + "*"
+    else:
+        print "*" + "-" * (2 * size) + "*"
+        print str2
 
 
 def main():
@@ -242,7 +262,7 @@ def main():
     if args.count > 1:
         p1won = sum(p1 > p2 for p1, p2 in scores)
         p2won = sum(p2 > p1 for p1, p2 in scores)
-        print_score_grid(scores, 26)
+        print_score_grid(scores, args.player1, args.player2, 26)
         print [p1won, p2won, args.count - p1won - p2won]
 
 
