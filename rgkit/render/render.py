@@ -243,7 +243,7 @@ class Render(object):
         kargs["tags"] = tags
         x, y = self.grid_to_xy(loc)
         rx, ry = self.square_bottom_corner((x, y))
-        if type == "square" or self._settings.bot_shape == "square":
+        if type == "square":
             item = self._win.create_rectangle(
                 x, y, rx, ry,
                 **kargs)

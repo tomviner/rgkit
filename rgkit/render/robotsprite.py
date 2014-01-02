@@ -30,6 +30,7 @@ class RobotSprite(object):
         # Tkinter objects
         self.square = None
         self.border = None
+        self.circle = None
         self.overlay = None
         self.text = None
 
@@ -108,7 +109,7 @@ class RobotSprite(object):
                 # color fade to yellow
                 bot_rgb = blend_colors(bot_rgb, (1, 1, 0), 1 - delta)
 
-        # DRAW ARROWS AND BORDER
+        # DRAW ARROWS AND BORDER AND CIRCLE
         if self.renderer.show_arrows.get():
             if arrow_fill is not None and self.overlay is None:
                     offset = (self.renderer._blocksize / 2,
@@ -121,6 +122,11 @@ class RobotSprite(object):
                     self.location, type=self.settings.bot_shape, layer=4,
                     outline=rgb_tuple_to_hex(self.settings.color_guard_border),
                     width=2)
+            if self.action == 'suicide' and self.circle is None:
+                self.circle = self.renderer.draw_grid_object(
+                    self.location, type="circle", layer=4,
+                    outline="yellow",
+                    width=2)
         else:
             if self.overlay is not None:
                 self.renderer.remove_object(self.overlay)
@@ -128,6 +134,9 @@ class RobotSprite(object):
             if self.border is not None:
                 self.renderer.remove_object(self.border)
                 self.border = None
+            if self.circle is not None:
+                self.renderer.remove_object(self.circle)
+                self.circle = None
 
         # DRAW BOTS WITH HP
         bot_hex = rgb_to_hex(*bot_rgb)
@@ -152,7 +161,7 @@ class RobotSprite(object):
         x, y = self.renderer.grid_to_xy(loc)
         ox, oy = self.animation_offset
         tex_rgb = self.settings.text_color_bright \
-            if self.hp > self.settings.robot_hp / 4 \
+            if self.hp_next > self.settings.robot_hp / 2 \
             else self.settings.text_color_dark
         tex_rgb = blend_colors(tex_rgb, bot_color, alpha)
         tex_hex = rgb_to_hex(*tex_rgb)
@@ -172,9 +181,11 @@ class RobotSprite(object):
     def clear(self):
         self.renderer.remove_object(self.square)
         self.renderer.remove_object(self.border)
+        self.renderer.remove_object(self.circle)
         self.renderer.remove_object(self.overlay)
         self.renderer.remove_object(self.text)
         self.square = None
         self.border = None
+        self.circle = None
         self.overlay = None
         self.text = None
