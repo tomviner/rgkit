@@ -12,11 +12,10 @@ class RGCurses:
         self._done = False
         self._paused = False
         self._selected = [settings.board_size // 2, settings.board_size // 2]
-        
+
         # *** Edit settings below this line ***
-        
-        self._manual_text = \
-"""Exit            q, <esc>
+
+        self._manual_text = """Exit            q, <esc>
 Play/Pause      p, <space>
 Next turn       j
 Prev turn       k
@@ -84,7 +83,7 @@ Cursor right    d, <right>"""
         attr_bot1_s = cs.A_BOLD
         attr_bot2_s = cs.A_BOLD
         attr_text = cs.A_NORMAL
-        
+
         # **** Do not edit settings below this line ***
 
         cs.curs_set(0)
