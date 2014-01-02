@@ -33,7 +33,6 @@ except ImportError:
 
 from rgkit import game
 from rgkit.settings import settings
-from rgkit import rgcurses
 
 parser = argparse.ArgumentParser(description="Robot game execution script.",
                                  formatter_class=RawTextHelpFormatter)
@@ -138,9 +137,10 @@ def play(players, print_info=True, animate_render=False, play_in_thread=False,
     # some more work before the bugs can be fixed. Need to make sure nothing
     # is printing when curses is running.
     if print_info and curses:
+        from rgkit import rgcurses
+        rgc = rgcurses.RGCurses(g, game.settings, names)
         if _rgcurses_lock:
             _rgcurses_lock.acquire()
-        rgc = rgcurses.RGCurses(g, game.settings, names)
         rgc.run()
         if _rgcurses_lock:
             _rgcurses_lock.release()
