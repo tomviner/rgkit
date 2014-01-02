@@ -1,5 +1,5 @@
 import Tkinter
-from rgkit.render.utils import rgb_to_hex, blend_colors
+from rgkit.render.utils import rgb_to_hex, rgb_tuple_to_hex, blend_colors
 
 
 def compute_color(settings, player, hp, action):
@@ -29,6 +29,7 @@ class RobotSprite(object):
 
         # Tkinter objects
         self.square = None
+        self.border = None
         self.overlay = None
         self.text = None
 
@@ -107,18 +108,26 @@ class RobotSprite(object):
                 # color fade to yellow
                 bot_rgb = blend_colors(bot_rgb, (1, 1, 0), 1 - delta)
 
-        # DRAW ARROWS
-        if arrow_fill is not None:
-            if self.overlay is None and self.renderer.show_arrows.get():
-                offset = (self.renderer._blocksize / 2,
-                          self.renderer._blocksize / 2)
-                self.overlay = self.renderer.draw_line(
-                    self.location, self.target, layer=4, fill=arrow_fill,
-                    offset=offset, width=3.0, arrow=Tkinter.LAST)
-            elif (self.overlay is not None and
-                    not self.renderer.show_arrows.get()):
+        # DRAW ARROWS AND BORDER
+        if self.renderer.show_arrows.get():
+            if arrow_fill is not None and self.overlay is None:
+                    offset = (self.renderer._blocksize / 2,
+                              self.renderer._blocksize / 2)
+                    self.overlay = self.renderer.draw_line(
+                        self.location, self.target, layer=5, fill=arrow_fill,
+                        offset=offset, width=3.0, arrow=Tkinter.LAST)
+            if self.action == 'guard' and self.border is None:
+                self.border = self.renderer.draw_grid_object(
+                    self.location, type=self.settings.bot_shape, layer=4,
+                    outline=rgb_tuple_to_hex(self.settings.color_guard_border),
+                    width=2)
+        else:
+            if self.overlay is not None:
                 self.renderer.remove_object(self.overlay)
                 self.overlay = None
+            if self.border is not None:
+                self.renderer.remove_object(self.border)
+                self.border = None
 
         # DRAW BOTS WITH HP
         bot_hex = rgb_to_hex(*bot_rgb)
@@ -162,8 +171,10 @@ class RobotSprite(object):
 
     def clear(self):
         self.renderer.remove_object(self.square)
+        self.renderer.remove_object(self.border)
         self.renderer.remove_object(self.overlay)
         self.renderer.remove_object(self.text)
         self.square = None
+        self.border = None
         self.overlay = None
         self.text = None
