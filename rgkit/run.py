@@ -17,6 +17,11 @@ except ImportError:
     # the OS does not support it. See http://bugs.python.org/issue3770
     _is_multiprocessing_supported = False
 
+if _is_multiprocessing_supported:
+    _rgcurses_lock = multiprocessing.Lock()
+else:
+    _rgcurses_lock = None
+
 try:
     imp.find_module('rgkit')
 except ImportError:
@@ -28,6 +33,7 @@ except ImportError:
 
 from rgkit import game
 from rgkit.settings import settings
+from rgkit import rgcurses
 
 parser = argparse.ArgumentParser(description="Robot game execution script.",
                                  formatter_class=RawTextHelpFormatter)
@@ -58,6 +64,9 @@ group.add_argument("-H", "--headless", action="store_true",
 group.add_argument("-T", "--play-in-thread", action="store_true",
                    default=False,
                    help="Separate GUI thread from robot move calculations.")
+group.add_argument("-C", "--curses", action="store_true",
+                   default=False,
+                   help="Display game in command line using curses.")
 parser.add_argument("--game-seed",
                     default=random.randint(0, settings.max_seed),
                     help="Appended with game countfor per-match seeds.")
@@ -90,7 +99,8 @@ def make_player(fname):
 
 
 def play(players, print_info=True, animate_render=False, play_in_thread=False,
-         match_seed=None, names=["Red", "Blue"], quiet=0, symmetric=False):
+         curses=False, match_seed=None, names=["Red", "Blue"], quiet=0, 
+         symmetric=False):
     if play_in_thread:
         g = game.ThreadedGame(*players,
                               print_info=print_info,
@@ -108,7 +118,7 @@ def play(players, print_info=True, animate_render=False, play_in_thread=False,
                       quiet=quiet,
                       symmetric=symmetric)
 
-    if print_info:
+    if print_info and not curses:
         # only import render if we need to render the game;
         # this way, people who don't have tkinter can still
         # run headless
@@ -116,10 +126,24 @@ def play(players, print_info=True, animate_render=False, play_in_thread=False,
 
     g.run_all_turns()
 
-    if print_info:
+    if print_info and not curses:
         #print "rendering %s animations" % ("with"
         #                                   if animate_render else "without")
         render.Render(g, game.settings, animate_render, names=names)
+    
+    # TODO:
+    # Displaying multiple games using curses is still a little bit buggy but at
+    # least it doesn't completely screw up the state of the terminal anymore.
+    # The plan is to show each game sequentially. Concurrency in run.py needs
+    # some more work before the bugs can be fixed. Need to make sure nothing
+    # is printing when curses is running.
+    if print_info and curses:
+        if _rgcurses_lock:
+            _rgcurses_lock.acquire()
+        rgc = rgcurses.RGCurses(g, game.settings, names)
+        rgc.run()
+        if _rgcurses_lock:
+            _rgcurses_lock.release()
 
     return g.get_scores()
 
@@ -138,6 +162,7 @@ def test_runs_sequentially(args):
                       not args.headless,
                       args.animate,
                       args.play_in_thread,
+                      args.curses,
                       match_seed=match_seed,
                       names=names,
                       quiet=args.quiet,
@@ -155,6 +180,7 @@ def task(data):
      headless,
      animate,
      play_in_thread,
+     curses,
      match_seed,
      quiet,
      symmetric) = data
@@ -167,6 +193,7 @@ def task(data):
         not headless,
         animate,
         play_in_thread,
+        curses,
         match_seed=match_seed,
         names=[
             bot_name(player1),
@@ -193,6 +220,7 @@ def test_runs_concurrently(args):
             args.headless,
             args.animate,
             args.play_in_thread,
+            args.curses,
             match_seed,
             args.quiet,
             args.symmetric
