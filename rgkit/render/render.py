@@ -12,7 +12,7 @@ class Render(object):
         self.init = True
 
         self.cell_border_width = 2
-        self.info_frame_height = 80
+        self.info_frame_height = 100
         self.board_margin = 0
 
         self._settings = settings
@@ -209,7 +209,7 @@ class Render(object):
 
         arrows_box = Tkinter.Checkbutton(
             frame, text="Show Arrows", variable=self.show_arrows,
-            command=self.paint)
+            command=self.tick)
         arrows_box.pack()
 
         self._toggle_button = Tkinter.Button(
@@ -289,22 +289,40 @@ class Render(object):
         red_text = '%s: %d' % (self._names[0], scores[0])
         blue_text = '%s: %d' % (self._names[1], scores[1])
 
-        white_text = [
-            'Turn: %d/%d' % (display_turn, self._settings.max_turns)
-        ]
+        info = ''
+        current_action = ''
         if self._highlighted is not None:
-            if self._highlighted in self._settings.obstacles:
-                info = 'Obstacle at '
-            elif display_state.is_robot(self._highlighted):
+            if display_state.is_robot(self._highlighted):
                 robot = display_state.robots[self._highlighted]
-                info = 'Robot #%d at ' % (robot.robot_id,)
-            else:
-                info = ''
+                info = 'Robot #%d' % robot.robot_id
+                if not self.show_arrows.get():
+                    bots_activity = self._game.get_actions_on_turn(
+                        display_turn)
+                    actioninfo = bots_activity[self._highlighted]
+                    if actioninfo.get('name') is not None:
+                        current_action += 'Current Action: {0}'.format(
+                            actioninfo['name'])
+                        if self._highlighted_target is not None:
+                            current_action += (' to %s' %
+                                               (self._highlighted_target,))
+        # if self._highlighted is not None:
+        #     if self._highlighted in self._settings.obstacles:
+        #         info = 'Obstacle at '
+        #     elif display_state.is_robot(self._highlighted):
+        #         robot = display_state.robots[self._highlighted]
+        #         info = 'Robot #%d at ' % robot.robot_id
+        #     else:
+        #         info = ''
 
-            white_text.append(
-                'Highlighted: %s%s' % (info, self._highlighted)
-            )
+        #     white_text.append(
+        #         'Highlighted: %s%s' % (info, self._highlighted)
+        #     )
 
+        white_text = [
+            'Turn: %d/%d' % (display_turn, self._settings.max_turns),
+            'Highlighted: %s; %s' % (self._highlighted, info),
+            current_action
+        ]
         self._info.itemconfig(self._label, text='\n'.join(white_text))
         self._info.itemconfig(self._labelred, text=red_text)
         self._info.itemconfig(self._labelblue, text=blue_text)
@@ -327,6 +345,7 @@ class Render(object):
     def tick(self):
         now = millis()
 
+        self.update_info_frame()
         # check if frame-update
         if self._animations:
             if not self._paused:
@@ -336,7 +355,6 @@ class Render(object):
                 if self._turn >= self._settings.max_turns:
                     self.toggle_pause()
                     self._turn = self._settings.max_turns
-                self.update_info_frame()
                 if self._sub_turn >= 1:
                     self._sub_turn -= 1
                     self._turn += 1
