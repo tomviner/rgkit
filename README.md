@@ -99,10 +99,10 @@ default robot and suppress GUI output with the following command:
 
 ## Developing in the source directory:
 
-`rgkit` is packaged as a module, so you *can* co-locate the module directory
-with your own source code and import/run as usual.
+`rgkit` is packaged as a module, so you *can* just checkout the module directory
+and import/run as usual.
 
-    rgkit
+    ./rgkit
     |--- rgkit
     |    |--- __init__.py
     |    |--- game.py
@@ -111,6 +111,7 @@ with your own source code and import/run as usual.
     |    |--- your_robot.py
     |--- setup.py
     ...
+    /path/your_other_robot.py
 
 __Running the game__
 
@@ -118,7 +119,7 @@ To run the game with the source configured this way, use the terminal and
 execute the following from the inner `rgkit` folder (i.e., in the same
 directory as `run.py`):
 
-    python run.py your_robot.py defaultrobots.py
+    python run.py your_robot.py /path/your_other_robot.py
 
 ## Importing:
 
