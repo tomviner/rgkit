@@ -62,11 +62,11 @@ After installing the package, the script is executable from the command line
 (if you're using virtualenv, remember to activate the environment). There are
 two entry points provided: `rgrun` and `rgmap`. The general usage of run is:
 
-    usage: rgrun [-h] [-m MAP] [-c COUNT] [-A] [-q] [-H | -T]
+    usage: rgrun [-h] [-m MAP] [-c COUNT] [-A] [-q] [-H | -T | -C]
                  [--game-seed GAME_SEED]
-                 [--match-seeds [MATCH_SEEDS [MATCH_SEEDS ...]]]
+                 [--match-seeds [MATCH_SEEDS [MATCH_SEEDS ...]]] [-s]
                  player1 player2
-    
+
     Robot game execution script.
     
     positional arguments:
@@ -85,10 +85,12 @@ two entry points provided: `rgrun` and `rgmap`. The general usage of run is:
                             -qqq: supresses all rgkit and bot output
       -H, --headless        Disable rendering game output.
       -T, --play-in-thread  Separate GUI thread from robot move calculations.
+      -C, --curses          Display game in command line using curses.
       --game-seed GAME_SEED
                             Appended with game countfor per-match seeds.
       --match-seeds [MATCH_SEEDS [MATCH_SEEDS ...]]
                             Used for random seed of the first matches in order.
+      -s, --symmetric       Bots spawn symmetrically
 
 So, from a directory containing your_robot.py, you can run a game against the
 default robot and suppress GUI output with the following command:
@@ -97,10 +99,10 @@ default robot and suppress GUI output with the following command:
 
 ## Developing in the source directory:
 
-`rgkit` is packaged as a module, so you *can* co-locate the module directory
-with your own source code and import/run as usual.
+`rgkit` is packaged as a module, so you *can* just checkout the module directory
+and import/run as usual.
 
-    rgkit
+    ./rgkit
     |--- rgkit
     |    |--- __init__.py
     |    |--- game.py
@@ -109,6 +111,7 @@ with your own source code and import/run as usual.
     |    |--- your_robot.py
     |--- setup.py
     ...
+    /path/your_other_robot.py
 
 __Running the game__
 
@@ -116,7 +119,7 @@ To run the game with the source configured this way, use the terminal and
 execute the following from the inner `rgkit` folder (i.e., in the same
 directory as `run.py`):
 
-    python run.py your_robot.py defaultrobots.py
+    python run.py your_robot.py /path/your_other_robot.py
 
 ## Importing:
 
