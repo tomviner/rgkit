@@ -1,8 +1,9 @@
 import curses as cs
 import time
 
+
 class RGCurses:
-    
+
     def __init__(self, game_inst, settings, names):
         self._settings = settings
         self._game = game_inst
@@ -10,7 +11,7 @@ class RGCurses:
         self._turn = 0
         self._done = False
         self._paused = False
-        self._selected = [settings.board_size // 2, settings.board_size //2]
+        self._selected = [settings.board_size // 2, settings.board_size // 2]
         
         # *** Edit settings below this line ***
         
@@ -26,63 +27,63 @@ Cursor down     s, <down>
 Cursor right    d, <right>"""
 
         self._turn_delay = 250
-        
+
         # Positions
-        self._game_grid_pos     = (1, 2)
-        self._score_pos         = (19, 41)
-        self._final_score_pos   = (1, 41)
-        self._manual_pos        = (3, 41)
-        self._cell_info_pos     = (13, 41)
-        self._turn_pos          = (18, 41)
+        self._game_grid_pos = (1, 2)
+        self._score_pos = (19, 41)
+        self._final_score_pos = (1, 41)
+        self._manual_pos = (3, 41)
+        self._cell_info_pos = (13, 41)
+        self._turn_pos = (18, 41)
 
         # Keybindings
-        self._exit_keys     = map(ord, ['q']) + [27]
-        self._pause_keys    = map(ord, ['p',' '])
-        self._step_keys     = map(ord, ['j'])
-        self._back_keys     = map(ord, ['k'])
-        self._rewind_keys   = map(ord, ['r'])
-        self._up_keys       = map(ord, ['w']) + [cs.KEY_UP]
-        self._left_keys     = map(ord, ['a']) + [cs.KEY_LEFT]
-        self._down_keys     = map(ord, ['s']) + [cs.KEY_DOWN]
-        self._right_keys    = map(ord, ['d']) + [cs.KEY_RIGHT]
+        self._exit_keys = map(ord, ['q']) + [27]
+        self._pause_keys = map(ord, ['p', ' '])
+        self._step_keys = map(ord, ['j'])
+        self._back_keys = map(ord, ['k'])
+        self._rewind_keys = map(ord, ['r'])
+        self._up_keys = map(ord, ['w']) + [cs.KEY_UP]
+        self._left_keys = map(ord, ['a']) + [cs.KEY_LEFT]
+        self._down_keys = map(ord, ['s']) + [cs.KEY_DOWN]
+        self._right_keys = map(ord, ['d']) + [cs.KEY_RIGHT]
 
     def _init_curses(self):
-        
+
         # Colors and attributes
 
-        colors_empty        = 1
-        colors_obstacle     = 2
-        colors_bot1         = 3
-        colors_bot2         = 4
+        colors_empty = 1
+        colors_obstacle = 2
+        colors_bot1 = 3
+        colors_bot2 = 4
         # Selected
-        colors_empty_s      = 5
-        colors_obstacle_s   = 6
-        colors_bot1_s       = 7
-        colors_bot2_s       = 8
+        colors_empty_s = 5
+        colors_obstacle_s = 6
+        colors_bot1_s = 7
+        colors_bot2_s = 8
         # Other
-        colors_text         = 9
-        
-        #             Color pair          Foreground       Background
-        cs.init_pair( colors_empty      , cs.COLOR_WHITE , cs.COLOR_BLACK   )
-        cs.init_pair( colors_obstacle   , cs.COLOR_BLACK , cs.COLOR_WHITE   )
-        cs.init_pair( colors_bot1       , cs.COLOR_WHITE , cs.COLOR_RED     )
-        cs.init_pair( colors_bot2       , cs.COLOR_WHITE , cs.COLOR_BLUE    )
-        cs.init_pair( colors_empty_s    , cs.COLOR_WHITE , cs.COLOR_YELLOW  )
-        cs.init_pair( colors_obstacle_s , cs.COLOR_BLACK , cs.COLOR_YELLOW  )
-        cs.init_pair( colors_bot1_s     , cs.COLOR_WHITE , cs.COLOR_MAGENTA )
-        cs.init_pair( colors_bot2_s     , cs.COLOR_WHITE , cs.COLOR_CYAN    )
-        cs.init_pair( colors_text       , cs.COLOR_WHITE , cs.COLOR_BLACK   )
+        colors_text = 9
+
+        # (Color pair, Foreground, Background)
+        cs.init_pair(colors_empty, cs.COLOR_WHITE, cs.COLOR_BLACK)
+        cs.init_pair(colors_obstacle, cs.COLOR_BLACK, cs.COLOR_WHITE)
+        cs.init_pair(colors_bot1, cs.COLOR_WHITE, cs.COLOR_RED)
+        cs.init_pair(colors_bot2, cs.COLOR_WHITE, cs.COLOR_BLUE)
+        cs.init_pair(colors_empty_s, cs.COLOR_WHITE, cs.COLOR_YELLOW)
+        cs.init_pair(colors_obstacle_s, cs.COLOR_BLACK, cs.COLOR_YELLOW)
+        cs.init_pair(colors_bot1_s, cs.COLOR_WHITE, cs.COLOR_MAGENTA)
+        cs.init_pair(colors_bot2_s, cs.COLOR_WHITE, cs.COLOR_CYAN)
+        cs.init_pair(colors_text, cs.COLOR_WHITE, cs.COLOR_BLACK)
 
         # Attributes
-        attr_empty        = cs.A_NORMAL
-        attr_obstacle     = cs.A_NORMAL
-        attr_bot1         = cs.A_BOLD
-        attr_bot2         = cs.A_BOLD
-        attr_empty_s      = cs.A_NORMAL
-        attr_obstacle_s   = cs.A_NORMAL
-        attr_bot1_s       = cs.A_BOLD
-        attr_bot2_s       = cs.A_BOLD
-        attr_text         = cs.A_NORMAL
+        attr_empty = cs.A_NORMAL
+        attr_obstacle = cs.A_NORMAL
+        attr_bot1 = cs.A_BOLD
+        attr_bot2 = cs.A_BOLD
+        attr_empty_s = cs.A_NORMAL
+        attr_obstacle_s = cs.A_NORMAL
+        attr_bot1_s = cs.A_BOLD
+        attr_bot2_s = cs.A_BOLD
+        attr_text = cs.A_NORMAL
         
         # **** Do not edit settings below this line ***
 
@@ -93,7 +94,7 @@ Cursor right    d, <right>"""
         self._attr_bot2 = cs.color_pair(colors_bot2) | attr_bot2
         self._attr_empty_s = cs.color_pair(colors_empty_s) | attr_empty_s
         self._attr_obstacle_s = cs.color_pair(colors_obstacle_s) \
-                              | attr_obstacle_s
+            | attr_obstacle_s
         self._attr_bot1_s = cs.color_pair(colors_bot1_s) | attr_bot1_s
         self._attr_bot2_s = cs.color_pair(colors_bot2_s) | attr_bot2_s
         self._attr_text = cs.color_pair(colors_text) | attr_text
@@ -104,7 +105,7 @@ Cursor right    d, <right>"""
             cs.wrapper(self._main)
         except:
             pass
-    
+
     def _grid_num_to_str(self, n):
         if -9 <= n <= -1:
             return str(n)
@@ -114,7 +115,7 @@ Cursor right    d, <right>"""
             return str(n)
         else:
             return 'EE'     # Error! number too big for one cell
-    
+
     def _draw_grid_empty(self, r, c):
         if [r, c] == self._selected:
             attr = self._attr_empty_s
@@ -173,7 +174,7 @@ Cursor right    d, <right>"""
                         self._draw_grid_bot2(r, c, robot.hp)
                 else:
                     self._draw_grid_empty(r, c)
-    
+
     def _draw_manual(self):
         r, c = self._manual_pos
         for line in self._manual_text.split("\n"):
@@ -225,7 +226,7 @@ Cursor right    d, <right>"""
             c += len(s)
             s = self._names[0]
             self._stdscr.addstr(r, c, s, self._attr_bot1)
-    
+
     def _draw_final_score(self):
         state = self._game.get_state(self._settings.max_turns)
         score = [0, 0]
@@ -276,15 +277,15 @@ Cursor right    d, <right>"""
             return True
         else:
             return False
-    
+
     def _move_selected_up(self):
         self._selected[0] = max(self._selected[0] - 1, 0)
-    
+
     def _move_selected_left(self):
         self._selected[1] = max(self._selected[1] - 1, 0)
-    
+
     def _move_selected_down(self):
-        self._selected[0] = min(self._selected[0] + 1, 
+        self._selected[0] = min(self._selected[0] + 1,
                                 self._settings.board_size - 1)
 
     def _move_selected_right(self):

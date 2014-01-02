@@ -99,7 +99,7 @@ def make_player(fname):
 
 
 def play(players, print_info=True, animate_render=False, play_in_thread=False,
-         curses=False, match_seed=None, names=["Red", "Blue"], quiet=0, 
+         curses=False, match_seed=None, names=["Red", "Blue"], quiet=0,
          symmetric=False):
     if play_in_thread:
         g = game.ThreadedGame(*players,
@@ -130,7 +130,7 @@ def play(players, print_info=True, animate_render=False, play_in_thread=False,
         #print "rendering %s animations" % ("with"
         #                                   if animate_render else "without")
         render.Render(g, game.settings, animate_render, names=names)
-    
+
     # TODO:
     # Displaying multiple games using curses is still a little bit buggy but at
     # least it doesn't completely screw up the state of the terminal anymore.
