@@ -9,7 +9,7 @@ def compute_color(settings, player, hp, action):
     g += (100 - maxclr * 1.75) / 255
     b += (100 - maxclr * 1.75) / 255
     color = (r, g, b)
-    if action is 'guard':
+    if action is 'guard' and settings.color_guard is not None:
         color = blend_colors(color, settings.color_guard, 0.65)
     return color
 
