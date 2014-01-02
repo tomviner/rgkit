@@ -1,3 +1,4 @@
+from __future__ import division
 import Tkinter
 import math
 
@@ -61,13 +62,13 @@ class Render(object):
         self._master.bind('<Configure>', self.on_resize)
 
         self._labelred = self._info.create_text(
-            self._blocksize / 2, self._blocksize * 1 / 4,
+            self._blocksize // 2, self._blocksize * 1 // 4,
             anchor='nw', font='TkFixedFont', fill='#ff1a1a')
         self._labelblue = self._info.create_text(
-            self._blocksize / 2, self._blocksize * 7 / 8,
+            self._blocksize // 2, self._blocksize * 7 // 8,
             anchor='nw', font='TkFixedFont', fill='#3455ff')
         self._label = self._info.create_text(
-            self._blocksize / 2, self._blocksize * 3 / 2,
+            self._blocksize // 2, self._blocksize * 3 // 2,
             anchor='nw', font='TkFixedFont', fill='white')
         self.create_controls(self._info, width, height)
 
@@ -126,7 +127,7 @@ class Render(object):
                                     self.info_frame_height),
                                 250)
 
-            self._blocksize = ((self._winsize - self.board_margin) /
+            self._blocksize = ((self._winsize - self.board_margin) //
                                self._settings.board_size)
             self._win.configure(width=self._winsize, height=self._winsize)
 
@@ -179,8 +180,8 @@ class Render(object):
             self.toggle_pause()
 
         def onclick(event):
-            x = (event.x - self.board_margin / 2) / self._blocksize
-            y = (event.y - self.board_margin / 2) / self._blocksize
+            x = (event.x - self.board_margin // 2) // self._blocksize
+            y = (event.y - self.board_margin // 2) // self._blocksize
             loc = (x, y)
             if (0 <= x < self._settings.board_size and
                     0 <= y < self._settings.board_size):
@@ -227,8 +228,8 @@ class Render(object):
 
         self._time_slider = Tkinter.Scale(
             frame,
-            from_=-self._settings.turn_interval / 2,
-            to_=self._settings.turn_interval / 2,
+            from_=-self._settings.turn_interval // 2,
+            to_=self._settings.turn_interval // 2,
             orient=Tkinter.HORIZONTAL,
             borderwidth=0,
             length=90)
@@ -262,8 +263,8 @@ class Render(object):
         self._layers[layer_id] = None
         x, y = self.grid_to_xy(loc)
         item = self._win.create_text(
-            x + (self._blocksize - self.cell_border_width) / 2,
-            y + (self._blocksize - self.cell_border_width) / 2,
+            x + (self._blocksize - self.cell_border_width) // 2,
+            y + (self._blocksize - self.cell_border_width) // 2,
             text=text, font='TkFixedFont', fill=color, tags=[layer_id])
         return item
 
@@ -340,7 +341,7 @@ class Render(object):
     def callback(self):
         self.update_slider_value()
         self.tick()
-        self._win.after(int(1000.0 / self._settings.FPS), self.callback)
+        self._win.after(int(1000 / self._settings.FPS), self.callback)
 
     def tick(self):
         now = millis()
@@ -349,9 +350,8 @@ class Render(object):
         # check if frame-update
         if self._animations:
             if not self._paused:
-                self._sub_turn = max(0.0,
-                                     float((now - self._t_frame_start)) /
-                                     float(self._slider_delay))
+                self._sub_turn = max(0.0, (now - self._t_frame_start) /
+                                     self._slider_delay)
                 if self._turn >= self._settings.max_turns:
                     self.toggle_pause()
                     self._turn = self._settings.max_turns
@@ -362,7 +362,7 @@ class Render(object):
                     self.turn_changed()
             subframe_t = ((now - self._t_cursor_start) %
                           self._settings.rate_cursor_blink)
-            subframe_hlt = float(subframe_t) / self._settings.rate_cursor_blink
+            subframe_hlt = subframe_t / self._settings.rate_cursor_blink
             self.paint(self._sub_turn, subframe_hlt)
         elif now > self._t_next_frame and not self._paused:
             self._turn += 1
@@ -423,8 +423,8 @@ class Render(object):
 
     def grid_to_xy(self, loc):
         x, y = loc
-        return (x * self._blocksize + self.board_margin / 2,
-                y * self._blocksize + self.board_margin / 2)
+        return (x * self._blocksize + self.board_margin // 2,
+                y * self._blocksize + self.board_margin // 2)
 
     def square_bottom_corner(self, square_topleft):
         x, y = square_topleft
