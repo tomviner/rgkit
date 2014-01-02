@@ -1,5 +1,4 @@
 import curses as cs
-import time
 
 
 class RGCurses:
