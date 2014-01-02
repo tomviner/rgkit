@@ -161,7 +161,7 @@ class RobotSprite(object):
         x, y = self.renderer.grid_to_xy(loc)
         ox, oy = self.animation_offset
         tex_rgb = self.settings.text_color_bright \
-            if self.hp_next > self.settings.robot_hp / 2 \
+            if self.hp > self.settings.robot_hp / 4 \
             else self.settings.text_color_dark
         tex_rgb = blend_colors(tex_rgb, bot_color, alpha)
         tex_hex = rgb_to_hex(*tex_rgb)
