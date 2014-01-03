@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='rgkit',
-    version='0.3.4',
+    version='0.3.5',
     description='Robot Game Testing Kit',
     maintainer='Peter Wen',
     maintainer_email='peter@whitehalmos.org',
