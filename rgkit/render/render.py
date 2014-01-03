@@ -210,7 +210,7 @@ class Render(object):
 
         arrows_box = Tkinter.Checkbutton(
             frame, text="Show Arrows", variable=self.show_arrows,
-            command=self.tick)
+            command=self.paint)
         arrows_box.pack()
 
         self._toggle_button = Tkinter.Button(
