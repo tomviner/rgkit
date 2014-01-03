@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='rgkit',
-    version='0.3.3',
+    version='0.3.4',
     description='Robot Game Testing Kit',
     maintainer='Peter Wen',
     maintainer_email='peter@whitehalmos.org',
@@ -10,6 +10,7 @@ setup(
     packages=['rgkit', 'rgkit.render'],
     package_data={'rgkit': ['bots/*.py', 'maps/*.py']},
     license='Unlicense',
+    long_description=open('README.md', 'r').read(),
     entry_points={
         'console_scripts': [
             'rgrun = rgkit.run:main',
