@@ -30,11 +30,14 @@ class HighlightSprite(object):
             color = blend_colors(color, bot_color, 0.7)
         return rgb_to_hex(*color)
 
+    def clear_target_square(self):
+        self.renderer.remove_object(self.target_square)
+        self.target_square = None
+
     def clear(self):
         self.renderer.remove_object(self.hlt_square)
-        self.renderer.remove_object(self.target_square)
         self.hlt_square = None
-        self.target_square = None
+        self.clear_target_square()
 
     def animate(self, delta=0):
         if self.settings.highlight_cursor_blink:
@@ -48,8 +51,11 @@ class HighlightSprite(object):
                 color = self.get_mixed_color(color, self.location)
                 self.hlt_square = self.renderer.draw_grid_object(
                     self.location, fill=color, layer=3, width=0)
-            if self.target is not None and self.target_square is None:
-                color = self.settings.target_color
-                color = self.get_mixed_color(color, self.target)
-                self.target_square = self.renderer.draw_grid_object(
-                    self.target, fill=color, layer=3, width=0)
+            if not self.renderer.show_arrows.get():
+                if self.target is not None and self.target_square is None:
+                    color = self.settings.target_color
+                    color = self.get_mixed_color(color, self.target)
+                    self.target_square = self.renderer.draw_grid_object(
+                        self.target, fill=color, layer=3, width=0)
+            else:
+                self.clear_target_square()
