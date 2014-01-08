@@ -73,7 +73,10 @@ parser.add_argument("--match-seeds", nargs='*',
                     help="Used for random seed of the first matches in order.")
 parser.add_argument("-s", "--symmetric", action="store_true",
                     default=False,
-                    help="Bots spawn symmetrically")
+                    help="Bots spawn symmetrically.")
+parser.add_argument("-M", "--heatmap", action="store_true",
+                    default=False,
+                    help="Print heatmap after playing a number of games.")
 
 
 def mute_all():
@@ -300,7 +303,8 @@ def main():
     if args.count > 1:
         p1won = sum(p1 > p2 for p1, p2 in scores)
         p2won = sum(p2 > p1 for p1, p2 in scores)
-        print_score_grid(scores, args.player1, args.player2, 26)
+        if args.heatmap:
+            print_score_grid(scores, args.player1, args.player2, 26)
         print [p1won, p2won, args.count - p1won - p2won]
 
 
