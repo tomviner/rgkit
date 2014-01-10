@@ -50,7 +50,6 @@ settings = {
     'bot_hp_animation': False,
 
     # rating systems
-    'rating_range': 100,
     'default_rating': 1200,
 
     # user-scripting
