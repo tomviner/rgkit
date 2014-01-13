@@ -119,9 +119,9 @@ Cursor right    d, <right>"""
             attr = self._attr_empty_s
         else:
             attr = self._attr_empty
-        r = self._game_grid_pos[0] + r
-        c = self._game_grid_pos[1] + 2 * c
-        self._stdscr.addstr(r, c, '  ', attr)
+        r = self._game_grid_pos[0] + 2 * r
+        c = self._game_grid_pos[1] + c
+        self._stdscr.addstr(c, r, '  ', attr)
 
     def _draw_grid_obstacle(self, r, c):
         if [r, c] == self._selected:
@@ -134,29 +134,29 @@ Cursor right    d, <right>"""
             show_str = self._grid_num_to_str(r)
         else:
             show_str = '  '
-        r = self._game_grid_pos[0] + r
-        c = self._game_grid_pos[1] + 2 * c
-        self._stdscr.addstr(r, c, show_str, attr)
+        r = self._game_grid_pos[0] + 2 * r
+        c = self._game_grid_pos[1] + c
+        self._stdscr.addstr(c, r, show_str, attr)
 
     def _draw_grid_bot1(self, r, c, hp):
         if [r, c] == self._selected:
             attr = self._attr_bot1_s
         else:
             attr = self._attr_bot1
-        r = self._game_grid_pos[0] + r
-        c = self._game_grid_pos[1] + 2 * c
+        r = self._game_grid_pos[0] + 2 * r
+        c = self._game_grid_pos[1] + c
         show_str = self._grid_num_to_str(hp)
-        self._stdscr.addstr(r, c, show_str, attr)
+        self._stdscr.addstr(c, r, show_str, attr)
 
     def _draw_grid_bot2(self, r, c, hp):
         if [r, c] == self._selected:
             attr = self._attr_bot2_s
         else:
             attr = self._attr_bot2
-        r = self._game_grid_pos[0] + r
-        c = self._game_grid_pos[1] + 2 * c
+        r = self._game_grid_pos[0] + 2 * r
+        c = self._game_grid_pos[1] + c
         show_str = self._grid_num_to_str(hp)
-        self._stdscr.addstr(r, c, show_str, attr)
+        self._stdscr.addstr(c, r, show_str, attr)
 
     def _draw_game_grid(self):
         state = self._game.get_state(self._turn)
@@ -277,17 +277,17 @@ Cursor right    d, <right>"""
             return False
 
     def _move_selected_up(self):
-        self._selected[0] = max(self._selected[0] - 1, 0)
-
-    def _move_selected_left(self):
         self._selected[1] = max(self._selected[1] - 1, 0)
 
+    def _move_selected_left(self):
+        self._selected[0] = max(self._selected[0] - 1, 0)
+
     def _move_selected_down(self):
-        self._selected[0] = min(self._selected[0] + 1,
+        self._selected[1] = min(self._selected[1] + 1,
                                 self._settings.board_size - 1)
 
     def _move_selected_right(self):
-        self._selected[1] = min(self._selected[1] + 1,
+        self._selected[0] = min(self._selected[0] + 1,
                                 self._settings.board_size - 1)
 
     def _handle_key(self, key):
