@@ -83,7 +83,8 @@ class GameState(object):
                 s = int(self._spawn_random.random() * n)
                 if s < count:
                     locations[s] = loc
-
+        
+        self._spawn_random.shuffle(locations)
         return locations[:per_player], locations[per_player:]
 
     # actions = {loc: action}
