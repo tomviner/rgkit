@@ -5,7 +5,7 @@ with open('README.md') as readme_file:
 
 setup(
     name='rgkit',
-    version='0.3.6',
+    version='0.3.7',
     description='Robot Game Testing Kit',
     maintainer='Peter Wen',
     maintainer_email='peter@whitehalmos.org',

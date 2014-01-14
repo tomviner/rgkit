@@ -60,7 +60,6 @@ settings = {
     'player_only_properties': ('robot_id',),
     'user_obj_types': ('Robot',),
     'valid_commands': ('move', 'attack', 'guard', 'suicide'),
-    'user_modules': ('numpy', 'euclid', 'random'),
 }
 
 # just change stuff above this line
