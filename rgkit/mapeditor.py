@@ -71,7 +71,7 @@ class MapEditor(object):
         self.bind_events()
 
         self._canvas.pack()
-        root.title('Robotgame Map Editor')
+        root.title('Robot Game Map Editor')
         root.mainloop()
 
     def prepare_backdrop(self, size):
