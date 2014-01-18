@@ -3,6 +3,7 @@
 import ast
 import Tkinter
 import sys
+import os.path
 
 from rgkit.settings import settings
 
@@ -70,7 +71,7 @@ class MapEditor(object):
         self.bind_events()
 
         self._canvas.pack()
-        root.title('robot game map editor')
+        root.title('Robotgame Map Editor')
         root.mainloop()
 
     def prepare_backdrop(self, size):
@@ -132,8 +133,11 @@ class MapEditor(object):
     def load_map(self):
         if self._map_file is None:
             return
-
-        map_data = ast.literal_eval(open(self._map_file).read())
+        if not os.path.exists(self._map_file):
+            map_data = {'start1': [], 'start2': [], 'spawn': [], 'obstacle': []
+                        }
+        else:
+            map_data = ast.literal_eval(open(self._map_file).read())
 
         label_mapping = dict((v, k) for k, v in color_mapping.values()
                              if v is not None)
