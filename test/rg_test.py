@@ -3,7 +3,6 @@ import pkg_resources
 import unittest
 
 import rgkit.settings
-from rgkit.settings import settings
 from rgkit import rg
 
 map_data = ast.literal_eval(

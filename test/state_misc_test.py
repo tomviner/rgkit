@@ -3,7 +3,6 @@ import pkg_resources
 import unittest
 
 import rgkit.settings
-from rgkit.settings import settings
 from rgkit.gamestate import GameState
 
 map_data = ast.literal_eval(
