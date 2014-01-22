@@ -3,6 +3,7 @@ import Tkinter
 import math
 
 from rgkit.settings import settings
+from rgkit.render.settings import settings as render_settings
 from rgkit.render.robotsprite import RobotSprite
 from rgkit.render.highlightsprite import HighlightSprite
 from rgkit.render.utils import millis, rgb_to_hex
@@ -78,7 +79,7 @@ class Render(object):
         self._highlighted = None
         self._highlighted_target = None
 
-        # Animation stuff (also see #render heading in settings.py)
+        # Animation stuff
         self._sprites = []
         self._highlight_sprite = None
         self._t_frame_start = 0
@@ -104,9 +105,9 @@ class Render(object):
             self._win.delete(obj)
 
     def turn_changed(self):
-        if settings.clear_highlight_between_turns:
+        if render_settings.clear_highlight_between_turns:
             self._highlighted = None
-        if settings.clear_highlight_target_between_turns:
+        if render_settings.clear_highlight_target_between_turns:
             self._highlighted_target = None
         self.update_sprites_new_turn()
         self.update_info_frame()
@@ -228,8 +229,8 @@ class Render(object):
 
         self._time_slider = Tkinter.Scale(
             frame,
-            from_=-settings.turn_interval // 2,
-            to_=settings.turn_interval // 2,
+            from_=-render_settings.turn_interval // 2,
+            to_=render_settings.turn_interval // 2,
             orient=Tkinter.HORIZONTAL,
             borderwidth=0,
             length=90)
@@ -336,12 +337,12 @@ class Render(object):
         v = -self._time_slider.get()
         if v > 0:
             v = v * 20
-        self._slider_delay = settings.turn_interval + v
+        self._slider_delay = render_settings.turn_interval + v
 
     def callback(self):
         self.update_slider_value()
         self.tick()
-        self._win.after(int(1000 / settings.FPS), self.callback)
+        self._win.after(int(1000 / render_settings.FPS), self.callback)
 
     def tick(self):
         now = millis()
@@ -361,8 +362,8 @@ class Render(object):
                     self.update_frame_start_time(self._t_next_frame)
                     self.turn_changed()
             subframe_t = ((now - self._t_cursor_start) %
-                          settings.rate_cursor_blink)
-            subframe_hlt = subframe_t / settings.rate_cursor_blink
+                          render_settings.rate_cursor_blink)
+            subframe_hlt = subframe_t / render_settings.rate_cursor_blink
             self.paint(self._sub_turn, subframe_hlt)
         elif now > self._t_next_frame and not self._paused:
             self._turn += 1
@@ -374,8 +375,8 @@ class Render(object):
 
     def get_bg_color(self, loc):
         if loc in settings.obstacles:
-            return rgb_to_hex(*settings.obstacle_color)
-        return rgb_to_hex(*settings.normal_color)
+            return rgb_to_hex(*render_settings.obstacle_color)
+        return rgb_to_hex(*render_settings.normal_color)
 
     def draw_background(self):
         # draw squares
@@ -385,7 +386,7 @@ class Render(object):
                 self.draw_grid_object(
                     loc, fill=self.get_bg_color(loc), layer=1, width=0)
         # draw text labels
-        text_color = rgb_to_hex(*settings.text_color)
+        text_color = rgb_to_hex(*render_settings.text_color)
         for y in range(settings.board_size):
             self.draw_text((y, 0), str(y), color=text_color)
             self.draw_text((0, y), str(y), color=text_color)

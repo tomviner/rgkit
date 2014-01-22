@@ -1,4 +1,4 @@
-from rgkit.settings import settings
+from rgkit.render.settings import settings as render_settings
 from rgkit.render.utils import rgb_to_hex, blend_colors, compute_color
 
 
@@ -38,20 +38,21 @@ class HighlightSprite(object):
         self.clear_target_square()
 
     def animate(self, delta=0):
-        if settings.highlight_cursor_blink:
-            if not delta < settings.highlight_cursor_blink_interval:
+        if render_settings.highlight_cursor_blink:
+            if not delta < render_settings.highlight_cursor_blink_interval:
                 self.clear()
                 return
 
         if self.location is not None:
             if self.hlt_square is None:
-                color = settings.highlight_color
+                color = render_settings.highlight_color
                 color = self.get_mixed_color(color, self.location)
                 self.hlt_square = self.renderer.draw_grid_object(
                     self.location, fill=color, layer=3, width=0)
             if not self.renderer.show_arrows.get():
                 if self.target is not None and self.target_square is None:
-                    color = get_mixed_color(settings.target_color, self.target)
+                    color = render_settings.target_color
+                    color = self.get_mixed_color(color, self.target)
                     self.target_square = self.renderer.draw_grid_object(
                         self.target, fill=color, layer=3, width=0)
             else:
