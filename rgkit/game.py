@@ -93,14 +93,13 @@ class Player(object):
 
 
 class Game(object):
-    def __init__(self, player1, player2, record_actions=False,
+    def __init__(self, players, record_actions=False,
                  record_history=False, print_info=False,
                  seed=None, quiet=0, symmetric=False):
         self._settings = settings
-        self._player1 = player1
-        self._player1.set_player_id(0)
-        self._player2 = player2
-        self._player2.set_player_id(1)
+        self._players = players
+        for i, player in enumerate(self._players):
+            player.set_player_id(i)
         self._record_actions = record_actions
         self._record_history = record_history
         self._print_info = print_info
@@ -147,11 +146,12 @@ class Game(object):
                 sys.stdout = NullDevice()
             if self._quiet >= 2:
                 sys.stderr = NullDevice()
-        seed1 = self._random.randint(0, self._settings.max_seed)
-        seed2 = self._random.randint(0, self._settings.max_seed)
-        actions = self._player1.get_actions(self._state, seed1)
-        actions2 = self._player2.get_actions(self._state, seed2)
-        actions.update(actions2)
+
+        actions = {}
+        for player in self._players:
+            seed = self._random.randint(0, self._settings.max_seed)
+            actions.update(player.get_actions(self._state, seed))
+
         if self._quiet < 3:
             if self._quiet >= 1:
                 sys.stdout = sys.__stdout__

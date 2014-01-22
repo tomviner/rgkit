@@ -18,7 +18,7 @@ class TestSeeding(unittest.TestCase):
 
         player1 = game.Player(code1)
         player2 = game.Player(code2)
-        game1 = game.Game(player1, player2,
+        game1 = game.Game([player1, player2],
                           print_info=False,
                           record_actions=False,
                           record_history=True,
@@ -28,7 +28,7 @@ class TestSeeding(unittest.TestCase):
 
         player1 = game.Player(code1)
         player2 = game.Player(code2)
-        game2 = game.Game(player1, player2,
+        game2 = game.Game([player1, player2],
                           print_info=False,
                           record_actions=True,
                           record_history=True,
@@ -47,7 +47,7 @@ class TestSeeding(unittest.TestCase):
 
         player1 = game.Player(code1)
         player2 = game.Player(code2)
-        game1 = game.Game(player1, player2,
+        game1 = game.Game([player1, player2],
                           print_info=False,
                           record_actions=False,
                           record_history=True,
@@ -57,7 +57,7 @@ class TestSeeding(unittest.TestCase):
 
         player1 = game.Player(code1)
         player2 = game.Player(code2)
-        game2 = game.Game(player1, player2,
+        game2 = game.Game([player1, player2],
                           print_info=False,
                           record_actions=True,
                           record_history=True,

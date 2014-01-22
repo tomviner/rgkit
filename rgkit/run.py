@@ -104,7 +104,7 @@ def play(players, print_info=True, animate_render=False, play_in_thread=False,
          curses=False, match_seed=None, names=["Red", "Blue"], quiet=0,
          symmetric=False):
     if play_in_thread:
-        g = game.ThreadedGame(*players,
+        g = game.ThreadedGame(players,
                               print_info=print_info,
                               record_actions=print_info,
                               record_history=True,
@@ -112,7 +112,7 @@ def play(players, print_info=True, animate_render=False, play_in_thread=False,
                               quiet=quiet,
                               symmetric=symmetric)
     else:
-        g = game.Game(*players,
+        g = game.Game(players,
                       print_info=print_info,
                       record_actions=print_info,
                       record_history=True,
