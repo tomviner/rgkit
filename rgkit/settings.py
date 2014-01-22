@@ -1,4 +1,10 @@
-settings = {
+class AttrDict(dict):
+    def __init__(self, *args, **kwargs):
+        super(AttrDict, self).__init__(*args, **kwargs)
+        self.__dict__ = self
+
+
+settings = AttrDict({
     # game settings
     'spawn_every': 10,
     'spawn_per_player': 5,
@@ -59,14 +65,12 @@ settings = {
     'exposed_properties': ('location', 'hp', 'player_id'),
     'player_only_properties': ('robot_id',),
     'user_obj_types': ('Robot',),
-    'valid_commands': ('move', 'attack', 'guard', 'suicide'),
-}
-
-# just change stuff above this line
+    'valid_commands': ('move', 'attack', 'guard', 'suicide')
+})
 
 
-class AttrDict(dict):
-    def __init__(self, *args, **kwargs):
-        super(AttrDict, self).__init__(*args, **kwargs)
-        self.__dict__ = self
-settings = AttrDict(settings)
+def init(map_data):
+    settings.spawn_coords = map_data['spawn']
+    settings.obstacles = map_data['obstacle']
+    settings.player_count = map_data.get('player_count', 2)
+    settings.start = map_data.get('start', None)

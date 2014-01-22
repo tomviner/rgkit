@@ -20,17 +20,6 @@ class NullDevice(object):
         pass
 
 
-def init_settings(map_data):
-    # I'll get rid of the globals. I promise.
-    global settings
-    settings.spawn_coords = map_data['spawn']
-    settings.obstacles = map_data['obstacle']
-    settings.start1 = map_data['start1']
-    settings.start2 = map_data['start2']
-    rg.set_settings(settings)
-    return settings
-
-
 class Player(object):
     def __init__(self, code=None, robot=None):
         self._player_id = None  # must be set using set_player_id
@@ -96,7 +85,6 @@ class Game(object):
     def __init__(self, players, record_actions=False,
                  record_history=False, print_info=False,
                  seed=None, quiet=0, symmetric=False):
-        self._settings = settings
         self._players = players
         for i, player in enumerate(self._players):
             player.set_player_id(i)
@@ -104,11 +92,11 @@ class Game(object):
         self._record_history = record_history
         self._print_info = print_info
         if seed is None:
-            seed = random.randint(0, self._settings.max_seed)
+            seed = random.randint(0, settings.max_seed)
         self.seed = str(seed)
         self._random = random.Random(self.seed)
         self._quiet = quiet
-        self._state = GameState(self._settings, use_start=True, seed=self.seed,
+        self._state = GameState(use_start=True, seed=self.seed,
                                 symmetric=symmetric)
 
         self._actions_on_turn = {}
@@ -149,7 +137,7 @@ class Game(object):
 
         actions = {}
         for player in self._players:
-            seed = self._random.randint(0, self._settings.max_seed)
+            seed = self._random.randint(0, settings.max_seed)
             actions.update(player.get_actions(self._state, seed))
 
         if self._quiet < 3:
@@ -238,7 +226,7 @@ class Game(object):
 
         self._save_state(self._state, 0)
 
-        while self._state.turn < self._settings.max_turns:
+        while self._state.turn < settings.max_turns:
             self.run_turn()
 
         # create last turn's state for server history
@@ -262,25 +250,23 @@ class Game(object):
 
             actions_on_turn[loc] = log_item
 
-        self._save_actions_on_turn(actions_on_turn, self._settings.max_turns)
+        self._save_actions_on_turn(actions_on_turn, settings.max_turns)
 
     def get_scores(self):
-        return self.get_state(self._settings.max_turns).get_scores()
+        return self.get_state(settings.max_turns).get_scores()
 
 
 class ThreadedGame(Game):
     def __init__(self, *args, **kwargs):
         super(ThreadedGame, self).__init__(*args, **kwargs)
 
-        max_turn = self._settings.max_turns
-
         # events set when actions_on_turn are calculated
         self._has_actions_on_turn = [threading.Event()
-                                     for _ in xrange(max_turn + 1)]
+                                     for _ in xrange(settings.max_turns + 1)]
 
         # events set when state are calculated
         self._has_state = [threading.Event()
-                           for _ in xrange(max_turn + 1)]
+                           for _ in xrange(settings.max_turns + 1)]
 
     def get_actions_on_turn(self, turn):
         self._has_actions_on_turn[turn].wait()

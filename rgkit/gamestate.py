@@ -2,16 +2,14 @@ import random
 from collections import defaultdict
 
 from rgkit import rg
-from rgkit.settings import AttrDict
+from rgkit.settings import settings, AttrDict
 
 
 class GameState(object):
-    def __init__(self, settings, use_start=False, turn=0,
+    def __init__(self, use_start=False, turn=0,
                  next_robot_id=0, seed=None, symmetric=False):
-        self._settings = settings
-
         if seed is None:
-            seed = random.randint(0, self._settings.max_seed)
+            seed = random.randint(0, settings.max_seed)
         self._seed = str(seed)
         self._spawn_random = random.Random(self._seed + 's')
         self._attack_random = random.Random(self._seed + 'a')
@@ -20,21 +18,21 @@ class GameState(object):
         self.turn = turn
         self._next_robot_id = next_robot_id
 
-        if use_start:
-            for loc in self._settings.start1:
-                self.add_robot(loc, 0)
-            for loc in self._settings.start2:
-                self.add_robot(loc, 1)
+        if use_start and settings.start is not None:
+            for i, start in enumerate(settings.start):
+                for loc in start:
+                    self.add_robot(loc, i)
 
         self.symmetric = symmetric
         if symmetric:
+            assert settings.player_count == 2
             self._get_spawn_locations = self._get_spawn_locations_symmetric
         else:
             self._get_spawn_locations = self._get_spawn_locations_random
 
     def add_robot(self, loc, player_id, hp=None, robot_id=None):
         if hp is None:
-            hp = self._settings.robot_hp
+            hp = settings.robot_hp
 
         if robot_id is None:
             robot_id = self._next_robot_id
@@ -56,26 +54,26 @@ class GameState(object):
 
     def _get_spawn_locations_symmetric(self):
         def symmetric_loc(loc):
-            return (self._settings.board_size - 1 - loc[0],
-                    self._settings.board_size - 1 - loc[1])
+            return (settings.board_size - 1 - loc[0],
+                    settings.board_size - 1 - loc[1])
         locs1 = []
         locs2 = []
-        while len(locs1) < self._settings.spawn_per_player:
-            loc = self._spawn_random.choice(self._settings.spawn_coords)
+        while len(locs1) < settings.spawn_per_player:
+            loc = self._spawn_random.choice(settings.spawn_coords)
             sloc = symmetric_loc(loc)
             if loc not in locs1 and loc not in locs2:
                 if sloc not in locs1 and sloc not in locs2:
                     locs1.append(loc)
                     locs2.append(sloc)
-        return locs1, locs2
+        return locs1 + locs2
 
     def _get_spawn_locations_random(self):
         # see http://stackoverflow.com/questions/2612648/reservoir-sampling
         locations = []
-        per_player = self._settings.spawn_per_player
-        count = per_player * 2
+        per_player = settings.spawn_per_player
+        count = per_player * settings.player_count
         n = 0
-        for loc in self._settings.spawn_coords:
+        for loc in settings.spawn_coords:
             n += 1
             if len(locations) < count:
                 locations.append(loc)
@@ -84,7 +82,7 @@ class GameState(object):
                 if s < count:
                     locations[s] = loc
         self._spawn_random.shuffle(locations)
-        return locations[:per_player], locations[per_player:]
+        return locations
 
     # actions = {loc: action}
     # all actions must be valid
@@ -149,7 +147,8 @@ class GameState(object):
                 collisions[loc2].add(loc)
 
         # {loc: [damage_dealt_by_player_0, damage_dealt_by_player_1]}
-        damage_map = defaultdict(lambda: [0, 0])
+        damage_map = defaultdict(
+            lambda: [0 for _ in xrange(settings.player_count)])
 
         for loc, robot in self.robots.iteritems():
             actor_id = robot.player_id
@@ -157,13 +156,14 @@ class GameState(object):
             if actions[loc][0] == 'attack':
                 target = actions[loc][1]
                 damage = self._attack_random.randint(
-                    *self._settings.attack_range)
+                    *settings.attack_range)
                 damage_map[target][actor_id] += damage
 
             if actions[loc][0] == 'suicide':
-                damage_map[loc][1 - actor_id] += self._settings.robot_hp
+                another_id = (actor_id + 1) % settings.player_count
+                damage_map[loc][another_id] += settings.robot_hp
 
-                damage = self._settings.suicide_damage
+                damage = settings.suicide_damage
                 for target in rg.locs_around(loc):
                     damage_map[target][actor_id] += damage
 
@@ -175,38 +175,40 @@ class GameState(object):
 
             # apply collision damage
             if actions[loc][0] != 'guard':
-                damage = self._settings.collision_damage
+                damage = settings.collision_damage
 
                 for loc2 in collisions[delta_info.loc]:
                     if robot.player_id != self.robots[loc2].player_id:
                         delta_info.hp_end -= damage
 
             # apply other damage
-            damage_taken = damage_map[loc_end][1 - robot.player_id]
+            self_damage = damage_map[loc_end][robot.player_id]
+            damage_taken = sum(damage_map[loc_end]) - self_damage
             if actions[loc][0] == 'guard':
                 damage_taken /= 2
 
             delta_info.hp_end -= damage_taken
 
         if spawn:
-            if self.turn % self._settings.spawn_every == 0:
+            if self.turn % settings.spawn_every == 0:
                 # clear bots on spawn
                 for delta_info in delta:
                     loc_end = delta_info.loc_end
 
-                    if loc_end in self._settings.spawn_coords:
+                    if loc_end in settings.spawn_coords:
                         delta_info.hp_end = 0
 
                 # spawn bots
                 locations = self._get_spawn_locations()
-                for player_id, locs in enumerate(locations):
-                    for loc in locs:
+                for i in xrange(settings.spawn_per_player):
+                    for player_id in xrange(settings.player_count):
+                        loc = locations[player_id*settings.spawn_per_player+i]
                         delta.append(AttrDict({
                             'loc': loc,
                             'hp': 0,
                             'player_id': player_id,
                             'loc_end': loc,
-                            'hp_end': self._settings.robot_hp
+                            'hp_end': settings.robot_hp
                         }))
 
         return delta
@@ -220,11 +222,11 @@ class GameState(object):
     # }]
     # returns new GameState
     def apply_delta(self, delta):
-        new_state = GameState(self._settings,
+        new_state = GameState(settings,
                               next_robot_id=self._next_robot_id,
                               turn=self.turn + 1,
                               seed=self._spawn_random.randint(
-                                  0, self._settings.max_seed),
+                                  0, settings.max_seed),
                               symmetric=self.symmetric)
 
         for delta_info in delta:
@@ -251,7 +253,7 @@ class GameState(object):
         return self.apply_delta(delta)
 
     def get_scores(self):
-        scores = [0, 0]
+        scores = [0 for _ in xrange(settings.player_count)]
 
         for robot in self.robots.itervalues():
             scores[robot.player_id] += 1
@@ -276,10 +278,10 @@ class GameState(object):
     # action = well, action
     def is_valid_action(self, actor, action):
         try:
-            if len(str(action)) > self._settings.str_limit:
+            if len(str(action)) > settings.str_limit:
                 return False
 
-            if len(repr(action)) > self._settings.str_limit:
+            if len(repr(action)) > settings.str_limit:
                 return False
 
             if action[0] in ['move', 'attack']:

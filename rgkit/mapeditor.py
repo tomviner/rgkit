@@ -134,7 +134,7 @@ class MapEditor(object):
         if self._map_file is None:
             return
         if not os.path.exists(self._map_file):
-            map_data = {'start1': [], 'start2': [], 'spawn': [], 'obstacle': []
+            map_data = {'spawn': [], 'obstacle': []
                         }
         else:
             map_data = ast.literal_eval(open(self._map_file).read())

@@ -1,11 +1,14 @@
 import ast
 import pkg_resources
 import unittest
-from rgkit import game, rg
+
+import rgkit.settings
+from rgkit.settings import settings
+from rgkit import rg
 
 map_data = ast.literal_eval(
     open(pkg_resources.resource_filename('rgkit', 'maps/default.py')).read())
-settings = game.init_settings(map_data)
+rgkit.settings.init(map_data)
 
 
 class TestRG(unittest.TestCase):

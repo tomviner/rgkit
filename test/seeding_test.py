@@ -1,11 +1,14 @@
 import ast
 import pkg_resources
 import unittest
+
+import rgkit.settings
+from rgkit.settings import settings
 from rgkit import game
 
 map_data = ast.literal_eval(
     open(pkg_resources.resource_filename('rgkit', 'maps/default.py')).read())
-settings = game.init_settings(map_data)
+rgkit.settings.init(map_data)
 
 
 class TestSeeding(unittest.TestCase):

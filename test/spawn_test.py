@@ -1,17 +1,19 @@
 import ast
 import pkg_resources
 import unittest
-from rgkit import game
+
+import rgkit.settings
+from rgkit.settings import settings
 from rgkit.gamestate import GameState
 
 map_data = ast.literal_eval(
     open(pkg_resources.resource_filename('rgkit', 'maps/default.py')).read())
-settings = game.init_settings(map_data)
+rgkit.settings.init(map_data)
 
 
 class TestSpawn(unittest.TestCase):
     def test_first_turn_spawning(self):
-        state = GameState(settings)
+        state = GameState()
 
         actions = {}
 
@@ -22,7 +24,7 @@ class TestSpawn(unittest.TestCase):
                           settings.spawn_per_player])
 
     def test_spawn_kills(self):
-        state = GameState(settings)
+        state = GameState()
 
         state.add_robot((4, 3), 0)
 
@@ -37,7 +39,7 @@ class TestSpawn(unittest.TestCase):
                         state.robots[4, 3].robot_id)
 
     def test_spawn_dodge(self):
-        state = GameState(settings)
+        state = GameState()
 
         state.add_robot((4, 3), 0)
 
@@ -50,7 +52,7 @@ class TestSpawn(unittest.TestCase):
         self.assertTrue(state2.is_robot((4, 4)))
 
     def test_spawn_hop_in(self):
-        state = GameState(settings)
+        state = GameState()
 
         state.add_robot((4, 4), 0)
 

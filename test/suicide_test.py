@@ -1,17 +1,19 @@
 import ast
 import pkg_resources
 import unittest
-from rgkit import game
+
+import rgkit.settings
+from rgkit.settings import settings
 from rgkit.gamestate import GameState
 
 map_data = ast.literal_eval(
     open(pkg_resources.resource_filename('rgkit', 'maps/default.py')).read())
-settings = game.init_settings(map_data)
+rgkit.settings.init(map_data)
 
 
 class TestSuicide(unittest.TestCase):
     def test_basic_suicide(self):
-        state = GameState(settings)
+        state = GameState()
         state.add_robot((10, 10), 0)
         state.add_robot((9, 10), 1)
 
@@ -29,7 +31,7 @@ class TestSuicide(unittest.TestCase):
         self.assertFalse(state2.is_robot((9, 10)))
 
     def test_guarding_reduces_damage(self):
-        state = GameState(settings)
+        state = GameState()
         state.add_robot((10, 10), 0)
         state.add_robot((9, 10), 1)
 
@@ -46,7 +48,7 @@ class TestSuicide(unittest.TestCase):
         self.assertFalse(state2.is_robot((9, 10)))
 
     def test_suicide_does_no_damage_to_teammates(self):
-        state = GameState(settings)
+        state = GameState()
         state.add_robot((10, 10), 0)
         state.add_robot((9, 10), 0)
 
@@ -62,7 +64,7 @@ class TestSuicide(unittest.TestCase):
         self.assertFalse(state2.is_robot((9, 10)))
 
     def test_suicide_dodge(self):
-        state = GameState(settings)
+        state = GameState()
         state.add_robot((10, 10), 0)
         state.add_robot((9, 10), 1)
 
@@ -77,7 +79,7 @@ class TestSuicide(unittest.TestCase):
         self.assertEqual(state2.robots[8, 10].hp, settings.robot_hp)
 
     def test_suicide_dodge_fail(self):
-        state = GameState(settings)
+        state = GameState()
         state.add_robot((10, 10), 0)
         state.add_robot((9, 10), 1)
         state.add_robot((7, 10), 1)
@@ -95,7 +97,7 @@ class TestSuicide(unittest.TestCase):
                          settings.robot_hp - settings.suicide_damage)
 
     def test_move_into_suicide_bot(self):
-        state = GameState(settings)
+        state = GameState()
         state.add_robot((10, 10), 0)
         state.add_robot((9, 10), 1)
 

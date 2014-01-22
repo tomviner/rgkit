@@ -31,8 +31,10 @@ except ImportError:
     parentdir = dirname(cdir)
     sys.path.insert(0, parentdir)
 
-from rgkit import game
+import rgkit.settings
 from rgkit.settings import settings
+from rgkit import game
+
 
 parser = argparse.ArgumentParser(description="Robot game execution script.",
                                  formatter_class=RawTextHelpFormatter)
@@ -292,7 +294,7 @@ def main():
         mute_all()
 
     map_data = ast.literal_eval(args.map.read())
-    game.init_settings(map_data)
+    rgkit.settings.init(map_data)
     print('Game seed: {0}'.format(args.game_seed))
 
     runner = test_runs_sequentially

@@ -1,24 +1,11 @@
-from math import sqrt
-
-settings = None
-CENTER_POINT = None
+from rgkit.settings import settings
 
 
-def after_settings():
-    global CENTER_POINT
-    CENTER_POINT = (int(settings.board_size / 2), int(settings.board_size / 2))
-
-
-def set_settings(s):
-    global settings
-    settings = s
-    after_settings()
-
-#################################################
+CENTER_POINT = (int(settings.board_size / 2), int(settings.board_size / 2))
 
 
 def dist(p1, p2):
-    return sqrt((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2)
+    return ((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2) ** 0.5
 
 
 def wdist(p1, p2):
