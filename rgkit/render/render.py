@@ -2,13 +2,14 @@ from __future__ import division
 import Tkinter
 import math
 
+from rgkit.settings import settings
 from rgkit.render.robotsprite import RobotSprite
 from rgkit.render.highlightsprite import HighlightSprite
 from rgkit.render.utils import millis, rgb_to_hex
 
 
 class Render(object):
-    def __init__(self, game_inst, settings, animations, names=["Red", "Blue"]):
+    def __init__(self, game_inst, animations, names=["Red", "Blue"]):
         self.size_changed = False
         self.init = True
 
@@ -16,10 +17,9 @@ class Render(object):
         self.info_frame_height = 100
         self.board_margin = 0
 
-        self._settings = settings
         self._animations = animations
         self._blocksize = 25
-        self._winsize = (self._blocksize * self._settings.board_size
+        self._winsize = (self._blocksize * settings.board_size
                          + self.board_margin)
         self._game = game_inst
         self._paused = True
@@ -104,9 +104,9 @@ class Render(object):
             self._win.delete(obj)
 
     def turn_changed(self):
-        if self._settings.clear_highlight_between_turns:
+        if settings.clear_highlight_between_turns:
             self._highlighted = None
-        if self._settings.clear_highlight_target_between_turns:
+        if settings.clear_highlight_target_between_turns:
             self._highlighted_target = None
         self.update_sprites_new_turn()
         self.update_info_frame()
@@ -128,7 +128,7 @@ class Render(object):
                                 250)
 
             self._blocksize = ((self._winsize - self.board_margin) //
-                               self._settings.board_size)
+                               settings.board_size)
             self._win.configure(width=self._winsize, height=self._winsize)
 
             self.draw_background()
@@ -139,7 +139,7 @@ class Render(object):
         if not self._paused:
             self.toggle_pause()
 
-        self._turn = min(max(new_turn, 1.0), self._settings.max_turns)
+        self._turn = min(max(new_turn, 1.0), settings.max_turns)
         self._sub_turn = 0.0
         self.update_frame_start_time()
         self.turn_changed()
@@ -183,8 +183,8 @@ class Render(object):
             x = (event.x - self.board_margin // 2) // self._blocksize
             y = (event.y - self.board_margin // 2) // self._blocksize
             loc = (x, y)
-            if (0 <= x < self._settings.board_size and
-                    0 <= y < self._settings.board_size):
+            if (0 <= x < settings.board_size and
+                    0 <= y < settings.board_size):
                 if loc == self._highlighted:
                     self._highlighted = None
                 else:
@@ -228,8 +228,8 @@ class Render(object):
 
         self._time_slider = Tkinter.Scale(
             frame,
-            from_=-self._settings.turn_interval // 2,
-            to_=self._settings.turn_interval // 2,
+            from_=-settings.turn_interval // 2,
+            to_=settings.turn_interval // 2,
             orient=Tkinter.HORIZONTAL,
             borderwidth=0,
             length=90)
@@ -307,7 +307,7 @@ class Render(object):
                             current_action += (' to %s' %
                                                (self._highlighted_target,))
         # if self._highlighted is not None:
-        #     if self._highlighted in self._settings.obstacles:
+        #     if self._highlighted in settings.obstacles:
         #         info = 'Obstacle at '
         #     elif display_state.is_robot(self._highlighted):
         #         robot = display_state.robots[self._highlighted]
@@ -320,7 +320,7 @@ class Render(object):
         #     )
 
         white_text = [
-            'Turn: %d/%d' % (display_turn, self._settings.max_turns),
+            'Turn: %d/%d' % (display_turn, settings.max_turns),
             'Highlighted: %s; %s' % (self._highlighted, info),
             current_action
         ]
@@ -330,18 +330,18 @@ class Render(object):
 
     def current_turn_int(self):
         return min(int(math.floor(self._turn + self._sub_turn)),
-                   self._settings.max_turns)
+                   settings.max_turns)
 
     def update_slider_value(self):
         v = -self._time_slider.get()
         if v > 0:
             v = v * 20
-        self._slider_delay = self._settings.turn_interval + v
+        self._slider_delay = settings.turn_interval + v
 
     def callback(self):
         self.update_slider_value()
         self.tick()
-        self._win.after(int(1000 / self._settings.FPS), self.callback)
+        self._win.after(int(1000 / settings.FPS), self.callback)
 
     def tick(self):
         now = millis()
@@ -352,17 +352,17 @@ class Render(object):
             if not self._paused:
                 self._sub_turn = max(0.0, (now - self._t_frame_start) /
                                      self._slider_delay)
-                if self._turn >= self._settings.max_turns:
+                if self._turn >= settings.max_turns:
                     self.toggle_pause()
-                    self._turn = self._settings.max_turns
+                    self._turn = settings.max_turns
                 if self._sub_turn >= 1:
                     self._sub_turn -= 1
                     self._turn += 1
                     self.update_frame_start_time(self._t_next_frame)
                     self.turn_changed()
             subframe_t = ((now - self._t_cursor_start) %
-                          self._settings.rate_cursor_blink)
-            subframe_hlt = subframe_t / self._settings.rate_cursor_blink
+                          settings.rate_cursor_blink)
+            subframe_hlt = subframe_t / settings.rate_cursor_blink
             self.paint(self._sub_turn, subframe_hlt)
         elif now > self._t_next_frame and not self._paused:
             self._turn += 1
@@ -373,20 +373,20 @@ class Render(object):
         self.update_block_size()
 
     def get_bg_color(self, loc):
-        if loc in self._settings.obstacles:
-            return rgb_to_hex(*self._settings.obstacle_color)
-        return rgb_to_hex(*self._settings.normal_color)
+        if loc in settings.obstacles:
+            return rgb_to_hex(*settings.obstacle_color)
+        return rgb_to_hex(*settings.normal_color)
 
     def draw_background(self):
         # draw squares
-        for y in range(self._settings.board_size):
-            for x in range(self._settings.board_size):
+        for y in range(settings.board_size):
+            for x in range(settings.board_size):
                 loc = (x, y)
                 self.draw_grid_object(
                     loc, fill=self.get_bg_color(loc), layer=1, width=0)
         # draw text labels
-        text_color = rgb_to_hex(*self._settings.text_color)
-        for y in range(self._settings.board_size):
+        text_color = rgb_to_hex(*settings.text_color)
+        for y in range(settings.board_size):
             self.draw_text((y, 0), str(y), color=text_color)
             self.draw_text((0, y), str(y), color=text_color)
 

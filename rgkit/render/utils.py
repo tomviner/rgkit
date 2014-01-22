@@ -1,4 +1,5 @@
 import time
+from rgkit.settings import settings
 
 
 def millis():
@@ -23,3 +24,15 @@ def blend_colors(color1, color2, weight):
     g = g1 * weight + g2 * (1 - weight)
     b = b1 * weight + b2 * (1 - weight)
     return (r, g, b)
+
+
+def compute_color(player_id, hp, action):
+    r, g, b = settings.colors[player_id]
+    maxclr = min(hp, 50)
+    r += (100 - maxclr * 1.75) / 255
+    g += (100 - maxclr * 1.75) / 255
+    b += (100 - maxclr * 1.75) / 255
+    color = (r, g, b)
+    if action is 'guard' and settings.color_guard is not None:
+        color = blend_colors(color, settings.color_guard, 0.65)
+    return color

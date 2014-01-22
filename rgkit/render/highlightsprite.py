@@ -1,5 +1,5 @@
-from rgkit.render.robotsprite import compute_color
-from rgkit.render.utils import rgb_to_hex, blend_colors
+from rgkit.settings import settings
+from rgkit.render.utils import rgb_to_hex, blend_colors, compute_color
 
 
 class HighlightSprite(object):
@@ -7,7 +7,6 @@ class HighlightSprite(object):
         self.location = loc
         self.target = target
         self.renderer = render
-        self.settings = self.renderer._settings
         self.hlt_square = None
         self.target_square = None
 
@@ -18,8 +17,7 @@ class HighlightSprite(object):
             robot = display_state.robots[loc]
             bot_action = self.renderer._game.get_actions_on_turn(
                 display_turn)[loc]['name']
-            robot_color = compute_color(self.settings,
-                                        robot.player_id, robot.hp,
+            robot_color = compute_color(robot.player_id, robot.hp,
                                         bot_action)
             return robot_color
         return None
@@ -40,21 +38,20 @@ class HighlightSprite(object):
         self.clear_target_square()
 
     def animate(self, delta=0):
-        if self.settings.highlight_cursor_blink:
-            if not delta < self.settings.highlight_cursor_blink_interval:
+        if settings.highlight_cursor_blink:
+            if not delta < settings.highlight_cursor_blink_interval:
                 self.clear()
                 return
 
         if self.location is not None:
             if self.hlt_square is None:
-                color = self.settings.highlight_color
+                color = settings.highlight_color
                 color = self.get_mixed_color(color, self.location)
                 self.hlt_square = self.renderer.draw_grid_object(
                     self.location, fill=color, layer=3, width=0)
             if not self.renderer.show_arrows.get():
                 if self.target is not None and self.target_square is None:
-                    color = self.settings.target_color
-                    color = self.get_mixed_color(color, self.target)
+                    color = get_mixed_color(settings.target_color, self.target)
                     self.target_square = self.renderer.draw_grid_object(
                         self.target, fill=color, layer=3, width=0)
             else:

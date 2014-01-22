@@ -1,10 +1,10 @@
 import curses as cs
+from rgkit.settings import settings
 
 
 class RGCurses:
 
-    def __init__(self, game_inst, settings, names):
-        self._settings = settings
+    def __init__(self, game_inst, names):
         self._game = game_inst
         self._names = names
         self._turn = 0
@@ -160,9 +160,9 @@ Cursor right    d, <right>"""
 
     def _draw_game_grid(self):
         state = self._game.get_state(self._turn)
-        for r in xrange(self._settings.board_size):
-            for c in xrange(self._settings.board_size):
-                if (r, c) in self._settings.obstacles:
+        for r in xrange(settings.board_size):
+            for c in xrange(settings.board_size):
+                if (r, c) in settings.obstacles:
                     self._draw_grid_obstacle(r, c)
                 elif state.is_robot((r, c)):
                     robot = state.robots[(r, c)]
@@ -184,7 +184,7 @@ Cursor right    d, <right>"""
         actions = self._game._actions_on_turn[self._turn]
         r, c = self._selected
         s = "Selected: " + str((r, c))
-        if (r, c) in self._settings.obstacles:
+        if (r, c) in settings.obstacles:
             s += "\nObstacle"
         elif state.is_robot((r, c)):
             robot = state.robots[(r, c)]
@@ -226,7 +226,7 @@ Cursor right    d, <right>"""
             self._stdscr.addstr(r, c, s, self._attr_bot1)
 
     def _draw_final_score(self):
-        state = self._game.get_state(self._settings.max_turns)
+        state = self._game.get_state(settings.max_turns)
         score = [0, 0]
         for bot in state.robots.values():
             score[bot.player_id] += 1
@@ -263,7 +263,7 @@ Cursor right    d, <right>"""
         self._draw_turn()
 
     def _increase_turn(self):
-        if self._turn < self._settings.max_turns:
+        if self._turn < settings.max_turns:
             self._turn += 1
             return True
         else:
@@ -284,11 +284,11 @@ Cursor right    d, <right>"""
 
     def _move_selected_down(self):
         self._selected[1] = min(self._selected[1] + 1,
-                                self._settings.board_size - 1)
+                                settings.board_size - 1)
 
     def _move_selected_right(self):
         self._selected[0] = min(self._selected[0] + 1,
-                                self._settings.board_size - 1)
+                                settings.board_size - 1)
 
     def _handle_key(self, key):
         if key in self._pause_keys:
