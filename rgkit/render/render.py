@@ -206,6 +206,7 @@ class Render(object):
         self._master.bind('<space>', lambda e: pause())
 
         self.show_arrows = Tkinter.BooleanVar()
+        self.show_arrows.set(True)
 
         frame = self._control_frame
 
