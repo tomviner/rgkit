@@ -211,7 +211,8 @@ class Game(object):
         actions = self._get_robots_actions()
 
         delta = self._state.get_delta(actions)
-        if self._delta_callback is not None:
+
+        if self._delta_callback is not None and self._state.turn > 0:
             self._delta_callback(delta)
 
         if self._record_actions:
@@ -219,6 +220,7 @@ class Game(object):
             self._save_actions_on_turn(actions_on_turn, self._state.turn)
 
         new_state = self._state.apply_delta(delta)
+
         self._save_state(new_state, new_state.turn)
 
         if self._record_history:
