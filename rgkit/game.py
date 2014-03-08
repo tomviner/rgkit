@@ -1,4 +1,5 @@
 import imp
+import os
 import random
 import sys
 import traceback
@@ -23,12 +24,13 @@ class NullDevice(object):
 class Player(object):
     def __init__(self, code=None, robot=None):
         self._player_id = None  # must be set using set_player_id
-
         if code is not None:
             self._code = code
+            self._name = os.path.splitext(os.path.basename(code))[0]
             self.reload()
         elif robot is not None:
             self._module = None
+            self._name = str(robot.__class__).split('.')[-1]
             self._robot = robot
         else:
             raise Exception('you need to provide code or a robot')
@@ -80,11 +82,14 @@ class Player(object):
 
         return actions
 
+    def name(self):
+        return self._name
+
 
 class Game(object):
-    def __init__(self, players, record_actions=False,
-                 record_history=False, print_info=False,
-                 seed=None, quiet=0, symmetric=False):
+    def __init__(self, players, record_actions=False, record_history=False,
+                 print_info=False, seed=None, quiet=0, delta_callback=None,
+                 symmetric=False):
         self._players = players
         for i, player in enumerate(self._players):
             player.set_player_id(i)
@@ -96,6 +101,7 @@ class Game(object):
         self.seed = str(seed)
         self._random = random.Random(self.seed)
         self._quiet = quiet
+        self._delta_callback = delta_callback
         self._state = GameState(use_start=True, seed=self.seed,
                                 symmetric=symmetric)
 
@@ -205,6 +211,8 @@ class Game(object):
         actions = self._get_robots_actions()
 
         delta = self._state.get_delta(actions)
+        if self._delta_callback is not None:
+            self._delta_callback(delta)
 
         if self._record_actions:
             actions_on_turn = self._calculate_actions_on_turn(delta, actions)
