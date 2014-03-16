@@ -4,6 +4,7 @@ import unittest
 import rgkit
 from rgkit.run import Runner, Options
 from rgkit.settings import settings as rgkit_settings
+import rgkit.gamestate as gamestate
 
 
 class TestRobot:
@@ -36,11 +37,12 @@ class TestRunner(unittest.TestCase):
         runner.run()
 
     def test_runner_delta_callback(self):
-        def callback(delta):
+        def callback(delta, game_state):
             global called
             called = True
             assert type(delta) is list
             assert type(delta[0]) is rgkit.settings.AttrDict
+            assert type(game_state) is gamestate.GameState
 
         runner = Runner.from_robots(TestRobot(), TestRobot(),
                                     delta_callback=callback)

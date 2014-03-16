@@ -212,14 +212,14 @@ class Game(object):
 
         delta = self._state.get_delta(actions)
 
-        if self._delta_callback is not None and self._state.turn > 0:
-            self._delta_callback(delta)
-
         if self._record_actions:
             actions_on_turn = self._calculate_actions_on_turn(delta, actions)
             self._save_actions_on_turn(actions_on_turn, self._state.turn)
 
         new_state = self._state.apply_delta(delta)
+
+        if self._delta_callback is not None and self._state.turn > 1:
+            self._delta_callback(delta, new_state)
 
         self._save_state(new_state, new_state.turn)
 
