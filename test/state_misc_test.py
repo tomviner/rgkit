@@ -2,12 +2,12 @@ import ast
 import pkg_resources
 import unittest
 
-import rgkit.settings
 from rgkit.gamestate import GameState
+from rgkit.settings import settings
 
 map_data = ast.literal_eval(
     open(pkg_resources.resource_filename('rgkit', 'maps/default.py')).read())
-rgkit.settings.init(map_data)
+settings.init_map(map_data)
 
 
 class TestStateMisc(unittest.TestCase):

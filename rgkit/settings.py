@@ -4,7 +4,18 @@ class AttrDict(dict):
         self.__dict__ = self
 
 
-settings = AttrDict({
+class Settings(AttrDict):
+    def __init__(self, *args, **kwargs):
+        super(Settings, self).__init__(*args, **kwargs)
+
+    def init_map(self, map_data):
+        self.spawn_coords = map_data['spawn']
+        self.obstacles = map_data['obstacle']
+        self.player_count = map_data.get('player_count', 2)
+        self.start = map_data.get('start', None)
+
+
+settings = Settings({
     'spawn_every': 10,
     'spawn_per_player': 5,
     'board_size': 19,
@@ -28,10 +39,3 @@ settings = AttrDict({
     'user_obj_types': ('Robot',),
     'valid_commands': ('move', 'attack', 'guard', 'suicide')
 })
-
-
-def init(map_data):
-    settings.spawn_coords = map_data['spawn']
-    settings.obstacles = map_data['obstacle']
-    settings.player_count = map_data.get('player_count', 2)
-    settings.start = map_data.get('start', None)

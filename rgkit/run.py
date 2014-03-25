@@ -21,7 +21,6 @@ except ImportError:
     sys.path.insert(0, parentdir)
 
 from rgkit.settings import settings as default_settings
-from rgkit.settings import init as settings_init
 from rgkit import game
 from rgkit.game import Player
 
@@ -35,7 +34,6 @@ class Options:
         if map_filepath is None:
             map_filepath = os.path.join(os.path.dirname(__file__),
                                         'maps/default.py')
-
         self.map_filepath = map_filepath
         self.print_info = print_info
         self.animate_render = animate_render
@@ -60,7 +58,8 @@ class Options:
 
 
 class Runner:
-    def __init__(self, player1, player2, settings=None, options=None,
+    def __init__(self, player1=None, player2=None, player1_file=None,
+                 player2_file=None, settings=None, options=None,
                  delta_callback=None):
 
         if settings is None:
@@ -69,8 +68,13 @@ class Runner:
             options = Options()
 
         self._map_data = ast.literal_eval(open(options.map_filepath).read())
-        settings_init(self._map_data)
         self.settings = settings
+        self.settings.init_map(self._map_data)
+        # Players can only be initialized from file after initializing settings
+        if player1_file is not None:
+            player1 = self._make_player(player1_file)
+        if player2_file is not None:
+            player2 = self._make_player(player2_file)
         self._players = [player1, player2]
         self._delta_callback = delta_callback
         self._names = [player1.name(), player2.name()]
@@ -86,7 +90,8 @@ class Runner:
     def from_robots(robot1, robot2, settings=None, options=None,
                     delta_callback=None):
 
-        return Runner(Player(robot=robot1), Player(robot=robot2),
+        return Runner(player1=Player(robot=robot1),
+                      player2=Player(robot=robot2),
                       settings=settings, options=options,
                       delta_callback=delta_callback)
 
@@ -103,9 +108,8 @@ class Runner:
                           curses=args.curses,
                           match_seeds=args.match_seeds,
                           symmetric=args.symmetric)
-        player1 = Runner._make_player(args.player1)
-        player2 = Runner._make_player(args.player2)
-        return Runner(player1, player2, options=options)
+        return Runner(player1_file=args.player1, player2_file=args.player2,
+                      options=options)
 
     @staticmethod
     def _make_player(file_name):
@@ -191,7 +195,7 @@ class Runner:
             from rgkit import rgcurses
             rgc = rgcurses.RGCurses(g, self._names)
             if self._rgcurses_lock:
-                self.rgcurses_lock.acquire()
+                self._rgcurses_lock.acquire()
             rgc.run()
             if self._rgcurses_lock:
                 self._rgcurses_lock.release()
