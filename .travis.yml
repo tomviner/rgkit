@@ -7,6 +7,7 @@ install:
 script:
   - nosetests
   - pyflakes rgkit test
+  - ./build-docs.sh
 branches:
   except:
     - webver
