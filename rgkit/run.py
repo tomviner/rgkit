@@ -114,14 +114,12 @@ class Runner:
     @staticmethod
     def _make_player(file_name):
         try:
-            with open(file_name) as f:
-                return game.Player(code=f.read())
+            return game.Player(file_name=file_name)
         except IOError, msg:
             if pkg_resources.resource_exists('rgkit', file_name):
                 bot_filename = pkg_resources.resource_filename('rgkit',
                                                                file_name)
-                with open(bot_filename) as f:
-                    return game.Player(code=f.read())
+                return game.Player(file_name=bot_filename)
             raise IOError(msg)
 
     @staticmethod
