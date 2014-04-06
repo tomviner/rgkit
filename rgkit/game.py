@@ -22,18 +22,19 @@ class NullDevice(object):
 
 
 class Player(object):
-    def __init__(self, code=None, robot=None):
+    def __init__(self, file_name=None, robot=None):
         self._player_id = None  # must be set using set_player_id
-        if code is not None:
-            self._code = code
-            self._name = os.path.splitext(os.path.basename(code))[0]
+        if file_name is not None:
+            with open(file_name) as f:
+                self._code = f.read()
+            self._name = os.path.splitext(os.path.basename(file_name))[0]
             self.reload()
         elif robot is not None:
             self._module = None
             self._name = str(robot.__class__).split('.')[-1]
             self._robot = robot
         else:
-            raise Exception('you need to provide code or a robot')
+            raise Exception('you need to provide a file name or a robot')
 
     def reload(self):
         self._module = imp.new_module('usercode%d' % id(self))

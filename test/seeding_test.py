@@ -13,13 +13,13 @@ settings.init_map(map_data)
 class TestSeeding(unittest.TestCase):
     def test_seeding_saves_spawning(self):
         seed = 42
-        code1 = open(pkg_resources.resource_filename(
-            'rgkit', 'bots/guardbot.py')).read()
-        code2 = open(pkg_resources.resource_filename(
-            'rgkit', 'bots/guardbot.py')).read()
+        file1 = pkg_resources.resource_filename(
+            'rgkit', 'bots/guardbot.py')
+        file2 = pkg_resources.resource_filename(
+            'rgkit', 'bots/guardbot.py')
 
-        player1 = game.Player(code1)
-        player2 = game.Player(code2)
+        player1 = game.Player(file1)
+        player2 = game.Player(file2)
         game1 = game.Game([player1, player2],
                           print_info=False,
                           record_actions=False,
@@ -28,8 +28,8 @@ class TestSeeding(unittest.TestCase):
 
         game1.run_all_turns()
 
-        player1 = game.Player(code1)
-        player2 = game.Player(code2)
+        player1 = game.Player(file1)
+        player2 = game.Player(file2)
         game2 = game.Game([player1, player2],
                           print_info=False,
                           record_actions=True,
@@ -42,13 +42,13 @@ class TestSeeding(unittest.TestCase):
 
     def test_seeding_saves_random(self):
         seed = 42
-        code1 = open(pkg_resources.resource_filename(
-            'rgkit', 'bots/randombot.py')).read()
-        code2 = open(pkg_resources.resource_filename(
-            'rgkit', 'bots/randombot.py')).read()
+        file1 = pkg_resources.resource_filename(
+            'rgkit', 'bots/randombot.py')
+        file2 = pkg_resources.resource_filename(
+            'rgkit', 'bots/randombot.py')
 
-        player1 = game.Player(code1)
-        player2 = game.Player(code2)
+        player1 = game.Player(file1)
+        player2 = game.Player(file2)
         game1 = game.Game([player1, player2],
                           print_info=False,
                           record_actions=False,
@@ -57,8 +57,8 @@ class TestSeeding(unittest.TestCase):
 
         game1.run_all_turns()
 
-        player1 = game.Player(code1)
-        player2 = game.Player(code2)
+        player1 = game.Player(file1)
+        player2 = game.Player(file2)
         game2 = game.Game([player1, player2],
                           print_info=False,
                           record_actions=True,
