@@ -1,7 +1,8 @@
 rgkit -- Testing kit for `Robot Game <http://robotgame.net/>`__
 ===============================================================
 
-`|Build Status|\ <https://travis-ci.org/WhiteHalmos/rgkit>`__
+.. image:: https://travis-ci.org/WhiteHalmos/rgkit.svg?branch=master
+    :target: https://travis-ci.org/WhiteHalmos/rgkit
 
 Please see this `link <http://robotgame.net/rules>`__ for the
 instructions to the game.
