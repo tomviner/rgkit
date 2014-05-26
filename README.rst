@@ -1,20 +1,20 @@
 rgkit -- Testing kit for `Robot Game <http://robotgame.net/>`__
 ===============================================================
 
-[|Build Status|\ ] (https://travis-ci.org/WhiteHalmos/rgkit)
+`|Build Status|\ <https://travis-ci.org/WhiteHalmos/rgkit>`__
 
 Please see this `link <http://robotgame.net/rules>`__ for the
 instructions to the game.
 
-Here are some excellent tools made by fellow players! \* `Open Source
-Bots <https://github.com/mpeterv/robotgame-bots>`__ \* `Simulate
-Situations <https://github.com/mpeterv/rgsimulator>`__ \* `Compare
-Bots <https://github.com/mueslo/rgcompare>`__ \* `Browser
-IDE <https://github.com/bsuh/rgfiddle>`__ \* `Fetch
-Stats <https://github.com/afffsdd/Get-Robot>`__
+Here are some excellent tools made by fellow players!
 
-Robot Game's original creator is `Brandon
-Hsiao <https://github.com/brandonhsiao>`__.
+- `Open Source Bots <https://github.com/mpeterv/robotgame-bots>`__
+- `Simulate Situations <https://github.com/mpeterv/rgsimulator>`__
+- `Compare Bots <https://github.com/mueslo/rgcompare>`__
+- `Browser IDE <https://github.com/bsuh/rgfiddle>`__
+- `Fetch Stats <https://github.com/afffsdd/Get-Robot>`__
+
+Robot Game was originally started by `Brandon Hsiao <https://github.com/brandonhsiao>`__.
 
 Package Installation
 --------------------
@@ -35,9 +35,9 @@ Or if you want the development version:
 
     pip install git+https://github.com/WhiteHalmos/rgkit.git
 
-**Note:** *This will install rgkit system-wide. It is recommended to use
-`virtualenv <http://www.virtualenv.org/en/latest/>`__ to manage
-development environments.*
+**Note:** *This will install rgkit system-wide. It is recommended to use*
+`virtualenv <http://www.virtualenv.org/en/latest/>`__
+*to manage development environments.*
 
 **virtualenv**
 
@@ -62,9 +62,9 @@ source code:
 
     python setup.py install
 
-**Note:** *This will install rgkit system-wide. It is recommended to use
-`virtualenv <http://www.virtualenv.org/en/latest/>`__ to manage
-development environments.*
+**Note:** *This will install rgkit system-wide. It is recommended to use*
+`virtualenv <http://www.virtualenv.org/en/latest/>`__
+*to manage development environments.*
 
 **Running the game**
 
