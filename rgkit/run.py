@@ -28,7 +28,7 @@ from rgkit.game import Player
 class Options:
     def __init__(self, map_filepath=None, print_info=False,
                  animate_render=False, play_in_thread=False, curses=False,
-                 game_seed=None, match_seeds=None, quiet=0, symmetric=False,
+                 game_seed=None, match_seeds=None, quiet=0, symmetric=True,
                  n_of_games=1):
 
         if map_filepath is None:
@@ -107,7 +107,7 @@ class Runner:
                           quiet=args.quiet,
                           curses=args.curses,
                           match_seeds=args.match_seeds,
-                          symmetric=args.symmetric)
+                          symmetric=not args.random)
         return Runner(player1_file=args.player1, player2_file=args.player2,
                       options=options)
 
@@ -276,9 +276,9 @@ def arg_parser():
     parser.add_argument("--match-seeds", nargs='*',
                         help="Used for random seed of the first matches"
                         + " in order.")
-    parser.add_argument("-s", "--symmetric", action="store_true",
+    parser.add_argument("-r", "--random", action="store_true",
                         default=False,
-                        help="Bots spawn symmetrically.")
+                        help="Bots spawn randomly instead of symmetrically.")
     parser.add_argument("-M", "--heatmap", action="store_true",
                         default=False,
                         help="Print heatmap after playing a number of games.")

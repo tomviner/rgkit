@@ -77,7 +77,7 @@ general usage of run is:
 
     usage: rgrun [-h] [-m MAP] [-c COUNT] [-A] [-q] [-H | -T | -C]
                  [--game-seed GAME_SEED]
-                 [--match-seeds [MATCH_SEEDS [MATCH_SEEDS ...]]] [-s]
+                 [--match-seeds [MATCH_SEEDS [MATCH_SEEDS ...]]] [-r]
                  player1 player2
 
     Robot game execution script.
@@ -103,7 +103,7 @@ general usage of run is:
                             Appended with game countfor per-match seeds.
       --match-seeds [MATCH_SEEDS [MATCH_SEEDS ...]]
                             Used for random seed of the first matches in order.
-      -s, --symmetric       Bots spawn symmetrically
+      -r, --random          Bots spawn randomly instead of symmetrically.
 
 So, from a directory containing your\_robot.py, you can run a game
 against the default robot and suppress GUI output with the following

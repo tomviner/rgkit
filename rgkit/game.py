@@ -90,7 +90,7 @@ class Player(object):
 class Game(object):
     def __init__(self, players, record_actions=False, record_history=False,
                  print_info=False, seed=None, quiet=0, delta_callback=None,
-                 symmetric=False):
+                 symmetric=True):
         self._players = players
         for i, player in enumerate(self._players):
             player.set_player_id(i)
