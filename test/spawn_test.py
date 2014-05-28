@@ -50,6 +50,23 @@ class TestSpawn(unittest.TestCase):
 
         self.assertTrue(state2.is_robot((4, 4)))
 
+    def test_spawn_dodge_overwrite(self):
+        state = GameState()
+
+        state.add_robot((4, 3), 0)
+
+        actions = {
+            (4, 3): ['move', (4, 4)]
+        }
+
+        # ensure that a robot will get spawned at (4, 3)
+        state._get_spawn_locations = lambda: [(i, 3) for i in xrange(10)]
+
+        state2 = state.apply_actions(actions)
+
+        self.assertTrue(state2.is_robot((4, 4)))
+        self.assertTrue(state2.is_robot((4, 3)))
+
     def test_spawn_hop_in(self):
         state = GameState()
 

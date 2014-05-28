@@ -84,74 +84,61 @@ class GameState(object):
         self._spawn_random.shuffle(locations)
         return locations
 
-    # actions = {loc: action}
-    # all actions must be valid
-    # delta = [AttrDict{
-    #    'loc': loc,
-    #    'hp': hp,
-    #    'player_id': player_id,
-    #    'loc_end': loc_end,
-    #    'hp_end': hp_end
-    #    'damage_caused' : damage_caused
-    # }]
-    def get_delta(self, actions, spawn=True):
-        delta = {}
-
-        def dest(loc):
-            if actions[loc][0] == 'move':
-                return actions[loc][1]
-            else:
-                return loc
-
-        hitpoints = defaultdict(lambda: set())
+    # dest = location of robot -> its destination
+    # contenders = {loc: set(locations of robots trying to move into loc)}
+    def _get_contenders(self, dest):
+        contenders = defaultdict(lambda: set())
 
         def stuck(loc):
-            # we are not moving anywhere
-            # inform others
-            old_hitpoints = hitpoints[loc]
-            hitpoints[loc] = set([loc])
+            # Robot at loc is stuck
+            # Other robots trying to move in its old locations
+            # should be marked as stuck, too
+            old_contenders = contenders[loc]
+            contenders[loc] = set([loc])
 
-            for rival in old_hitpoints:
-                if rival != loc:
-                    stuck(rival)
-
-        for loc in self.robots:
-            hitpoints[dest(loc)].add(loc)
+            for contender in old_contenders:
+                if contender != loc:
+                    stuck(contender)
 
         for loc in self.robots:
-            if len(hitpoints[dest(loc)]) > 1 or (self.is_robot(dest(loc)) and
-                                                 dest(loc) != loc and
-                                                 dest(dest(loc)) == loc):
-                # we've got a problem
+            contenders[dest(loc)].add(loc)
+
+        for loc in self.robots:
+            if len(contenders[dest(loc)]) > 1 or (self.is_robot(dest(loc)) and
+                                                  dest(loc) != loc and
+                                                  dest(dest(loc)) == loc):
+                # Robot at loc is going to fail to move
                 stuck(loc)
 
-        # calculate new locations
-        for loc, robot in self.robots.iteritems():
-            if actions[loc][0] == 'move' and loc in hitpoints[loc]:
-                new_loc = loc
-            else:
-                new_loc = dest(loc)
+        return contenders
 
-            delta[loc] = AttrDict({
-                'loc': loc,
-                'hp': robot.hp,
-                'player_id': robot.player_id,
-                'loc_end': new_loc,
-                'hp_end': robot.hp,  # will be adjusted later
-                'damage_caused': 0
-            })
+    # new_locations = {loc: new_loc}
+    def _get_new_locations(self, dest, contenders):
+        new_locations = {}
 
-        # {loc: set(robots collided with loc}
-        collisions = defaultdict(lambda: set())
         for loc in self.robots:
-            for loc2 in hitpoints[dest(loc)]:
+            if loc != dest(loc) and loc in contenders[loc]:
+                new_locations[loc] = loc
+            else:
+                new_locations[loc] = dest(loc)
+
+        return new_locations
+
+    # collisions = {loc: set(robots collided with robot at loc)}
+    def _get_collisions(self, dest, contenders):
+        collisions = defaultdict(lambda: set())
+
+        for loc in self.robots:
+            for loc2 in contenders[dest(loc)]:
                 collisions[loc].add(loc2)
                 collisions[loc2].add(loc)
 
-        # {loc: [
-        #        damage_dealt_by_player_0 : {other_loc1 : damage, ... },
-        #        damage_dealt_by_player_1 : {other_loc2 : damage, ... },
-        # ]}
+        return collisions
+
+    # damage_map = {loc: [actor_id: (actor_loc, damage)]}
+    # only counts potential attack and suicide damage
+    # self suicide damage is not counted
+    def _get_damage_map(self, actions):
         damage_map = defaultdict(
             lambda: [{} for _ in xrange(settings.player_count)])
 
@@ -163,84 +150,114 @@ class GameState(object):
                 damage = self._attack_random.randint(
                     *settings.attack_range)
                 damage_map[target][actor_id][loc] = damage
-
-            if actions[loc][0] == 'suicide':
-                another_id = (actor_id + 1) % settings.player_count
-                damage_map[loc][another_id][loc] = settings.robot_hp
-
+            elif actions[loc][0] == 'suicide':
                 damage = settings.suicide_damage
                 for target in rg.locs_around(loc):
                     damage_map[target][actor_id][loc] = damage
 
-        # apply damage
-        for loc, delta_info in delta.iteritems():
-            loc_end = delta_info.loc_end
-            robot = self.robots[loc]
-            is_guard = (actions[loc][0] == 'guard')
-            # apply collision damage
-            if not is_guard:
-                damage = settings.collision_damage
+        return damage_map
 
-                for other_loc in collisions[delta_info.loc]:
-                    if robot.player_id != self.robots[other_loc].player_id:
-                        other_delta = delta[other_loc]
-                        if other_delta is not None:
-                            other_delta.damage_caused += damage
-                        delta_info.hp_end -= damage
+    def _apply_damage_caused(self, delta, damage_caused):
+        for robot_delta in delta:
+            robot_delta.damage_caused += damage_caused[robot_delta.loc]
 
-            # apply other damage
-            damage_taken = 0
-            for player_id, damage_player_map in enumerate(damage_map[loc_end]):
-                if player_id != robot.player_id:
-                    for caused_loc, damage in damage_player_map.items():
-                        damage_taken += damage
+    def _apply_spawn(self, delta):
+        # clear robots on spawn
+        for robot_delta in delta:
+            if robot_delta.loc_end in settings.spawn_coords:
+                robot_delta.hp_end = 0
 
-                        # ignore suicide self damage
-                        if caused_loc != loc:
-                            damage_caused = damage
-                            if is_guard:
-                                damage_caused /= 2
+        # spawn robots
+        locations = self._get_spawn_locations()
+        for i in xrange(settings.spawn_per_player):
+            for player_id in xrange(settings.player_count):
+                loc = locations[player_id*settings.spawn_per_player+i]
+                delta.append(AttrDict({
+                    'loc': loc,
+                    'hp': 0,
+                    'player_id': player_id,
+                    'loc_end': loc,
+                    'hp_end': settings.robot_hp,
+                    'damage_caused': 0
+                }))
 
-                            caused_delta = delta[caused_loc]
-                            if caused_delta is not None:
-                                caused_delta.damage_caused += damage_caused
-
-            if is_guard:
-                damage_taken /= 2
-
-            delta_info.hp_end -= damage_taken
-
-        if spawn:
-            if self.turn % settings.spawn_every == 0:
-                # clear bots on spawn
-                for delta_info in delta.values():
-                    loc_end = delta_info.loc_end
-
-                    if loc_end in settings.spawn_coords:
-                        delta_info.hp_end = 0
-
-                # spawn bots
-                locations = self._get_spawn_locations()
-                for i in xrange(settings.spawn_per_player):
-                    for player_id in xrange(settings.player_count):
-                        loc = locations[player_id*settings.spawn_per_player+i]
-                        delta[loc] = AttrDict({
-                            'loc': loc,
-                            'hp': 0,
-                            'player_id': player_id,
-                            'loc_end': loc,
-                            'hp_end': settings.robot_hp,
-                            'damage_caused': 0
-                        })
-
-        return delta.values()
-
+    # actions = {loc: action}
+    # all actions must be valid
     # delta = [AttrDict{
     #    'loc': loc,
     #    'hp': hp,
     #    'player_id': player_id,
     #    'loc_end': loc_end,
     #    'hp_end': hp_end
+    #    'damage_caused': damage_caused
+    # }]
+    def get_delta(self, actions, spawn=True):
+        delta = []
+
+        def dest(loc):
+            if actions[loc][0] == 'move':
+                return actions[loc][1]
+            else:
+                return loc
+
+        contenders = self._get_contenders(dest)
+        new_locations = self._get_new_locations(dest, contenders)
+        collisions = self._get_collisions(dest, contenders)
+        damage_map = self._get_damage_map(actions)
+        damage_caused = defaultdict(lambda: 0)  # {loc: damage_caused}
+
+        for loc, robot in self.robots.iteritems():
+            robot_delta = AttrDict({
+                'loc': loc,
+                'hp': robot.hp,
+                'player_id': robot.player_id,
+                'loc_end': new_locations[loc],
+                'hp_end': robot.hp,  # to be adjusted
+                'damage_caused': 0  # to be adjusted
+            })
+
+            is_guard = actions[loc][0] == 'guard'
+
+            # collision damage
+            if not is_guard:
+                damage = settings.collision_damage
+
+                for other_loc in collisions[loc]:
+                    if robot.player_id != self.robots[other_loc].player_id:
+                        robot_delta.hp_end -= damage
+                        damage_caused[other_loc] += damage
+
+            # attack and suicide damage
+            for player_id, player_damage_map in enumerate(
+                    damage_map[new_locations[loc]]):
+                if player_id != robot.player_id:
+                    for actor_loc, damage in player_damage_map.iteritems():
+                        if is_guard:
+                            damage /= 2
+
+                        robot_delta.hp_end -= damage
+                        damage_caused[actor_loc] += damage
+
+            # account for suicides
+            if actions[loc][0] == 'suicide':
+                robot_delta.hp_end = 0
+
+            delta.append(robot_delta)
+
+        self._apply_damage_caused(delta, damage_caused)
+
+        if spawn and self.turn % settings.spawn_every == 0:
+            self._apply_spawn(delta)
+
+        return delta
+
+    # delta = [AttrDict{
+    #    'loc': loc,
+    #    'hp': hp,
+    #    'player_id': player_id,
+    #    'loc_end': loc_end,
+    #    'hp_end': hp_end,
+    #    'damage_caused': damage_caused
     # }]
     # returns new GameState
     def apply_delta(self, delta):
