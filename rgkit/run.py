@@ -29,31 +29,34 @@ class Options:
     def __init__(self, map_filepath=None, print_info=False,
                  animate_render=False, play_in_thread=False, curses=False,
                  game_seed=None, match_seeds=None, quiet=0, symmetric=True,
-                 n_of_games=1):
+                 n_of_games=1, start=0):
 
         if map_filepath is None:
             map_filepath = os.path.join(os.path.dirname(__file__),
                                         'maps/default.py')
-        self.map_filepath = map_filepath
-        self.print_info = print_info
         self.animate_render = animate_render
-        self.play_in_thread = play_in_thread
         self.curses = curses
         self.game_seed = game_seed
+        self.map_filepath = map_filepath
         self.match_seeds = match_seeds
-        self.quiet = quiet
-        self.symmetric = symmetric
         self.n_of_games = n_of_games
+        self.play_in_thread = play_in_thread
+        self.print_info = print_info
+        self.quiet = quiet
+        self.start = start
+        self.symmetric = symmetric
 
     def __eq__(self, other):
-        return (self.map_filepath == other.map_filepath and
-                self.print_info == other.print_info and
-                self.animate_render == other.animate_render and
-                self.play_in_thread == other.play_in_thread and
+        return (self.animate_render == other.animate_render and
                 self.curses == other.curses and
+                self.game_seed == other.game_seed and
+                self.map_filepath == other.map_filepath and
                 self.match_seeds == other.match_seeds and
-                self.quiet == other.quiet and
                 self.n_of_games == other.n_of_games and
+                self.play_in_thread == other.play_in_thread and
+                self.print_info == other.print_info and
+                self.quiet == other.quiet and
+                self.start == other.start and
                 self.symmetric == other.symmetric)
 
 
@@ -99,16 +102,19 @@ class Runner:
     def from_command_line_args(args):
         map_name = os.path.join(args.map)
 
-        options = Options(map_filepath=map_name,
-                          print_info=not args.headless,
-                          n_of_games=args.count,
-                          animate_render=args.animate,
-                          play_in_thread=args.play_in_thread,
-                          quiet=args.quiet,
+        options = Options(animate_render=args.animate,
                           curses=args.curses,
+                          game_seed=args.game_seed,
+                          map_filepath=map_name,
                           match_seeds=args.match_seeds,
+                          n_of_games=args.count,
+                          play_in_thread=args.play_in_thread,
+                          print_info=not args.headless,
+                          quiet=args.quiet,
+                          start=args.start,
                           symmetric=not args.random)
-        return Runner(player1_file=args.player1, player2_file=args.player2,
+        return Runner(player1_file=args.player1,
+                      player2_file=args.player2,
                       options=options)
 
     @staticmethod
@@ -137,27 +143,27 @@ class Runner:
 
     def run(self):
         scores = []
-        print(self.options.n_of_games)
-        for i in xrange(self.options.n_of_games):
+        for i in xrange(self.options.start,
+                        self.options.start + self.options.n_of_games):
             # A sequential, deterministic seed is used for each match that can
             # be overridden by user provided ones.
             match_seed = str(self.options.game_seed) + '-' + str(i)
             if self.options.match_seeds and i < len(self.options.match_seeds):
                 match_seed = self.options.match_seeds[i]
-            result = self.play()
+            result = self.play(match_seed)
             scores.append(result)
             if self.options.quiet >= 3 and not self.options.print_info:
                 self.unmute_all()
             print '{0} - seed: {1}'.format(result, match_seed)
         return scores
 
-    def play(self):
+    def play(self, match_seed):
         if self.options.play_in_thread:
             g = game.ThreadedGame(self._players,
                                   print_info=self.options.print_info,
                                   record_actions=self.options.print_info,
                                   record_history=True,
-                                  seed=self.options.match_seeds,
+                                  seed=match_seed,
                                   quiet=self.options.quiet,
                                   delta_callback=self._delta_callback,
                                   symmetric=self.options.symmetric)
@@ -166,7 +172,7 @@ class Runner:
                           print_info=self.options.print_info,
                           record_actions=self.options.print_info,
                           record_history=True,
-                          seed=self.options.match_seeds,
+                          seed=match_seed,
                           quiet=self.options.quiet,
                           delta_callback=self._delta_callback,
                           symmetric=self.options.symmetric)
@@ -221,13 +227,17 @@ def run_concurrently(args):
     num_cpu = multiprocessing.cpu_count()
     (games_per_cpu, remainder) = divmod(args.count, num_cpu)
     data = []
+    start = 0
     for i in xrange(num_cpu):
         copy_args = copy.deepcopy(args)
 
         if i == 0:
             copy_args.count = games_per_cpu + remainder
+            start += games_per_cpu + remainder
         else:
             copy_args.count = games_per_cpu
+            copy_args.start = start
+            start += games_per_cpu
 
         data.append(copy_args)
 
@@ -236,29 +246,30 @@ def run_concurrently(args):
     return [score for scores in results for score in scores]
 
 
-def arg_parser():
-    parser = argparse.ArgumentParser(description=
-                                     "Robot game execution script.",
-                                     formatter_class=RawTextHelpFormatter)
+def get_arg_parser():
+    parser = argparse.ArgumentParser(
+        description="Robot game execution script.",
+        formatter_class=RawTextHelpFormatter)
     parser.add_argument("player1",
                         help="File containing first robot class definition.")
     parser.add_argument("player2",
                         help="File containing second robot class definition.")
-    defalut_map = pkg_resources.resource_filename('rgkit', 'maps/default.py')
+    default_map = pkg_resources.resource_filename('rgkit', 'maps/default.py')
     parser.add_argument("-m", "--map",
                         help="User-specified map file.",
-                        default=defalut_map)
+                        default=default_map)
     parser.add_argument("-c", "--count", type=int,
                         default=1,
                         help="Game count, default: 1, multithreading if >1")
     parser.add_argument("-A", "--animate", action="store_true",
                         default=False,
                         help="Enable animations in rendering.")
-    parser.add_argument("-q", "--quiet", action="count",
-                        help="Quiet execution.\n\
-    -q : suppresses bot stdout\n\
-    -qq: suppresses bot stdout and stderr\n\
-    -qqq: supresses all rgkit and bot output")
+    parser.add_argument(
+        "-q", "--quiet", action="count", help=
+"""Quiet execution.
+-q : suppresses bot stdout
+-qq: suppresses bot stdout and stderr
+-qqq: supresses all rgkit and bot output""")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-H", "--headless", action="store_true",
                        default=False,
@@ -273,15 +284,17 @@ def arg_parser():
     parser.add_argument("--game-seed",
                         default=random.randint(0, default_settings.max_seed),
                         help="Appended with game countfor per-match seeds.")
-    parser.add_argument("--match-seeds", nargs='*',
-                        help="Used for random seed of the first matches"
-                        + " in order.")
+    parser.add_argument(
+        "--match-seeds", nargs='*',
+        help="Used for random seed of the first matches in order.")
     parser.add_argument("-r", "--random", action="store_true",
                         default=False,
                         help="Bots spawn randomly instead of symmetrically.")
     parser.add_argument("-M", "--heatmap", action="store_true",
                         default=False,
                         help="Print heatmap after playing a number of games.")
+    parser.add_argument("-s", "--start", type=int, default=0,
+                        help="Starting index of matches, useful for resuming.")
 
     return parser
 
@@ -345,7 +358,7 @@ def print_score_grid(scores, player1, player2, size):
 
 
 def main():
-    args = arg_parser().parse_args()
+    args = get_arg_parser().parse_args()
     if args.quiet >= 3:
         mute_all()
 
