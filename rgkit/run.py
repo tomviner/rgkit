@@ -61,26 +61,28 @@ class Options:
 
 
 class Runner:
-    def __init__(self, player1=None, player2=None, player1_file=None,
-                 player2_file=None, settings=None, options=None,
-                 delta_callback=None):
+    def __init__(self, players=None, player_files=None, settings=None,
+                 options=None, delta_callback=None):
 
         if settings is None:
             settings = Runner.default_settings()
         if options is None:
             options = Options()
+        if players is None:
+            players = []
 
         self._map_data = ast.literal_eval(open(options.map_filepath).read())
         self.settings = settings
         self.settings.init_map(self._map_data)
         # Players can only be initialized from file after initializing settings
-        if player1_file is not None:
-            player1 = self._make_player(player1_file)
-        if player2_file is not None:
-            player2 = self._make_player(player2_file)
-        self._players = [player1, player2]
+        if player_files is not None:
+            for player_file in player_files:
+                players.append(self._make_player(player_file))
+        self._players = players
         self._delta_callback = delta_callback
-        self._names = [player1.name(), player2.name()]
+        self._names = []
+        for player in players:
+            self._names.append(player.name())
         self.options = options
 
         if Runner.is_multiprocessing_supported():
@@ -90,11 +92,14 @@ class Runner:
             self._rgcurses_lock = None
 
     @staticmethod
-    def from_robots(robot1, robot2, settings=None, options=None,
+    def from_robots(robots, settings=None, options=None,
                     delta_callback=None):
 
-        return Runner(player1=Player(robot=robot1),
-                      player2=Player(robot=robot2),
+        players = []
+        for robot in robots:
+            players.append(Player(robot=robot))
+
+        return Runner(players,
                       settings=settings, options=options,
                       delta_callback=delta_callback)
 
@@ -113,9 +118,9 @@ class Runner:
                           quiet=args.quiet,
                           start=args.start,
                           symmetric=not args.random)
-        return Runner(player1_file=args.player1,
-                      player2_file=args.player2,
-                      options=options)
+        # TODO: generalize to N player files
+        player_files = [args.player1, args.player2]
+        return Runner(player_files=player_files, options=options)
 
     @staticmethod
     def _make_player(file_name):
@@ -265,8 +270,7 @@ def get_arg_parser():
                         default=False,
                         help="Enable animations in rendering.")
     parser.add_argument(
-        "-q", "--quiet", action="count", help=
-"""Quiet execution.
+        "-q", "--quiet", action="count", help="""Quiet execution.
 -q : suppresses bot stdout
 -qq: suppresses bot stdout and stderr
 -qqq: supresses all rgkit and bot output""")

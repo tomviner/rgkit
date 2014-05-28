@@ -31,7 +31,7 @@ class TestRunner(unittest.TestCase):
 
     def test_runner_from_robots(self):
         print(TestRobot().__class__)
-        runner = Runner.from_robots(TestRobot(), TestRobot())
+        runner = Runner.from_robots([TestRobot(), TestRobot()])
         self.assertEqual(runner.options, Options())
         runner.settings.max_turns = 1
         runner.run()
@@ -44,14 +44,14 @@ class TestRunner(unittest.TestCase):
             assert type(delta[0]) is rgkit.settings.AttrDict
             assert type(game_state) is gamestate.GameState
 
-        runner = Runner.from_robots(TestRobot(), TestRobot(),
+        runner = Runner.from_robots([TestRobot(), TestRobot()],
                                     delta_callback=callback)
         runner.run()
         assert called
 
     def test_runner_from_robots_perf(self):
 
-        runner = Runner.from_robots(TestRobot(), TestRobot())
+        runner = Runner.from_robots([TestRobot(), TestRobot()])
         runner.options.n_of_games = 100
         runner.settings.max_turns = 100
         # uncomment for profiling
