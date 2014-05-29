@@ -98,7 +98,7 @@ Cursor right    d, <right>"""
         self._attr_text = cs.color_pair(colors_text) | attr_text
 
     def run(self):
-        #TODO: handle off-screen draws gracefully, instead of try-catch
+        # TODO: handle off-screen draws gracefully, instead of try-catch
         try:
             cs.wrapper(self._main)
         except:
@@ -342,8 +342,8 @@ Cursor right    d, <right>"""
                         self._paused = True
                 else:
                     self._handle_key(c)
-            #TODO: Not every cell need to be cleared. Clearing everything
-            #      creates flicker.
+            # TODO: Not every cell need to be cleared. Clearing everything
+            #       creates flicker.
             self._stdscr.clear()
             self._draw_screen()
             self._stdscr.refresh()

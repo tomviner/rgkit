@@ -191,8 +191,9 @@ class Runner:
         g.run_all_turns()
 
         if self.options.print_info and not self.options.curses:
-            #print "rendering %s animations" % ("with"
-            #                               if animate_render else "without")
+            # print "rendering %s animations" % ("with"
+            #                                    if animate_render
+            #                                    else "without")
             render.Render(g, self.options.animate_render, names=self._names)
 
         # TODO: Displaying multiple games using curses is still a little bit
