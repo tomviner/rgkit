@@ -157,9 +157,10 @@ class Runner:
                 match_seed = self.options.match_seeds[i]
             result = self.play(match_seed)
             scores.append(result)
-            if self.options.quiet >= 3 and not self.options.print_info:
-                self.unmute_all()
-            print '{0} - seed: {1}'.format(result, match_seed)
+            if self.options.quiet < 3:
+                print '{0} - seed: {1}'.format(result, match_seed)
+        if self.options.quiet >= 3 and not self.options.print_info:
+            self.unmute_all()
         return scores
 
     def play(self, match_seed):
@@ -375,6 +376,8 @@ def main():
         runner = lambda _args: Runner.from_command_line_args(_args).run()
     scores = runner(args)
 
+    if args.quiet >= 3:
+        unmute_all()
     if args.count > 1:
         p1won = sum(p1 > p2 for p1, p2 in scores)
         p2won = sum(p2 > p1 for p1, p2 in scores)
