@@ -7,7 +7,7 @@ from rgkit.settings import settings, AttrDict
 
 class GameState(object):
     def __init__(self, use_start=False, turn=0,
-                 next_robot_id=0, seed=None, symmetric=False):
+                 next_robot_id=0, seed=None, symmetric=True):
         if seed is None:
             seed = random.randint(0, settings.max_seed)
         self._seed = str(seed)
