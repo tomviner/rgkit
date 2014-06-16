@@ -34,6 +34,7 @@ class TestRunner(unittest.TestCase):
         runner = Runner.from_robots([TestRobot(), TestRobot()])
         self.assertEqual(runner.options, Options())
         runner.settings.max_turns = 1
+        runner.options.quiet = 4
         runner.run()
 
     def test_runner_delta_callback(self):
@@ -46,6 +47,7 @@ class TestRunner(unittest.TestCase):
 
         runner = Runner.from_robots([TestRobot(), TestRobot()],
                                     delta_callback=callback)
+        runner.options.quiet = 4
         runner.run()
         assert called
 

@@ -159,7 +159,7 @@ class Runner:
             result = self.play(match_seed)
             scores.append(result)
             printed.append('{0} - seed: {1}'.format(result, match_seed))
-        if args.quiet < 4:
+        if self.options.quiet < 4:
             unmute_all()
             print '\n'.join(printed)
         return scores
