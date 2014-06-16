@@ -148,6 +148,7 @@ class Runner:
 
     def run(self):
         scores = []
+        printed = []
         for i in xrange(self.options.start,
                         self.options.start + self.options.n_of_games):
             # A sequential, deterministic seed is used for each match that can
@@ -157,10 +158,9 @@ class Runner:
                 match_seed = self.options.match_seeds[i]
             result = self.play(match_seed)
             scores.append(result)
-            if self.options.quiet < 3:
-                print '{0} - seed: {1}'.format(result, match_seed)
-        if self.options.quiet >= 3 and not self.options.print_info:
-            self.unmute_all()
+            printed.append('{0} - seed: {1}'.format(result, match_seed))
+        unmute_all()
+        print '\n'.join(printed)
         return scores
 
     def play(self, match_seed):
@@ -249,7 +249,7 @@ def run_concurrently(args):
         data.append(copy_args)
 
     pool = multiprocessing.Pool(num_cpu)
-    results = pool.map(_task, data, 1)
+    results = pool.map(_task, data)
     return [score for scores in results for score in scores]
 
 
@@ -365,10 +365,10 @@ def print_score_grid(scores, player1, player2, size):
 
 def main():
     args = get_arg_parser().parse_args()
+    print('Game seed: {0}'.format(args.game_seed))
+
     if args.quiet >= 3:
         mute_all()
-
-    print('Game seed: {0}'.format(args.game_seed))
 
     if Runner.is_multiprocessing_supported() and args.count > 1:
         runner = run_concurrently
@@ -378,12 +378,11 @@ def main():
 
     if args.quiet >= 3:
         unmute_all()
-    if args.count > 1:
-        p1won = sum(p1 > p2 for p1, p2 in scores)
-        p2won = sum(p2 > p1 for p1, p2 in scores)
-        if args.heatmap:
-            print_score_grid(scores, args.player1, args.player2, 26)
-        print [p1won, p2won, args.count - p1won - p2won]
+    p1won = sum(p1 > p2 for p1, p2 in scores)
+    p2won = sum(p2 > p1 for p1, p2 in scores)
+    if args.heatmap:
+        print_score_grid(scores, args.player1, args.player2, 26)
+    print [p1won, p2won, args.count - p1won - p2won]
 
 
 if __name__ == '__main__':
