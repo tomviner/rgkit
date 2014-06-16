@@ -159,8 +159,9 @@ class Runner:
             result = self.play(match_seed)
             scores.append(result)
             printed.append('{0} - seed: {1}'.format(result, match_seed))
-        unmute_all()
-        print '\n'.join(printed)
+        if args.quiet < 4:
+            unmute_all()
+            print '\n'.join(printed)
         return scores
 
     def play(self, match_seed):
@@ -275,7 +276,8 @@ def get_arg_parser():
         "-q", "--quiet", action="count", help="""Quiet execution.
 -q : suppresses bot stdout
 -qq: suppresses bot stdout and stderr
--qqq: supresses all rgkit and bot output""")
+-qqq: supresses all rgkit and bot output
+-qqqq: final summary only""")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-H", "--headless", action="store_true",
                        default=False,
@@ -307,12 +309,12 @@ def get_arg_parser():
 
 def mute_all():
     sys.stdout = game.NullDevice()
-    sys.stderr = game.NullDevice()
+    #sys.stderr = game.NullDevice()
 
 
 def unmute_all():
     sys.stdout = sys.__stdout__
-    sys.stderr = sys.__stderr__
+    #sys.stderr = sys.__stderr__
 
 
 def print_score_grid(scores, player1, player2, size):
@@ -365,11 +367,11 @@ def print_score_grid(scores, player1, player2, size):
 
 def main():
     args = get_arg_parser().parse_args()
-    print('Game seed: {0}'.format(args.game_seed))
 
     if args.quiet >= 3:
         mute_all()
 
+    print('Game seed: {0}'.format(args.game_seed))
     if Runner.is_multiprocessing_supported() and args.count > 1:
         runner = run_concurrently
     else:

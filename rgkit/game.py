@@ -19,6 +19,7 @@ sys.modules['rg'] = rg  # preserve backwards compatible robot imports
 class NullDevice(object):
     def write(self, msg):
         pass
+
     def flush(self):
         pass
 
