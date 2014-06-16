@@ -309,12 +309,12 @@ def get_arg_parser():
 
 def mute_all():
     sys.stdout = game.NullDevice()
-    #sys.stderr = game.NullDevice()
+    # sys.stderr = game.NullDevice()
 
 
 def unmute_all():
     sys.stdout = sys.__stdout__
-    #sys.stderr = sys.__stderr__
+    # sys.stderr = sys.__stderr__
 
 
 def print_score_grid(scores, player1, player2, size):
