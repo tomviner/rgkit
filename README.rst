@@ -12,8 +12,6 @@ Here are some excellent tools made by fellow players!
 - `Open Source Bots <https://github.com/mpeterv/robotgame-bots>`__
 - `Simulate Situations <https://github.com/mpeterv/rgsimulator>`__
 - `Compare Bots <https://github.com/mueslo/rgcompare>`__
-- `Browser IDE <https://github.com/bsuh/rgfiddle>`__
-- `Fetch Stats <https://github.com/afffsdd/Get-Robot>`__
 
 Robot Game was originally started by `Brandon Hsiao <https://github.com/brandonhsiao>`__.
 
