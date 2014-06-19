@@ -31,6 +31,7 @@ class Player(object):
             with open(file_name) as f:
                 self._code = f.read()
             self._name = os.path.splitext(os.path.basename(file_name))[0]
+            self._file_name = file_name
             self.reload()
         elif robot is not None:
             self._module = None
@@ -39,7 +40,10 @@ class Player(object):
         else:
             raise Exception('you need to provide a file name or a robot')
 
-    def reload(self):
+    def reload(self, from_file=None):
+        if from_file and self._file_name:
+            with open(self._file_name) as f:
+                self._code = f.read()
         self._module = imp.new_module('usercode%d' % id(self))
         exec self._code in self._module.__dict__
         self._robot = self._module.__dict__['Robot']()
