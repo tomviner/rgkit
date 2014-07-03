@@ -25,28 +25,32 @@ class NullDevice(object):
 
 
 class Player(object):
-    def __init__(self, file_name=None, robot=None):
+    def __init__(self, file_name=None, robot=None, code=None, name=None):
+        """
+        One of these arguments must be provided:
+        file_name -- path to file containing a robot
+        robot -- instance of a robot
+        code -- source code containing a robot
+        name argument can be used to set robot's name
+        """
         self._player_id = None  # must be set using set_player_id
-        if file_name is not None:
-            with open(file_name) as f:
-                self._code = f.read()
-            self._name = os.path.splitext(os.path.basename(file_name))[0]
-            self._file_name = file_name
-            self.reload()
-        elif robot is not None:
-            self._module = None
+
+        if robot is not None:
             self._name = str(robot.__class__).split('.')[-1]
             self._robot = robot
         else:
-            raise Exception('you need to provide a file name or a robot')
+            if file_name is not None:
+                with open(file_name) as f:
+                    code = f.read()
 
-    def reload(self, from_file=None):
-        if from_file and self._file_name:
-            with open(self._file_name) as f:
-                self._code = f.read()
-        self._module = imp.new_module('usercode%d' % id(self))
-        exec self._code in self._module.__dict__
-        self._robot = self._module.__dict__['Robot']()
+                self._name = os.path.splitext(os.path.basename(file_name))[0]
+
+            self._module = imp.new_module('usercode%d' % id(self))
+            exec code in self._module.__dict__
+            self._robot = self._module.Robot()
+
+        if name is not None:
+            self._name = name
 
     def set_player_id(self, player_id):
         self._player_id = player_id
