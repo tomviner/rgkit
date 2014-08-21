@@ -382,9 +382,10 @@ def main():
         unmute_all()
     p1won = sum(p1 > p2 for p1, p2 in scores)
     p2won = sum(p2 > p1 for p1, p2 in scores)
+    avg_score = [sum(x)/len(x) for x in zip(*scores)]
     if args.heatmap:
         print_score_grid(scores, args.player1, args.player2, 26)
-    print [p1won, p2won, args.count - p1won - p2won]
+    print [p1won, p2won, args.count - p1won - p2won], '-', avg_score
 
 
 if __name__ == '__main__':
