@@ -147,22 +147,20 @@ class Game(object):
         self._states[turn] = state
 
     def _get_robots_actions(self):
-        if self._quiet < 3:
-            if self._quiet >= 1:
-                sys.stdout = NullDevice()
-            if self._quiet >= 2:
-                sys.stderr = NullDevice()
+        if self._quiet >= 1:
+            sys.stdout = NullDevice()
+        if self._quiet >= 2:
+            sys.stderr = NullDevice()
 
         actions = {}
         for player in self._players:
             seed = self._random.randint(0, settings.max_seed)
             actions.update(player.get_actions(self._state, seed))
 
-        if self._quiet < 3:
-            if self._quiet >= 1:
-                sys.stdout = sys.__stdout__
-            if self._quiet >= 2:
-                sys.stderr = sys.__stderr__
+        if self._quiet >= 1:
+            sys.stdout = sys.__stdout__
+        if self._quiet >= 2:
+            sys.stderr = sys.__stderr__
 
         return actions
 
