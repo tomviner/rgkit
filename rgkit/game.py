@@ -72,6 +72,9 @@ class Player(object):
                     'Bot {0}: {1} is not a valid action from {2}'.format(
                         robot.robot_id + 1, action, robot.location)
                 )
+            
+            if action[0] in ['move', 'attack']:
+                action[1] = (int(action[1][0]), int(action[1][1]))
 
         except:
             traceback.print_exc(file=sys.stdout)
