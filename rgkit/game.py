@@ -74,7 +74,10 @@ class Player(object):
                 )
 
             if action[0] in ['move', 'attack']:
-                action[1] = (int(action[1][0]), int(action[1][1]))
+                action = (
+                    action[0],
+                    (int(action[1][0]), int(action[1][1]))
+                )
 
         except:
             traceback.print_exc(file=sys.stdout)
