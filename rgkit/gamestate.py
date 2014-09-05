@@ -312,24 +312,3 @@ class GameState(object):
         game_info.turn = self.turn
 
         return game_info
-
-    # actor = location
-    # action = well, action
-    def is_valid_action(self, actor, action):
-        try:
-            if len(str(action)) > settings.str_limit:
-                return False
-
-            if len(repr(action)) > settings.str_limit:
-                return False
-
-            if action[0] in ['move', 'attack']:
-                return action[1] in rg.locs_around(
-                    actor, filter_out=['invalid', 'obstacle'])
-            elif action[0] in ['guard', 'suicide']:
-                return True
-            else:
-                return False
-
-        except:
-            return False

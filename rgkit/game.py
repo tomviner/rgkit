@@ -55,6 +55,60 @@ class Player(object):
     def set_player_id(self, player_id):
         self._player_id = player_id
 
+    def _validate_type(self, robot, var_name, obj, types):
+        if type(obj) not in types:
+            raise Exception(
+                "Bot {0}: {1} of type {2} is not valid.".format(
+                    robot.robot_id, var_name, type(obj).__name__)
+            )
+
+    def _validate_length(self, robot, var_name, obj, lengths):
+        if len(obj) not in lengths:
+            # assumes that type of obj has already been validated and so
+            # __repr__ has not been overwritten
+            raise Exception(
+                "Bot {0}: {1} of length {2} is not valid.".format(
+                    robot.robot_id, var_name, len(obj))
+            )
+
+    def _validate_action(self, robot, action):
+        """
+        Need to be VERY CAREFUL here not to call any built-in functions on
+        'action' unless it is known to be completely safe. A malicious bot may
+        return an object with overwritten built-in functions that run arbitrary
+        code.
+        """
+        self._validate_type(robot, 'action', action, (list, tuple))
+        self._validate_length(robot, 'action', action, (1, 2))
+        self._validate_type(robot, 'action[0]', action[0], (str,))
+        if len(action) == 1:
+            if action[0] not in ('guard', 'suicide'):
+                raise Exception(
+                    'Bot {0}: {1} is not a valid action.'.format(
+                        robot.robot_id, action)
+                )
+        elif len(action) == 2:
+            self._validate_type(robot, 'action[1]', action[1], (list, tuple))
+            self._validate_length(robot, 'action[1]', action[1], (2,))
+            self._validate_type(
+                robot, 'action[1][0]', action[1][0], (int, long, float))
+            self._validate_type(
+                robot, 'action[1][1]', action[1][1], (int, long, float))
+            if action[0] not in ('move', 'attack'):
+                raise Exception(
+                    'Bot {0}: {1} is not a valid action.'.format(
+                        robot.robot_id, action)
+                )
+            valid_locs = rg.locs_around(
+                robot.location, filter_out=['invalid', 'obstacle'])
+            if action[1] not in valid_locs:
+                raise Exception(
+                    'Bot {0}: {1} is not a valid action.'.format(
+                        robot.robot_id, action)
+                )
+        else:
+            raise Exception('Bot %d: action must have length 1 or 2.')
+
     def _get_action(self, game_state, game_info, robot, seed):
         try:
             random.seed(seed)
@@ -67,11 +121,7 @@ class Player(object):
             self._robot.robot_id = robot.robot_id
             action = self._robot.act(game_info)
 
-            if not game_state.is_valid_action(robot.location, action):
-                raise Exception(
-                    'Bot {0}: {1} is not a valid action from {2}'.format(
-                        robot.robot_id + 1, action, robot.location)
-                )
+            self._validate_action(robot, action)
 
             if action[0] in ['move', 'attack']:
                 action = (
