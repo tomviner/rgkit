@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from setuptools import setup
 
 with open('README.rst') as readme_file:
@@ -5,7 +7,7 @@ with open('README.rst') as readme_file:
 
 setup(
     name='rgkit',
-    version='0.4.2',
+    version='0.4.3',
     description='Robot Game Testing Kit',
     maintainer='Peter Wen',
     maintainer_email='peter@whitehalmos.org',
