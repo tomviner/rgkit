@@ -84,24 +84,18 @@ class Player(object):
         Player._validate_type(robot, 'action', action, (list, tuple))
         Player._validate_length(robot, 'action', action, (1, 2))
         Player._validate_type(robot, 'action[0]', action[0], (str,))
-        if len(action) == 1:
-            if action[0] not in ('guard', 'suicide'):
+        if action[0] in ('move', 'attack'):
+            if len(action) != 2:
                 raise Exception(
-                    'Bot {0}: {1} is not a valid action.'.format(
+                    'Bot {0}: {1} requires a location as well.'.format(
                         robot.robot_id, action)
                 )
-        elif len(action) == 2:
             Player._validate_type(robot, 'action[1]', action[1], (list, tuple))
             Player._validate_length(robot, 'action[1]', action[1], (2,))
             Player._validate_type(
                 robot, 'action[1][0]', action[1][0], (int, long, float))
             Player._validate_type(
                 robot, 'action[1][1]', action[1][1], (int, long, float))
-            if action[0] not in ('move', 'attack'):
-                raise Exception(
-                    'Bot {0}: {1} is not a valid action.'.format(
-                        robot.robot_id, action)
-                )
             valid_locs = rg.locs_around(
                 robot.location, filter_out=['invalid', 'obstacle'])
             if action[1] not in valid_locs:
@@ -109,8 +103,9 @@ class Player(object):
                     'Bot {0}: {1} is not a valid action.'.format(
                         robot.robot_id, action)
                 )
-        else:
-            raise Exception('Bot %d: action must have length 1 or 2.')
+        elif action[0] not in ('guard', 'suicide'):
+            raise Exception('Bot %d: action must be one of "guard", "suicide",'
+                            '"move", or "attack".')
 
     def _get_action(self, game_state, game_info, robot, seed):
         try:
@@ -126,11 +121,13 @@ class Player(object):
 
             Player._validate_action(robot, action)
 
-            if action[0] in ['move', 'attack']:
+            if action[0] in ('move', 'attack'):
                 action = (
                     action[0],
                     (int(action[1][0]), int(action[1][1]))
                 )
+            elif action[0] in ('guard', 'suicide'):
+                action = (action[0],)
 
         except:
             traceback.print_exc(file=sys.stdout)

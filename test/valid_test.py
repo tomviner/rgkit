@@ -18,8 +18,14 @@ class TestValid(unittest.TestCase):
         robot = state.robots[(9, 9)]
         Player._validate_action(robot, ['guard'])
         Player._validate_action(robot, ['suicide'])
+        Player._validate_action(robot, ['guard', None])
+        Player._validate_action(robot, ['suicide', (1, 1)])
         Player._validate_action(robot, ['attack', (9, 10)])
         Player._validate_action(robot, ['move', (9, 10)])
+        Player._validate_action(robot, ('guard', (2, 3)))
+        Player._validate_action(robot, ('suicide', None))
+        Player._validate_action(robot, ('attack', (9, 10)))
+        Player._validate_action(robot, ('move', (9, 10)))
 
     def test_none(self):
         state = GameState()
@@ -42,13 +48,13 @@ class TestValid(unittest.TestCase):
         with self.assertRaises(Exception):
             Player._validate_action(robot, ['exterminate'])
 
-    def test_additional_info(self):
+    def test_lack_of_location(self):
         state = GameState()
         state.add_robot((9, 9), 0)
         robot = state.robots[(9, 9)]
 
         with self.assertRaises(Exception):
-            Player._validate_action(robot, ['guard', 'additional info'])
+            Player._validate_action(robot, ['move'])
 
     def test_move_to_self(self):
         state = GameState()
