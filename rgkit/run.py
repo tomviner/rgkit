@@ -381,7 +381,7 @@ def main():
     start_time = time.time()
     scores = runner(args)
     total_time = time.time() - start_time
-    
+
     if args.quiet >= 3:
         unmute_all()
     p1won = sum(p1 > p2 for p1, p2 in scores)
