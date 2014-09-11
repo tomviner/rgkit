@@ -10,6 +10,7 @@ import pkg_resources
 import random
 import os
 import sys
+import time
 
 try:
     imp.find_module('rgkit')
@@ -376,7 +377,10 @@ def main():
         runner = run_concurrently
     else:
         runner = lambda _args: Runner.from_command_line_args(_args).run()
+
+    start_time = time.time()
     scores = runner(args)
+    total_time = time.time() - start_time
 
     if args.quiet >= 3:
         unmute_all()
@@ -386,6 +390,7 @@ def main():
     if args.heatmap:
         print_score_grid(scores, args.player1, args.player2, 26)
     print [p1won, p2won, args.count - p1won - p2won], '-', avg_score
+    print '%5.2f s per game' % (total_time/args.count)
 
 
 if __name__ == '__main__':
