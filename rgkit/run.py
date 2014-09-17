@@ -162,7 +162,8 @@ class Runner:
             printed.append('{0} - seed: {1}'.format(result, match_seed))
         if self.options.quiet < 4:
             unmute_all()
-            print '\n'.join(printed)
+            if printed:
+                print '\n'.join(printed)
         return scores
 
     def play(self, match_seed):
@@ -240,13 +241,14 @@ def run_concurrently(args):
     for i in xrange(num_cpu):
         copy_args = copy.deepcopy(args)
 
-        if i == 0:
-            copy_args.count = games_per_cpu + remainder
-            start += games_per_cpu + remainder
-        else:
-            copy_args.count = games_per_cpu
-            copy_args.start = start
-            start += games_per_cpu
+        copy_args.start = start
+        copy_args.count = games_per_cpu
+        start += games_per_cpu
+        # Distribute remainder of games evenly among CPUs
+        if remainder > 0:
+            copy_args.count += 1
+            start += 1
+            remainder -= 1
 
         data.append(copy_args)
 
@@ -390,7 +392,8 @@ def main():
     if args.heatmap:
         print_score_grid(scores, args.player1, args.player2, 26)
     print [p1won, p2won, args.count - p1won - p2won], '-', avg_score
-    print '%5.2f s per game' % (total_time/args.count)
+    print '{0:6.2f}s per game, {1} games, total {2:.0f}s'.format(
+        total_time / args.count, args.count, total_time)
 
 
 if __name__ == '__main__':
