@@ -306,6 +306,13 @@ def get_arg_parser():
                         help="Print heatmap after playing a number of games.")
     parser.add_argument("-s", "--start", type=int, default=0,
                         help="Starting index of matches, useful for resuming.")
+    try:
+        os.nice(0)
+        parser.add_argument("--nice", type=int, default=5,
+                            help="Value for os.nice to lower runner priority.")
+    except:
+        # Not available on this platform, no need to add the option.
+        pass
 
     return parser
 
@@ -373,6 +380,11 @@ def main():
 
     if args.quiet >= 3:
         mute_all()
+    try:
+        os.nice(args.nice)
+    except:
+        # Not available on this platform.
+        pass
 
     print('Game seed: {0}'.format(args.game_seed))
     if Runner.is_multiprocessing_supported() and args.count > 1:
@@ -384,16 +396,18 @@ def main():
     scores = runner(args)
     total_time = time.time() - start_time
 
+    print '{0:6.2f}s per game, {1} games, total {2:.0f}s'.format(
+        total_time / args.count, args.count, total_time)
     if args.quiet >= 3:
         unmute_all()
     p1won = sum(p1 > p2 for p1, p2 in scores)
     p2won = sum(p2 > p1 for p1, p2 in scores)
-    avg_score = [sum(x)/len(x) for x in zip(*scores)]
+    avg_score = [float(sum(x))/len(x) for x in zip(*scores)]
+    diff = int(avg_score[0] - avg_score[1])
+    avg_score = map(int, avg_score)
     if args.heatmap:
         print_score_grid(scores, args.player1, args.player2, 26)
-    print [p1won, p2won, args.count - p1won - p2won], '-', avg_score
-    print '{0:6.2f}s per game, {1} games, total {2:.0f}s'.format(
-        total_time / args.count, args.count, total_time)
+    print [p1won, p2won, args.count - p1won - p2won], '-', avg_score, '-', diff
 
 
 if __name__ == '__main__':
