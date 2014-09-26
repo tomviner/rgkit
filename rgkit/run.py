@@ -27,7 +27,7 @@ from rgkit.game import Player
 
 
 class Options:
-    def __init__(self, map_filepath=None, print_info=False,
+    def __init__(self, map_filepath=None, headless=False, print_info=False,
                  animate_render=False, play_in_thread=False, curses=False,
                  game_seed=None, match_seeds=None, quiet=0, symmetric=True,
                  n_of_games=1, start=0):
@@ -38,6 +38,7 @@ class Options:
         self.animate_render = animate_render
         self.curses = curses
         self.game_seed = game_seed
+        self.headless = headless
         self.map_filepath = map_filepath
         self.match_seeds = match_seeds
         self.n_of_games = n_of_games
@@ -51,6 +52,7 @@ class Options:
         return (self.animate_render == other.animate_render and
                 self.curses == other.curses and
                 self.game_seed == other.game_seed and
+                self.headless == other.headless and
                 self.map_filepath == other.map_filepath and
                 self.match_seeds == other.match_seeds and
                 self.n_of_games == other.n_of_games and
@@ -111,11 +113,12 @@ class Runner:
         options = Options(animate_render=args.animate,
                           curses=args.curses,
                           game_seed=args.game_seed,
+                          headless=args.headless,
                           map_filepath=map_name,
                           match_seeds=args.match_seeds,
                           n_of_games=args.count,
                           play_in_thread=args.play_in_thread,
-                          print_info=not args.headless,
+                          print_info=not args.headless and args.quiet <= 2,
                           quiet=args.quiet,
                           start=args.start,
                           symmetric=not args.random)
@@ -157,6 +160,8 @@ class Runner:
             match_seed = str(self.options.game_seed) + '-' + str(i)
             if self.options.match_seeds and i < len(self.options.match_seeds):
                 match_seed = self.options.match_seeds[i]
+            for player in self._players:
+                player.load()
             result = self.play(match_seed)
             scores.append(result)
             printed.append('{0} - seed: {1}'.format(result, match_seed))
@@ -170,7 +175,7 @@ class Runner:
         if self.options.play_in_thread:
             g = game.ThreadedGame(self._players,
                                   print_info=self.options.print_info,
-                                  record_actions=self.options.print_info,
+                                  record_actions=not self.options.headless,
                                   record_history=True,
                                   seed=match_seed,
                                   quiet=self.options.quiet,
@@ -179,14 +184,14 @@ class Runner:
         else:
             g = game.Game(self._players,
                           print_info=self.options.print_info,
-                          record_actions=self.options.print_info,
+                          record_actions=not self.options.headless,
                           record_history=True,
                           seed=match_seed,
                           quiet=self.options.quiet,
                           delta_callback=self._delta_callback,
                           symmetric=self.options.symmetric)
 
-        if self.options.print_info and not self.options.curses:
+        if not self.options.headless and not self.options.curses:
             # only import render if we need to render the game;
             # this way, people who don't have tkinter can still
             # run headless
@@ -194,7 +199,7 @@ class Runner:
 
         g.run_all_turns()
 
-        if self.options.print_info and not self.options.curses:
+        if not self.options.headless and not self.options.curses:
             # print "rendering %s animations" % ("with"
             #                                    if animate_render
             #                                    else "without")
@@ -205,7 +210,7 @@ class Runner:
         # terminal anymore.  The plan is to show each game sequentially.
         # Concurrency in run.py needs some more work before the bugs can be
         # fixed. Need to make sure nothing is printing when curses is running.
-        if self.options.print_info and self.options.curses:
+        if not self.options.headless and self.options.curses:
             from rgkit import rgcurses
             rgc = rgcurses.RGCurses(g, self._names)
             if self._rgcurses_lock:

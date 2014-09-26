@@ -35,22 +35,27 @@ class Player(object):
         """
         self._player_id = None  # must be set using set_player_id
 
+        self._code = code
+        if file_name is not None:
+            with open(file_name) as f:
+                self._code = f.read()
+            self._name = os.path.splitext(
+                os.path.basename(file_name))[0]
+        if name is not None:
+            self._name = name
+        self.load(robot)
+
+    def load(self, robot=None):
         if robot is not None:
             self._name = str(robot.__class__).split('.')[-1]
             self._robot = robot
-        else:
-            if file_name is not None:
-                with open(file_name) as f:
-                    code = f.read()
-
-                self._name = os.path.splitext(os.path.basename(file_name))[0]
-
+        elif self._code:
             self._module = imp.new_module('usercode%d' % id(self))
-            exec code in self._module.__dict__
+            exec self._code in self._module.__dict__
             self._robot = self._module.Robot()
-
-        if name is not None:
-            self._name = name
+        else:
+            # No way to reload robot...
+            pass
 
     def set_player_id(self, player_id):
         self._player_id = player_id
