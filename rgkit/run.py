@@ -379,59 +379,59 @@ def main():
     args = get_arg_parser().parse_args()
     num_opponents = len(args.opponents)
     total_won, total_lost, total_draw, total_avg_score, total_diff = (
-        0,0,0,(0,0),0)
+        0, 0, 0, (0, 0), 0)
     for opponent in args.opponents:
-      args.player2 = opponent
-      if args.quiet >= 3:
-          mute_all()
-      try:
-          os.nice(args.nice)
-      except:
-          # Not available on this platform.
-          pass
-      print('Game seed: {0}'.format(args.game_seed))
-      if Runner.is_multiprocessing_supported() and args.count > 1:
-          runner = run_concurrently
-      else:
-          runner = lambda _args: Runner.from_command_line_args(_args).run()
+        args.player2 = opponent
+        if args.quiet >= 3:
+            mute_all()
+        try:
+            os.nice(args.nice)
+        except:
+            # Not available on this platform.
+            pass
+        print('Game seed: {0}'.format(args.game_seed))
+        if Runner.is_multiprocessing_supported() and args.count > 1:
+            runner = run_concurrently
+        else:
+            runner = lambda _args: Runner.from_command_line_args(_args).run()
 
-      start_time = time.time()
-      scores = runner(args)
-      total_time = time.time() - start_time
+        start_time = time.time()
+        scores = runner(args)
+        total_time = time.time() - start_time
 
-      print '{0:6.2f}s per game, {1} games, total {2:.0f}s'.format(
-          total_time / args.count, args.count, total_time)
-      if args.quiet >= 3:
-          unmute_all()
-      p1won = sum(p1 > p2 for p1, p2 in scores)
-      p2won = sum(p2 > p1 for p1, p2 in scores)
-      draw = args.count - p1won - p2won
-      avg_score = [float(sum(x))/len(x) for x in zip(*scores)]
-      diff = avg_score[0] - avg_score[1]
-      if args.heatmap:
-          print_score_grid(scores, args.player1, args.player2, 26)
-      total_won += p1won
-      total_lost += p2won
-      total_draw += draw
-      total_avg_score = (total_avg_score[0] + avg_score[0],
-                         total_avg_score[1] + avg_score[1])
-      total_diff += diff
-      avg_score = map(int, avg_score)
-      diff = int(diff)
-      print '{:10} - {:15} - {:8} ({})'.format(
-          os.path.basename(opponent)[:10], [p1won, p2won, draw], avg_score,
-          diff)
+        print '{0:6.2f}s per game, {1} games, total {2:.0f}s'.format(
+            total_time / args.count, args.count, total_time)
+        if args.quiet >= 3:
+            unmute_all()
+        p1won = sum(p1 > p2 for p1, p2 in scores)
+        p2won = sum(p2 > p1 for p1, p2 in scores)
+        draw = args.count - p1won - p2won
+        avg_score = [float(sum(x))/len(x) for x in zip(*scores)]
+        diff = avg_score[0] - avg_score[1]
+        if args.heatmap:
+            print_score_grid(scores, args.player1, args.player2, 26)
+        total_won += p1won
+        total_lost += p2won
+        total_draw += draw
+        total_avg_score = (total_avg_score[0] + avg_score[0],
+                           total_avg_score[1] + avg_score[1])
+        total_diff += diff
+        avg_score = map(int, avg_score)
+        diff = int(diff)
+        print '{:10} - {:15} - {:8} ({})'.format(
+            os.path.basename(opponent)[:10], [p1won, p2won, draw], avg_score,
+            diff)
 
     if num_opponents > 1:
-      total_avg_score = map(int, (total_avg_score[0] / num_opponents,
-                                  total_avg_score[1] / num_opponents))
-      total_diff = int(total_diff / num_opponents)
-      win_rate = (100 * float(total_won + 0.5 * total_draw) /
-                  (total_won + total_lost + total_draw))
-      print (
-        'Overall: [{}, {}, {}] WR: {:<5.1f} Score: {} ({})'.format(
-          total_won, total_lost, total_draw, win_rate, total_avg_score,
-          total_diff))
+        total_avg_score = map(int, (total_avg_score[0] / num_opponents,
+                                    total_avg_score[1] / num_opponents))
+        total_diff = int(total_diff / num_opponents)
+        win_rate = (100 * float(total_won + 0.5 * total_draw) /
+                    (total_won + total_lost + total_draw))
+        print (
+            'Overall: [{}, {}, {}] WR: {:<5.1f} Score: {} ({})'.format(
+                total_won, total_lost, total_draw, win_rate, total_avg_score,
+                total_diff))
 
 
 if __name__ == '__main__':
