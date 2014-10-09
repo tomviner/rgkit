@@ -1,8 +1,8 @@
 rgkit -- Testing kit for `Robot Game <http://robotgame.net/>`__
 ===============================================================
 
-.. image:: https://travis-ci.org/WhiteHalmos/rgkit.svg?branch=master
-    :target: https://travis-ci.org/WhiteHalmos/rgkit
+.. image:: https://travis-ci.org/RobotGame/rgkit.svg?branch=master
+    :target: https://travis-ci.org/RobotGame/rgkit
 
 Please see this `link <http://robotgame.net/rules>`__ for the
 instructions to the game.
@@ -32,7 +32,7 @@ Or if you want the development version:
 
 ::
 
-    pip install git+https://github.com/WhiteHalmos/rgkit.git
+    pip install git+https://github.com/RobotGame/rgkit.git
 
 **Note:** *This will install rgkit system-wide. It is recommended to use*
 `virtualenv <http://www.virtualenv.org/en/latest/>`__
@@ -156,4 +156,4 @@ any other module:
         def act(self):
             return ['guard']
 
-.. |Build Status| image:: https://travis-ci.org/WhiteHalmos/rgkit.png?branch=master
+.. |Build Status| image:: https://travis-ci.org/RobotGame/rgkit.png?branch=master
