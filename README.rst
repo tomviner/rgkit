@@ -3,6 +3,11 @@ rgkit -- Testing kit for `Robot Game <http://robotgame.net/>`__
 
 .. image:: https://travis-ci.org/RobotGame/rgkit.svg?branch=master
     :target: https://travis-ci.org/RobotGame/rgkit
+    :alt: Build Status
+
+.. image:: https://pypip.in/download/rgkit/badge.svg?style=flat
+    :target: https://crate.io/packages/rgkit
+    :alt: Downloads
 
 Please see this `link <http://robotgame.net/rules>`__ for the
 instructions to the game.
