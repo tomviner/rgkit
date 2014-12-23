@@ -3,19 +3,13 @@ rgkit -- Testing kit for `Robot Game <http://robotgame.net/>`__
 
 .. image:: https://travis-ci.org/RobotGame/rgkit.svg?branch=master
     :target: https://travis-ci.org/RobotGame/rgkit
+    :alt: Build Status
 
-Please see this `link <http://robotgame.net/rules>`__ for the
-instructions to the game.
+.. image:: https://pypip.in/download/rgkit/badge.svg?style=flat
+    :target: https://crate.io/packages/rgkit
+    :alt: Downloads
 
-Here are some excellent tools made by fellow players!
-
-- `Open Source Bots <https://github.com/mpeterv/robotgame-bots>`__
-- `Simulate Situations <https://github.com/mpeterv/rgsimulator>`__
-- `Compare Bots <https://github.com/mueslo/rgcompare>`__
-
-Robot Game was originally started by `Brandon Hsiao <https://github.com/brandonhsiao>`__.
-
-Package Installation
+Installing as a package
 --------------------
 
 **pip**
@@ -112,11 +106,11 @@ command:
 
     rgrun -H your_robot.py defaultrobots.py
 
-Developing in the source directory:
+Developing with source
 -----------------------------------
 
-``rgkit`` is packaged as a module, so you *can* just checkout the module
-directory and import/run as usual.
+``rgkit`` is packaged as a module, but you *can* just checkout the
+repository and import/run the source scripts.
 
 ::
 
@@ -141,12 +135,11 @@ same directory as ``run.py``):
 
     python run.py your_robot.py /path/your_other_robot.py
 
-Importing:
+Coding your own robots
 ----------
 
-Once installed, you should only need the ``rg`` module (which is itself
-optional) to develop your own robots. The package can be imported like
-any other module:
+Once installed, you should only need the ``rg`` module to develop your
+own robots. The package can be imported like any other module:
 
 ::
 
@@ -156,4 +149,11 @@ any other module:
         def act(self):
             return ['guard']
 
-.. |Build Status| image:: https://travis-ci.org/RobotGame/rgkit.png?branch=master
+Other Tools
+----------
+
+Here are some excellent tools made by fellow players!
+
+- `Open Source Bots <https://github.com/mpeterv/robotgame-bots>`__
+- `Simulate Situations <https://github.com/mpeterv/rgsimulator>`__
+- `Compare Bots <https://github.com/mueslo/rgcompare>`__

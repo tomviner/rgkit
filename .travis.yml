@@ -7,9 +7,6 @@ script:
   - nosetests
   - pyflakes rgkit test
   - ./build-docs.sh
-branches:
-  except:
-    - webver
 notifications:
   email: false
   irc:
