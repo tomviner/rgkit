@@ -2,6 +2,7 @@ import imp
 import os
 import random
 import sys
+import StringIO
 import traceback
 try:
     import threading
@@ -114,6 +115,10 @@ class Player(object):
 
     def _get_action(self, game_state, game_info, robot, seed):
         try:
+            captured_stdout = StringIO.StringIO()
+            _stdout = sys.stdout
+            sys.stdout = captured_stdout
+
             random.seed(seed)
             # Server requires knowledge of seed
             game_info.seed = seed
@@ -137,23 +142,31 @@ class Player(object):
         except:
             traceback.print_exc(file=sys.stdout)
             action = ['guard']
+        finally:
+            sys.stdout = _stdout
+            sys.stdout.write(captured_stdout.getvalue())
 
-        return action
+        return action, captured_stdout.getvalue()
 
-    # returns map (loc) -> (action) for all bots of this player
+    # returns map (loc) -> (action, output) for all bots of this player
     # 'fixes' invalid actions
-    def get_actions(self, game_state, seed):
+    def get_actions_and_output(self, game_state, seed):
         game_info = game_state.get_game_info(self._player_id)
         actions = {}
+        output = {}
 
         for loc, robot in game_state.robots.iteritems():
             if robot.player_id == self._player_id:
                 # Every act call should get a different random seed
-                actions[loc] = self._get_action(
+                actions[loc], output[loc] = self._get_action(
                     game_state, game_info, robot,
                     seed=str(seed) + '-' + str(robot.robot_id))
 
-        return actions
+        return actions, output
+
+    # returns map (loc) -> (action) for all bots of this player
+    def get_actions(self, game_state, seed):
+        return self.get_actions_and_output(game_state, seed)[0]
 
     def name(self):
         return self._name
