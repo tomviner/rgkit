@@ -4,7 +4,7 @@ import random
 import sys
 import traceback
 try:
-    import StringIO
+    from StringIO import StringIO
 except ImportError:
     from io import StringIO
 try:
@@ -135,7 +135,7 @@ class Player(object):
         """Returns sanitized action, output and error flag from robot"""
         try:
             exc_flag = False
-            captured_output = StringIO.StringIO()
+            captured_output = StringIO()
 
             _stdout = sys.stdout
             _stderr = sys.stderr
