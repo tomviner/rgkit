@@ -24,6 +24,21 @@ class NullDevice(object):
     def flush(self):
         pass
 
+# TODO: use actual logging module with log levels and copying stdout
+#       instead of this
+class Tee(object):
+    def __init__(self, orig, copy):
+        self.orig = orig
+        self.copy = copy
+
+    def write(self, message):
+        self.orig.write(message)
+        self.copy.write(message)
+
+    def flush(self):
+        self.orig.flush()
+        self.copy.flush()
+
 
 class Player(object):
     def __init__(self, file_name=None, robot=None, code=None, name=None):
@@ -110,14 +125,19 @@ class Player(object):
                         robot.robot_id, action)
                 )
         elif action[0] not in ('guard', 'suicide'):
-            raise Exception('Bot %d: action must be one of "guard", "suicide",'
+            raise ValueError('Bot %d: action must be one of "guard", "suicide",'
                             '"move", or "attack".')
 
-    def _get_action(self, game_state, game_info, robot, seed):
+    def _get_response(self, game_state, game_info, robot, seed):
+        """Returns sanitized action, output and error flag from robot"""
         try:
-            captured_stdout = StringIO.StringIO()
+            exc_flag = False
+            captured_output = StringIO.StringIO()
+
             _stdout = sys.stdout
-            sys.stdout = captured_stdout
+            _stderr = sys.stderr
+            sys.stdout = Tee(sys.stdout, captured_output)
+            sys.stderr = Tee(sys.stderr, captured_output)
 
             random.seed(seed)
             # Server requires knowledge of seed
@@ -135,38 +155,37 @@ class Player(object):
                 action = (
                     action[0],
                     (int(action[1][0]), int(action[1][1]))
-                )
+                    )
             elif action[0] in ('guard', 'suicide'):
                 action = (action[0],)
 
         except:
-            traceback.print_exc(file=sys.stdout)
+            exc_flag = True
+            traceback.print_exc(file=sys.stderr)
             action = ['guard']
+
         finally:
             sys.stdout = _stdout
-            sys.stdout.write(captured_stdout.getvalue())
+            sys.stderr = _stderr
 
-        return action, captured_stdout.getvalue()
+        return action, (exc_flag, captured_output.getvalue())
 
-    # returns map (loc) -> (action, output) for all bots of this player
-    # 'fixes' invalid actions
-    def get_actions_and_output(self, game_state, seed):
+    def get_responses(self, game_state, seed):
+        """
+        Returns a tuple of three dictionaries containing actions, output
+        and error flag for each bot, respectively
+        """
         game_info = game_state.get_game_info(self._player_id)
-        actions = {}
-        output = {}
+        actions, outputs = {}, {}
 
         for loc, robot in game_state.robots.iteritems():
             if robot.player_id == self._player_id:
                 # Every act call should get a different random seed
-                actions[loc], output[loc] = self._get_action(
+                actions[loc], outputs[loc] = self._get_response(
                     game_state, game_info, robot,
                     seed=str(seed) + '-' + str(robot.robot_id))
 
-        return actions, output
-
-    # returns map (loc) -> (action) for all bots of this player
-    def get_actions(self, game_state, seed):
-        return self.get_actions_and_output(game_state, seed)[0]
+        return actions, outputs
 
     def name(self):
         return self._name
@@ -220,32 +239,33 @@ class Game(object):
     def _save_state(self, state, turn):
         self._states[turn] = state
 
-    def _get_robots_actions(self):
-        if self._quiet >= 1:
-            sys.stdout = NullDevice()
-        if self._quiet >= 2:
-            sys.stderr = NullDevice()
-
-        actions = {}
+    def _get_robots_responses(self):
+        # TODO: honour quietness
+        actions, outputs = {}, {}
         for player in self._players:
             seed = self._random.randint(0, settings.max_seed)
-            actions.update(player.get_actions(self._state, seed))
+            responses = player.get_responses(self._state, seed)
+            actions.update(responses[0])
+            outputs.update(responses[1])
 
-        if self._quiet >= 1:
-            sys.stdout = sys.__stdout__
-        if self._quiet >= 2:
-            sys.stderr = sys.__stderr__
+        return actions, outputs
 
-        return actions
+    def _make_history(self, responses, record_output=False):
+        # todo: rework this. We are getting data about the player
+        #       from two sources: 1) from arguments, and 2) from
+        #       class members. Either move *all* to 1) and make
+        #       static or move all to 2).
 
-    def _make_history(self, actions):
         '''
         An aggregate of all bots and their actions this turn.
+
+        Optionally records per-bot output.
 
         Stores a list of each player's bots at the start of this turn and
         the actions they each performed this turn. Newly spawned bots have no
         actions.
         '''
+        actions, outputs = responses
         robots = []
         for loc, robot in self._state.robots.iteritems():
             robot_info = {
@@ -255,7 +275,11 @@ class Game(object):
                 'robot_id': robot.robot_id,
             }
             if loc in actions:
+                #since the state after the final turn does not contain any
+                #actions, 'loc' is not always contained in 'actions'
                 robot_info['action'] = actions[loc]
+            if outputs and loc in outputs:
+                robot_info['output'] = outputs[loc]
             robots.append(robot_info)
         return robots
 
@@ -288,11 +312,11 @@ class Game(object):
 
         return actions_on_turn
 
-    def run_turn(self):
+    def run_turn(self, record_output=False):
         if self._print_info:
             print (' running turn %d ' % (self._state.turn)).center(70, '-')
 
-        actions = self._get_robots_actions()
+        actions, output = responses = self._get_robots_responses()
 
         delta = self._state.get_delta(actions)
 
@@ -308,7 +332,8 @@ class Game(object):
         self._save_state(new_state, new_state.turn)
 
         if self._record_history:
-            self.history.append(self._make_history(actions))
+            self.history.append(self._make_history(responses,
+                record_output=record_output))
 
         self._state = new_state
 
@@ -325,7 +350,7 @@ class Game(object):
 
         # create last turn's state for server history
         if self._record_history:
-            self.history.append(self._make_history({}))
+            self.history.append(self._make_history(({},{})))
 
         # create dummy data for last turn
         # TODO: render should be cleverer
