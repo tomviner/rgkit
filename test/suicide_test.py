@@ -1,3 +1,5 @@
+from __future__ import division
+
 import ast
 import pkg_resources
 import unittest
@@ -43,7 +45,7 @@ class TestSuicide(unittest.TestCase):
 
         self.assertTrue(state2.is_robot((10, 10)))
         self.assertEqual(state2.robots[10, 10].hp,
-                         settings.robot_hp - settings.suicide_damage/2)
+                         settings.robot_hp - settings.suicide_damage//2)
         self.assertFalse(state2.is_robot((9, 10)))
 
     def test_suicide_does_no_damage_to_teammates(self):
