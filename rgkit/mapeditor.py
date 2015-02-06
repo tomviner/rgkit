@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+from __future__ import division
 from __future__ import print_function
 
 import ast
@@ -165,7 +166,7 @@ class MapEditor(object):
         for i, color in enumerate(self._colors):
             if color in label_mapping and label_mapping[color] is not None:
                 coords[label_mapping[color]].append((i % settings.board_size,
-                                                     i / settings.board_size))
+                                                     i // settings.board_size))
 
         with open(self._map_file, 'w') as f:
             f.write(str(coords))

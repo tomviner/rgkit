@@ -1,3 +1,4 @@
+from __future__ import division
 import random
 from collections import defaultdict
 
@@ -247,7 +248,7 @@ class GameState(object):
                 if player_id != robot.player_id:
                     for actor_loc, damage in player_damage_map.items():
                         if is_guard:
-                            damage /= 2
+                            damage //= 2
 
                         robot_delta.hp_end -= damage
                         damage_caused[actor_loc] += damage
