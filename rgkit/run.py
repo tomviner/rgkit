@@ -429,8 +429,8 @@ def main():
             repr(avg_score), diff))
 
     if num_opponents > 1:
-        total_avg_score = map(int, (total_avg_score[0] / num_opponents,
-                                    total_avg_score[1] / num_opponents))
+        total_avg_score = list(map(int, (total_avg_score[0] / num_opponents,
+                                    total_avg_score[1] / num_opponents)))
         total_diff = int(total_diff / num_opponents)
         win_rate = (100 * float(total_won + 0.5 * total_draw) /
                     (total_won + total_lost + total_draw))

@@ -1,5 +1,8 @@
 from __future__ import division
-import Tkinter
+try:
+    import Tkinter
+except ImportError:
+    import tkinter as Tkinter
 import math
 
 from rgkit.settings import settings
