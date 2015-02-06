@@ -143,7 +143,7 @@ class MapEditor(object):
         label_mapping = dict((v, k) for k, v in color_mapping.values()
                              if v is not None)
 
-        for label, color in label_mapping.iteritems():
+        for label, color in label_mapping.items():
             if label not in map_data:
                 continue
 
@@ -158,7 +158,7 @@ class MapEditor(object):
         coords = {}
         label_mapping = dict(color_mapping.values())
 
-        for color, label in label_mapping.iteritems():
+        for color, label in label_mapping.items():
             if label is not None:
                 coords[label] = []
 

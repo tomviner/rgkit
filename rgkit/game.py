@@ -181,7 +181,7 @@ class Player(object):
         game_info = game_state.get_game_info(self._player_id)
         actions, outputs = {}, {}
 
-        for loc, robot in game_state.robots.iteritems():
+        for loc, robot in game_state.robots.items():
             if robot.player_id == self._player_id:
                 # Every act call should get a different random seed
                 actions[loc], outputs[loc] = self._get_response(
@@ -270,7 +270,7 @@ class Game(object):
         '''
         actions, outputs = responses
         robots = []
-        for loc, robot in self._state.robots.iteritems():
+        for loc, robot in self._state.robots.items():
             robot_info = {
                 'location': loc,
                 'hp': robot.hp,
@@ -359,7 +359,7 @@ class Game(object):
         # TODO: render should be cleverer
         actions_on_turn = {}
 
-        for loc, robot in self._state.robots.iteritems():
+        for loc, robot in self._state.robots.items():
             log_item = {
                 'name': '',
                 'target': None,
