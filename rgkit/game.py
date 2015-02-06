@@ -84,7 +84,7 @@ class Player(object):
         if sys.version_info >= (3, 0):
             return (int, float)
         else:
-            return (int, long, float)
+            return (int, long, float)  # noqa
 
     @staticmethod
     def _validate_type(robot, var_name, obj, types):

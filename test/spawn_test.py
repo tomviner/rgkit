@@ -60,7 +60,7 @@ class TestSpawn(unittest.TestCase):
         }
 
         # ensure that a robot will get spawned at (4, 3)
-        state._get_spawn_locations = lambda: [(i, 3) for i in xrange(10)]
+        state._get_spawn_locations = lambda: [(i, 3) for i in range(10)]
 
         state2 = state.apply_actions(actions)
 
