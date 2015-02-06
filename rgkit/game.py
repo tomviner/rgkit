@@ -2,8 +2,11 @@ import imp
 import os
 import random
 import sys
-import StringIO
 import traceback
+try:
+    import StringIO
+except ImportError:
+    from io import StringIO
 try:
     import threading
 except ImportError:
