@@ -3,10 +3,8 @@ import os
 import random
 import sys
 import traceback
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
+import io
+
 try:
     import threading
 except ImportError:
@@ -30,13 +28,14 @@ class NullDevice(object):
 # TODO: use actual logging module with log levels and copying stdout
 #       instead of this
 class Tee(object):
-    def __init__(self, orig, copy):
+    def __init__(self, orig, copy, conv=lambda s:s):
         self.orig = orig
         self.copy = copy
+        self.conv = conv
 
     def write(self, message):
         self.orig.write(message)
-        self.copy.write(message)
+        self.copy.write(self.conv(message))
 
     def flush(self):
         self.orig.flush()
@@ -142,12 +141,13 @@ class Player(object):
         """Returns sanitized action, output and error flag from robot"""
         try:
             exc_flag = False
-            captured_output = StringIO()
+            captured_output = io.BytesIO()
+            conv = lambda s: s.encode('ascii', 'replace')
 
             _stdout = sys.stdout
             _stderr = sys.stderr
-            sys.stdout = Tee(sys.stdout, captured_output)
-            sys.stderr = Tee(sys.stderr, captured_output)
+            sys.stdout = Tee(sys.stdout, captured_output, conv=conv)
+            sys.stderr = Tee(sys.stderr, captured_output, conv=conv)
 
             random.seed(seed)
             # Server requires knowledge of seed
@@ -324,7 +324,7 @@ class Game(object):
 
     def run_turn(self, record_output=False):
         if self._print_info:
-            print (' running turn %d ' % (self._state.turn)).center(70, '-')
+            print((' running turn %d ' % (self._state.turn)).center(70, '-'))
 
         actions, output = responses = self._get_robots_responses()
 
@@ -351,7 +351,7 @@ class Game(object):
         assert self._state.turn == 0
 
         if self._print_info:
-            print ('Match seed: {0}'.format(self.seed))
+            print(('Match seed: {0}'.format(self.seed)))
 
         self._save_state(self._state, 0)
 
