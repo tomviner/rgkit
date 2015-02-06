@@ -422,11 +422,11 @@ def main():
         total_avg_score = (total_avg_score[0] + avg_score[0],
                            total_avg_score[1] + avg_score[1])
         total_diff += diff
-        avg_score = map(int, avg_score)
+        avg_score = list(map(int, avg_score))
         diff = int(diff)
         print('{:10} - {:15} - {:8} ({})'.format(
-            os.path.basename(opponent)[:10], [p1won, p2won, draw], avg_score,
-            diff))
+            os.path.basename(opponent)[:10], repr([p1won, p2won, draw]),
+            repr(avg_score), diff))
 
     if num_opponents > 1:
         total_avg_score = map(int, (total_avg_score[0] / num_opponents,
