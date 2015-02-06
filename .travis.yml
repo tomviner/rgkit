@@ -6,7 +6,7 @@ install:
   - "pip install -r requirements.txt"
 script:
   - nosetests
-  - pyflakes rgkit test
+  - flake8 rgkit test
   - ./build-docs.sh
 notifications:
   email: false
