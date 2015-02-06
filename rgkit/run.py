@@ -282,7 +282,7 @@ def get_arg_parser():
                         default=False,
                         help="Enable animations in rendering.")
     parser.add_argument(
-        "-q", "--quiet", action="count", help="""Quiet execution.
+        "-q", "--quiet", action="count", default=0, help="""Quiet execution.
 -q : suppresses bot stdout
 -qq: suppresses bot stdout and stderr
 -qqq: supresses all rgkit and bot output
