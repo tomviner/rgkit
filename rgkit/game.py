@@ -384,11 +384,11 @@ class ThreadedGame(Game):
 
         # events set when actions_on_turn are calculated
         self._has_actions_on_turn = [threading.Event()
-                                     for _ in xrange(settings.max_turns + 1)]
+                                     for _ in range(settings.max_turns + 1)]
 
         # events set when state are calculated
         self._has_state = [threading.Event()
-                           for _ in xrange(settings.max_turns + 1)]
+                           for _ in range(settings.max_turns + 1)]
 
     def get_actions_on_turn(self, turn):
         self._has_actions_on_turn[turn].wait()

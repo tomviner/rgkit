@@ -153,7 +153,7 @@ class GameState(object):
     # self suicide damage is not counted
     def _get_damage_map(self, actions):
         damage_map = defaultdict(
-            lambda: [{} for _ in xrange(settings.player_count)])
+            lambda: [{} for _ in range(settings.player_count)])
 
         for loc, robot in self.robots.iteritems():
             actor_id = robot.player_id
@@ -183,8 +183,8 @@ class GameState(object):
                 robot_delta.hp_end = 0
 
         # spawn robots
-        for i in xrange(settings.spawn_per_player):
-            for player_id in xrange(settings.player_count):
+        for i in range(settings.spawn_per_player):
+            for player_id in range(settings.player_count):
                 loc = spawn_locations[player_id*settings.spawn_per_player+i]
                 delta.append(AttrDict({
                     'loc': loc,
@@ -306,7 +306,7 @@ class GameState(object):
         return self.apply_delta(delta)
 
     def get_scores(self):
-        scores = [0 for _ in xrange(settings.player_count)]
+        scores = [0 for _ in range(settings.player_count)]
 
         for robot in self.robots.itervalues():
             scores[robot.player_id] += 1

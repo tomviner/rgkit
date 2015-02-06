@@ -154,7 +154,7 @@ class Runner:
     def run(self):
         scores = []
         printed = []
-        for i in xrange(self.options.start,
+        for i in range(self.options.start,
                         self.options.start + self.options.n_of_games):
             # A sequential, deterministic seed is used for each match that can
             # be overridden by user provided ones.
@@ -244,7 +244,7 @@ def run_concurrently(args):
     (games_per_cpu, remainder) = divmod(args.count, num_cpu)
     data = []
     start = 0
-    for i in xrange(num_cpu):
+    for i in range(num_cpu):
         copy_args = copy.deepcopy(args)
 
         copy_args.start = start
@@ -345,7 +345,7 @@ def print_score_grid(scores, player1, player2, size):
         else:
             sys.stdout.write(" " + str(n))
 
-    grid = [[0 for c in xrange(size)] for r in xrange(size)]
+    grid = [[0 for c in range(size)] for r in range(size)]
 
     for s1, s2 in scores:
         grid[to_grid(s1)][to_grid(s2)] += 1
@@ -359,9 +359,9 @@ def print_score_grid(scores, player1, player2, size):
         print(str1)
         print("*" + "-" * (2 * size) + "*")
 
-    for r in xrange(size - 1, -1, -1):
+    for r in range(size - 1, -1, -1):
         sys.stdout.write("|")
-        for c in xrange(size):
+        for c in range(size):
             if grid[r][c] == 0:
                 if r == c:
                     sys.stdout.write(". ")

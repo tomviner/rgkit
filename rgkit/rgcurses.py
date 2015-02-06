@@ -160,8 +160,8 @@ Cursor right    d, <right>"""
 
     def _draw_game_grid(self):
         state = self._game.get_state(self._turn)
-        for r in xrange(settings.board_size):
-            for c in xrange(settings.board_size):
+        for r in range(settings.board_size):
+            for c in range(settings.board_size):
                 if (r, c) in settings.obstacles:
                     self._draw_grid_obstacle(r, c)
                 elif state.is_robot((r, c)):
