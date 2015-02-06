@@ -25,10 +25,11 @@ class NullDevice(object):
     def flush(self):
         pass
 
+
 # TODO: use actual logging module with log levels and copying stdout
 #       instead of this
 class Tee(object):
-    def __init__(self, orig, copy, conv=lambda s:s):
+    def __init__(self, orig, copy, conv=lambda s: s):
         self.orig = orig
         self.copy = copy
         self.conv = conv
@@ -134,8 +135,8 @@ class Player(object):
                         robot.robot_id, action)
                 )
         elif action[0] not in ('guard', 'suicide'):
-            raise ValueError('Bot %d: action must be one of "guard", "suicide",'
-                            '"move", or "attack".')
+            raise ValueError('Bot %d: action must be one of "guard", '
+                             '"suicide", "move", or "attack".')
 
     def _get_response(self, game_state, game_info, robot, seed):
         """Returns sanitized action, output and error flag from robot"""
@@ -285,8 +286,8 @@ class Game(object):
                 'robot_id': robot.robot_id,
             }
             if loc in actions:
-                #since the state after the final turn does not contain any
-                #actions, 'loc' is not always contained in 'actions'
+                # since the state after the final turn does not contain any
+                # actions, 'loc' is not always contained in 'actions'
                 robot_info['action'] = actions[loc]
             if outputs and loc in outputs:
                 robot_info['output'] = outputs[loc]
@@ -326,7 +327,8 @@ class Game(object):
         if self._print_info:
             print((' running turn %d ' % (self._state.turn)).center(70, '-'))
 
-        actions, output = responses = self._get_robots_responses()
+        responses = self._get_robots_responses()
+        actions = responses[1]
 
         delta = self._state.get_delta(actions)
 
@@ -342,8 +344,8 @@ class Game(object):
         self._save_state(new_state, new_state.turn)
 
         if self._record_history:
-            self.history.append(self._make_history(responses,
-                record_output=record_output))
+            self.history.append(self._make_history(
+                responses, record_output=record_output))
 
         self._state = new_state
 
@@ -360,7 +362,7 @@ class Game(object):
 
         # create last turn's state for server history
         if self._record_history:
-            self.history.append(self._make_history(({},{})))
+            self.history.append(self._make_history(({}, {})))
 
         # create dummy data for last turn
         # TODO: render should be cleverer

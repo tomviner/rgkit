@@ -107,20 +107,20 @@ class RobotSprite(object):
         # DRAW ARROWS AND BORDER AND CIRCLE
         if self.renderer.show_arrows.get():
             if arrow_fill is not None and self.overlay is None:
-                    offset = (self.renderer._blocksize / 2,
-                              self.renderer._blocksize / 2)
-                    self.overlay = self.renderer.draw_line(
-                        self.location, self.target, layer=5, fill=arrow_fill,
-                        offset=offset, width=3.0, arrow=Tkinter.LAST)
+                offset = (self.renderer._blocksize / 2,
+                          self.renderer._blocksize / 2)
+                self.overlay = self.renderer.draw_line(
+                    self.location, self.target, layer=5, fill=arrow_fill,
+                    offset=offset, width=3.0, arrow=Tkinter.LAST)
             if self.action == 'guard' and self.border is None:
                 self.border = self.renderer.draw_grid_object(
-                    self.location, type=render_settings.bot_shape, layer=4,
+                    self.location, shape=render_settings.bot_shape, layer=4,
                     outline=rgb_tuple_to_hex(
                         render_settings.color_guard_border),
                     width=2)
             if self.action == 'suicide' and self.circle is None:
                 self.circle = self.renderer.draw_grid_object(
-                    self.location, type="circle", layer=4,
+                    self.location, shape="circle", layer=4,
                     outline="yellow",
                     width=2)
         else:
@@ -147,7 +147,7 @@ class RobotSprite(object):
         ox, oy = self.animation_offset
         if self.square is None:
             self.square = self.renderer.draw_grid_object(
-                self.location, type=render_settings.bot_shape, layer=3,
+                self.location, shape=render_settings.bot_shape, layer=3,
                 fill=color, width=0)
         self.renderer._win.itemconfig(self.square, fill=color)
         self.renderer._win.coords(self.square,

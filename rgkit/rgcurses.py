@@ -2,8 +2,7 @@ import curses as cs
 from rgkit.settings import settings
 
 
-class RGCurses:
-
+class RGCurses(object):
     def __init__(self, game_inst, names):
         self._game = game_inst
         self._names = names
@@ -250,9 +249,7 @@ Cursor right    d, <right>"""
     def _draw_turn(self):
         r, c = self._turn_pos
         s = "Turn: " + str(self._turn)
-        for line in s.split("\n"):
-            self._stdscr.addstr(r, c, s, self._attr_text)
-            r += 1
+        self._stdscr.addstr(r, c, s, self._attr_text)
 
     def _draw_screen(self):
         self._draw_game_grid()

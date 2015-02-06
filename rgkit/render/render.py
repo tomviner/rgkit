@@ -241,7 +241,7 @@ class Render(object):
         self._time_slider.pack(fill=Tkinter.X)
         self._time_slider.set(0)
 
-    def draw_grid_object(self, loc, type="square", layer=0, **kargs):
+    def draw_grid_object(self, loc, shape="square", layer=0, **kargs):
         layer_id = 'layer %d' % layer
         self._layers[layer_id] = None
         tags = kargs.get("tags", [])
@@ -249,11 +249,11 @@ class Render(object):
         kargs["tags"] = tags
         x, y = self.grid_to_xy(loc)
         rx, ry = self.square_bottom_corner((x, y))
-        if type == "square":
+        if shape == "square":
             item = self._win.create_rectangle(
                 x, y, rx, ry,
                 **kargs)
-        elif type == "circle":
+        elif shape == "circle":
             item = self._win.create_oval(
                 x, y, rx, ry,
                 **kargs)

@@ -27,7 +27,7 @@ from rgkit import game
 from rgkit.game import Player
 
 
-class Options:
+class Options(object):
     def __init__(self, map_filepath=None, headless=False, print_info=False,
                  animate_render=False, play_in_thread=False, curses=False,
                  game_seed=None, match_seeds=None, quiet=0, symmetric=True,
@@ -64,7 +64,7 @@ class Options:
                 self.symmetric == other.symmetric)
 
 
-class Runner:
+class Runner(object):
     def __init__(self, players=None, player_files=None, settings=None,
                  options=None, delta_callback=None):
 
@@ -155,7 +155,7 @@ class Runner:
         scores = []
         printed = []
         for i in range(self.options.start,
-                        self.options.start + self.options.n_of_games):
+                       self.options.start + self.options.n_of_games):
             # A sequential, deterministic seed is used for each match that can
             # be overridden by user provided ones.
             match_seed = str(self.options.game_seed) + '-' + str(i)
@@ -244,7 +244,8 @@ def run_concurrently(args):
     (games_per_cpu, remainder) = divmod(args.count, num_cpu)
     data = []
     start = 0
-    for i in range(num_cpu):
+
+    for _ in range(num_cpu):
         copy_args = copy.deepcopy(args)
 
         copy_args.start = start
@@ -383,6 +384,10 @@ def print_score_grid(scores, player1, player2, size):
 
 def main():
     args = get_arg_parser().parse_args()
+
+    if "nice" in args:
+        os.nice(args.nice)
+
     num_opponents = len(args.opponents)
     total_won, total_lost, total_draw, total_avg_score, total_diff = (
         0, 0, 0, (0, 0), 0)
@@ -390,11 +395,6 @@ def main():
         args.player2 = opponent
         if args.quiet >= 3:
             mute_all()
-        try:
-            os.nice(args.nice)
-        except:
-            # Not available on this platform.
-            pass
         print('Game seed: {0}'.format(args.game_seed))
         if Runner.is_multiprocessing_supported() and args.count > 1:
             runner = run_concurrently
@@ -430,7 +430,7 @@ def main():
 
     if num_opponents > 1:
         total_avg_score = list(map(int, (total_avg_score[0] / num_opponents,
-                                    total_avg_score[1] / num_opponents)))
+                                         total_avg_score[1] / num_opponents)))
         total_diff = int(total_diff / num_opponents)
         win_rate = (100 * float(total_won + 0.5 * total_draw) /
                     (total_won + total_lost + total_draw))
