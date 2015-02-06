@@ -67,7 +67,7 @@ class Player(object):
             self._robot = robot
         elif self._code:
             self._module = imp.new_module('usercode%d' % id(self))
-            exec self._code in self._module.__dict__
+            exec(self._code, self._module.__dict__)
             self._robot = self._module.Robot()
         else:
             # No way to reload robot...

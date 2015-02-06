@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+from __future__ import print_function
 
 import ast
 import Tkinter
@@ -21,7 +22,7 @@ color_mapping = {
 
 
 def print_instructions():
-    print '''
+    print('''
 usage: python mapeditor.py <starting map file>
 
 I made this map editor to use for myself. Therefore, it might not seem
@@ -45,7 +46,7 @@ Other functions
 [d] fill board with selected color
 [f] save map data to map file provided
 [i] invert black and white colors
-'''
+''')
 
 
 class MapEditor(object):
@@ -168,7 +169,7 @@ class MapEditor(object):
 
         with open(self._map_file, 'w') as f:
             f.write(str(coords))
-            print 'saved!'
+            print('saved!')
 
     def invert_colors(self):
         old_color = self._current_color
