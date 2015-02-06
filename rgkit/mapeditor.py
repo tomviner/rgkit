@@ -124,7 +124,7 @@ class MapEditor(object):
         if self._pressed:
             self.paint_square(tk_event=event)
 
-    def release_handler(self, event):
+    def release_handler(self, _):
         self._pressed = False
 
     def paint_all(self):
@@ -154,8 +154,6 @@ class MapEditor(object):
                                   settings.board_size * coord[1])
 
     def save_map(self):
-        global settings
-
         coords = {}
         label_mapping = dict(color_mapping.values())
 
