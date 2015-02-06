@@ -80,6 +80,13 @@ class Player(object):
         self._player_id = player_id
 
     @staticmethod
+    def _numeral_types():
+        if sys.version_info >= (3, 0):
+            return (int, float)
+        else:
+            return (int, long, float)
+
+    @staticmethod
     def _validate_type(robot, var_name, obj, types):
         if type(obj) not in types:
             raise Exception(
@@ -117,9 +124,9 @@ class Player(object):
             Player._validate_type(robot, 'action[1]', action[1], (list, tuple))
             Player._validate_length(robot, 'action[1]', action[1], (2,))
             Player._validate_type(
-                robot, 'action[1][0]', action[1][0], (int, long, float))
+                robot, 'action[1][0]', action[1][0], Player._numeral_types())
             Player._validate_type(
-                robot, 'action[1][1]', action[1][1], (int, long, float))
+                robot, 'action[1][1]', action[1][1], Player._numeral_types())
             valid_locs = rg.locs_around(
                 robot.location, filter_out=['invalid', 'obstacle'])
             if action[1] not in valid_locs:
