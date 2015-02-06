@@ -1,3 +1,4 @@
+from __future__ import division
 import random
 from collections import defaultdict
 
@@ -153,9 +154,9 @@ class GameState(object):
     # self suicide damage is not counted
     def _get_damage_map(self, actions):
         damage_map = defaultdict(
-            lambda: [{} for _ in xrange(settings.player_count)])
+            lambda: [{} for _ in range(settings.player_count)])
 
-        for loc, robot in self.robots.iteritems():
+        for loc, robot in self.robots.items():
             actor_id = robot.player_id
 
             if actions[loc][0] == 'attack':
@@ -183,8 +184,8 @@ class GameState(object):
                 robot_delta.hp_end = 0
 
         # spawn robots
-        for i in xrange(settings.spawn_per_player):
-            for player_id in xrange(settings.player_count):
+        for i in range(settings.spawn_per_player):
+            for player_id in range(settings.player_count):
                 loc = spawn_locations[player_id*settings.spawn_per_player+i]
                 delta.append(AttrDict({
                     'loc': loc,
@@ -220,7 +221,7 @@ class GameState(object):
         damage_map = self._get_damage_map(actions)
         damage_caused = defaultdict(lambda: 0)  # {loc: damage_caused}
 
-        for loc, robot in self.robots.iteritems():
+        for loc, robot in self.robots.items():
             robot_delta = AttrDict({
                 'loc': loc,
                 'hp': robot.hp,
@@ -245,9 +246,9 @@ class GameState(object):
             for player_id, player_damage_map in enumerate(
                     damage_map[new_locations[loc]]):
                 if player_id != robot.player_id:
-                    for actor_loc, damage in player_damage_map.iteritems():
+                    for actor_loc, damage in player_damage_map.items():
                         if is_guard:
-                            damage /= 2
+                            damage //= 2
 
                         robot_delta.hp_end -= damage
                         damage_caused[actor_loc] += damage
@@ -306,9 +307,9 @@ class GameState(object):
         return self.apply_delta(delta)
 
     def get_scores(self):
-        scores = [0 for _ in xrange(settings.player_count)]
+        scores = [0 for _ in range(settings.player_count)]
 
-        for robot in self.robots.itervalues():
+        for robot in self.robots.values():
             scores[robot.player_id] += 1
 
         return scores
@@ -318,8 +319,8 @@ class GameState(object):
         game_info = AttrDict()
 
         game_info.robots = dict((loc, AttrDict(robot))
-                                for loc, robot in self.robots.iteritems())
-        for robot in game_info.robots.itervalues():
+                                for loc, robot in self.robots.items())
+        for robot in game_info.robots.values():
             if robot.player_id != player_id:
                 del robot.robot_id
 

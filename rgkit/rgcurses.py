@@ -35,15 +35,15 @@ Cursor right    d, <right>"""
         self._turn_pos = (18, 41)
 
         # Keybindings
-        self._exit_keys = map(ord, ['q']) + [27]
-        self._pause_keys = map(ord, ['p', ' '])
-        self._step_keys = map(ord, ['j'])
-        self._back_keys = map(ord, ['k'])
-        self._rewind_keys = map(ord, ['r'])
-        self._up_keys = map(ord, ['w']) + [cs.KEY_UP]
-        self._left_keys = map(ord, ['a']) + [cs.KEY_LEFT]
-        self._down_keys = map(ord, ['s']) + [cs.KEY_DOWN]
-        self._right_keys = map(ord, ['d']) + [cs.KEY_RIGHT]
+        self._exit_keys = [ord('q'), 27]
+        self._pause_keys = [ord('p'), ord(' ')]
+        self._step_keys = [ord('j')]
+        self._back_keys = [ord('k')]
+        self._rewind_keys = [ord('r')]
+        self._up_keys = [ord('w'), cs.KEY_UP]
+        self._left_keys = [ord('a'), cs.KEY_LEFT]
+        self._down_keys = [ord('s'), cs.KEY_DOWN]
+        self._right_keys = [ord('d'), cs.KEY_RIGHT]
 
     def _init_curses(self):
 
@@ -160,8 +160,8 @@ Cursor right    d, <right>"""
 
     def _draw_game_grid(self):
         state = self._game.get_state(self._turn)
-        for r in xrange(settings.board_size):
-            for c in xrange(settings.board_size):
+        for r in range(settings.board_size):
+            for c in range(settings.board_size):
                 if (r, c) in settings.obstacles:
                     self._draw_grid_obstacle(r, c)
                 elif state.is_robot((r, c)):

@@ -53,6 +53,10 @@ def locs_around(loc, filter_out=None):
             if len(filter_out & loc_types(a_loc)) == 0]
 
 
+def _sign(x):
+    return x and 1 if x > 0 else -1
+
+
 def toward(curr, dest):
     if curr == dest:
         return curr
@@ -61,8 +65,8 @@ def toward(curr, dest):
     x, y = dest
     x_diff, y_diff = x - x0, y - y0
 
-    move_y = (x0, y0 + cmp(y_diff, 0))
-    move_x = (x0 + cmp(x_diff, 0), y0)
+    move_y = (x0, y0 + _sign(y_diff))
+    move_x = (x0 + _sign(x_diff), y0)
 
     if abs(y_diff) > abs(x_diff):
         if move_y not in settings.obstacles:

@@ -2,8 +2,9 @@ import imp
 import os
 import random
 import sys
-import StringIO
 import traceback
+import io
+
 try:
     import threading
 except ImportError:
@@ -27,13 +28,14 @@ class NullDevice(object):
 # TODO: use actual logging module with log levels and copying stdout
 #       instead of this
 class Tee(object):
-    def __init__(self, orig, copy):
+    def __init__(self, orig, copy, conv=lambda s:s):
         self.orig = orig
         self.copy = copy
+        self.conv = conv
 
     def write(self, message):
         self.orig.write(message)
-        self.copy.write(message)
+        self.copy.write(self.conv(message))
 
     def flush(self):
         self.orig.flush()
@@ -67,7 +69,7 @@ class Player(object):
             self._robot = robot
         elif self._code:
             self._module = imp.new_module('usercode%d' % id(self))
-            exec self._code in self._module.__dict__
+            exec(self._code, self._module.__dict__)
             self._robot = self._module.Robot()
         else:
             # No way to reload robot...
@@ -75,6 +77,13 @@ class Player(object):
 
     def set_player_id(self, player_id):
         self._player_id = player_id
+
+    @staticmethod
+    def _numeral_types():
+        if sys.version_info >= (3, 0):
+            return (int, float)
+        else:
+            return (int, long, float)
 
     @staticmethod
     def _validate_type(robot, var_name, obj, types):
@@ -114,9 +123,9 @@ class Player(object):
             Player._validate_type(robot, 'action[1]', action[1], (list, tuple))
             Player._validate_length(robot, 'action[1]', action[1], (2,))
             Player._validate_type(
-                robot, 'action[1][0]', action[1][0], (int, long, float))
+                robot, 'action[1][0]', action[1][0], Player._numeral_types())
             Player._validate_type(
-                robot, 'action[1][1]', action[1][1], (int, long, float))
+                robot, 'action[1][1]', action[1][1], Player._numeral_types())
             valid_locs = rg.locs_around(
                 robot.location, filter_out=['invalid', 'obstacle'])
             if action[1] not in valid_locs:
@@ -132,12 +141,13 @@ class Player(object):
         """Returns sanitized action, output and error flag from robot"""
         try:
             exc_flag = False
-            captured_output = StringIO.StringIO()
+            captured_output = io.BytesIO()
+            conv = lambda s: s.encode('ascii', 'replace')
 
             _stdout = sys.stdout
             _stderr = sys.stderr
-            sys.stdout = Tee(sys.stdout, captured_output)
-            sys.stderr = Tee(sys.stderr, captured_output)
+            sys.stdout = Tee(sys.stdout, captured_output, conv=conv)
+            sys.stderr = Tee(sys.stderr, captured_output, conv=conv)
 
             random.seed(seed)
             # Server requires knowledge of seed
@@ -178,7 +188,7 @@ class Player(object):
         game_info = game_state.get_game_info(self._player_id)
         actions, outputs = {}, {}
 
-        for loc, robot in game_state.robots.iteritems():
+        for loc, robot in game_state.robots.items():
             if robot.player_id == self._player_id:
                 # Every act call should get a different random seed
                 actions[loc], outputs[loc] = self._get_response(
@@ -267,7 +277,7 @@ class Game(object):
         '''
         actions, outputs = responses
         robots = []
-        for loc, robot in self._state.robots.iteritems():
+        for loc, robot in self._state.robots.items():
             robot_info = {
                 'location': loc,
                 'hp': robot.hp,
@@ -314,7 +324,7 @@ class Game(object):
 
     def run_turn(self, record_output=False):
         if self._print_info:
-            print (' running turn %d ' % (self._state.turn)).center(70, '-')
+            print((' running turn %d ' % (self._state.turn)).center(70, '-'))
 
         actions, output = responses = self._get_robots_responses()
 
@@ -341,7 +351,7 @@ class Game(object):
         assert self._state.turn == 0
 
         if self._print_info:
-            print ('Match seed: {0}'.format(self.seed))
+            print(('Match seed: {0}'.format(self.seed)))
 
         self._save_state(self._state, 0)
 
@@ -356,7 +366,7 @@ class Game(object):
         # TODO: render should be cleverer
         actions_on_turn = {}
 
-        for loc, robot in self._state.robots.iteritems():
+        for loc, robot in self._state.robots.items():
             log_item = {
                 'name': '',
                 'target': None,
@@ -381,11 +391,11 @@ class ThreadedGame(Game):
 
         # events set when actions_on_turn are calculated
         self._has_actions_on_turn = [threading.Event()
-                                     for _ in xrange(settings.max_turns + 1)]
+                                     for _ in range(settings.max_turns + 1)]
 
         # events set when state are calculated
         self._has_state = [threading.Event()
-                           for _ in xrange(settings.max_turns + 1)]
+                           for _ in range(settings.max_turns + 1)]
 
     def get_actions_on_turn(self, turn):
         self._has_actions_on_turn[turn].wait()

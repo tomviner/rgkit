@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+from __future__ import print_function
 
 import argparse
 from argparse import RawTextHelpFormatter
@@ -130,7 +131,7 @@ class Runner:
     def _make_player(file_name):
         try:
             return game.Player(file_name=file_name)
-        except IOError, msg:
+        except IOError as msg:
             if pkg_resources.resource_exists('rgkit', file_name):
                 bot_filename = pkg_resources.resource_filename('rgkit',
                                                                file_name)
@@ -153,7 +154,7 @@ class Runner:
     def run(self):
         scores = []
         printed = []
-        for i in xrange(self.options.start,
+        for i in range(self.options.start,
                         self.options.start + self.options.n_of_games):
             # A sequential, deterministic seed is used for each match that can
             # be overridden by user provided ones.
@@ -168,7 +169,7 @@ class Runner:
         if self.options.quiet < 4:
             unmute_all()
             if printed:
-                print '\n'.join(printed)
+                print('\n'.join(printed))
         return scores
 
     def play(self, match_seed):
@@ -243,7 +244,7 @@ def run_concurrently(args):
     (games_per_cpu, remainder) = divmod(args.count, num_cpu)
     data = []
     start = 0
-    for i in xrange(num_cpu):
+    for i in range(num_cpu):
         copy_args = copy.deepcopy(args)
 
         copy_args.start = start
@@ -281,7 +282,7 @@ def get_arg_parser():
                         default=False,
                         help="Enable animations in rendering.")
     parser.add_argument(
-        "-q", "--quiet", action="count", help="""Quiet execution.
+        "-q", "--quiet", action="count", default=0, help="""Quiet execution.
 -q : suppresses bot stdout
 -qq: suppresses bot stdout and stderr
 -qqq: supresses all rgkit and bot output
@@ -344,7 +345,7 @@ def print_score_grid(scores, player1, player2, size):
         else:
             sys.stdout.write(" " + str(n))
 
-    grid = [[0 for c in xrange(size)] for r in xrange(size)]
+    grid = [[0 for c in range(size)] for r in range(size)]
 
     for s1, s2 in scores:
         grid[to_grid(s1)][to_grid(s2)] += 1
@@ -353,14 +354,14 @@ def print_score_grid(scores, player1, player2, size):
     str1 = player1 + " : " + str(p1won)
     if len(str1) + 2 <= 2 * size - len(str1):
         str1 = " " + str1 + " "
-        print "*" + str1 + "-" * (2 * size - len(str1)) + "*"
+        print("*" + str1 + "-" * (2 * size - len(str1)) + "*")
     else:
-        print str1
-        print "*" + "-" * (2 * size) + "*"
+        print(str1)
+        print("*" + "-" * (2 * size) + "*")
 
-    for r in xrange(size - 1, -1, -1):
+    for r in range(size - 1, -1, -1):
         sys.stdout.write("|")
-        for c in xrange(size):
+        for c in range(size):
             if grid[r][c] == 0:
                 if r == c:
                     sys.stdout.write(". ")
@@ -374,10 +375,10 @@ def print_score_grid(scores, player1, player2, size):
     str2 = player2 + " : " + str(p2won)
     if len(str2) + 2 <= 2 * size - len(str2):
         str2 = " " + str2 + " "
-        print "*" + "-" * (2 * size - len(str2)) + str2 + "*"
+        print("*" + "-" * (2 * size - len(str2)) + str2 + "*")
     else:
-        print "*" + "-" * (2 * size) + "*"
-        print str2
+        print("*" + "-" * (2 * size) + "*")
+        print(str2)
 
 
 def main():
@@ -404,8 +405,8 @@ def main():
         scores = runner(args)
         total_time = time.time() - start_time
 
-        print '{0:6.2f}s per game, {1} games, total {2:.0f}s'.format(
-            total_time / args.count, args.count, total_time)
+        print('{0:6.2f}s per game, {1} games, total {2:.0f}s'.format(
+            total_time / args.count, args.count, total_time))
         if args.quiet >= 3:
             unmute_all()
         p1won = sum(p1 > p2 for p1, p2 in scores)
@@ -421,22 +422,21 @@ def main():
         total_avg_score = (total_avg_score[0] + avg_score[0],
                            total_avg_score[1] + avg_score[1])
         total_diff += diff
-        avg_score = map(int, avg_score)
+        avg_score = list(map(int, avg_score))
         diff = int(diff)
-        print '{:10} - {:15} - {:8} ({})'.format(
-            os.path.basename(opponent)[:10], [p1won, p2won, draw], avg_score,
-            diff)
+        print('{:10} - {:15} - {:8} ({})'.format(
+            os.path.basename(opponent)[:10], repr([p1won, p2won, draw]),
+            repr(avg_score), diff))
 
     if num_opponents > 1:
-        total_avg_score = map(int, (total_avg_score[0] / num_opponents,
-                                    total_avg_score[1] / num_opponents))
+        total_avg_score = list(map(int, (total_avg_score[0] / num_opponents,
+                                    total_avg_score[1] / num_opponents)))
         total_diff = int(total_diff / num_opponents)
         win_rate = (100 * float(total_won + 0.5 * total_draw) /
                     (total_won + total_lost + total_draw))
-        print (
-            'Overall: [{}, {}, {}] WR: {:<5.1f} Score: {} ({})'.format(
-                total_won, total_lost, total_draw, win_rate, total_avg_score,
-                total_diff))
+        print('Overall: [{}, {}, {}] WR: {:<5.1f} Score: {} ({})'.format(
+            total_won, total_lost, total_draw, win_rate, total_avg_score,
+            total_diff))
 
 
 if __name__ == '__main__':

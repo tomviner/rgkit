@@ -1,5 +1,8 @@
 from __future__ import division
-import Tkinter
+try:
+    import Tkinter
+except ImportError:
+    import tkinter as Tkinter
 import math
 
 from rgkit.settings import settings
@@ -343,7 +346,7 @@ class Render(object):
     def callback(self):
         self.update_slider_value()
         self.tick()
-        self._win.after(int(1000 / render_settings.FPS), self.callback)
+        self._win.after(1000 // render_settings.FPS, self.callback)
 
     def tick(self):
         now = millis()

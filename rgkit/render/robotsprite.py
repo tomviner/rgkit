@@ -1,4 +1,7 @@
-import Tkinter
+try:
+    import Tkinter
+except ImportError:
+    import tkinter as Tkinter
 from rgkit.settings import settings
 from rgkit.render.settings import settings as render_settings
 from rgkit.render.utils import rgb_to_hex, rgb_tuple_to_hex, blend_colors
