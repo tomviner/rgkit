@@ -172,8 +172,8 @@ class Player(object):
 
     def get_responses(self, game_state, seed):
         """
-        Returns a tuple of three dictionaries containing actions, output
-        and error flag for each bot, respectively
+        Returns a tuple of two dictionaries containing actions,
+        and (error flag and output) for each bot, respectively
         """
         game_info = game_state.get_game_info(self._player_id)
         actions, outputs = {}, {}

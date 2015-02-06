@@ -84,9 +84,22 @@ class GameState(object):
         self._spawn_random.shuffle(locations)
         return locations
 
-    # dest = location of robot -> its destination
-    # contenders = {loc: set(locations of robots trying to move into loc)}
     def _get_contenders(self, dest):
+        """
+        Generates a dict of locations, where the values correspond to the
+        set of bots that wish to move into that square or will be moving
+        into that square. This is because due to collisions a bot can
+        'use up' two squares:
+        1. the first is blocked because he attempted to move into it
+        2. the second is blocked because that is his current location
+           where he will be staying due to the collision at 1
+
+        :param dest: func(location of robot) = destination of robot
+        :returns: dict[destination] = set(locations of bots that either
+                                        want to move to 'destination' or
+                                        are moving to 'destination'
+                                        because of collisions)
+        """
         contenders = defaultdict(lambda: set())
 
         def stuck(loc):
@@ -157,21 +170,22 @@ class GameState(object):
 
         return damage_map
 
-    def _apply_damage_caused(self, delta, damage_caused):
+    @staticmethod
+    def _apply_damage_caused(delta, damage_caused):
         for robot_delta in delta:
             robot_delta.damage_caused += damage_caused[robot_delta.loc]
 
-    def _apply_spawn(self, delta):
+    @staticmethod
+    def _apply_spawn(delta, spawn_locations):
         # clear robots on spawn
         for robot_delta in delta:
             if robot_delta.loc_end in settings.spawn_coords:
                 robot_delta.hp_end = 0
 
         # spawn robots
-        locations = self._get_spawn_locations()
         for i in xrange(settings.spawn_per_player):
             for player_id in xrange(settings.player_count):
-                loc = locations[player_id*settings.spawn_per_player+i]
+                loc = spawn_locations[player_id*settings.spawn_per_player+i]
                 delta.append(AttrDict({
                     'loc': loc,
                     'hp': 0,
@@ -247,7 +261,7 @@ class GameState(object):
         self._apply_damage_caused(delta, damage_caused)
 
         if spawn and self.turn % settings.spawn_every == 0:
-            self._apply_spawn(delta)
+            self._apply_spawn(delta, self._get_spawn_locations())
 
         return delta
 
