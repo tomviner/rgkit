@@ -10,7 +10,7 @@ rgkit -- Testing kit for `Robot Game <http://robotgame.net/>`__
     :alt: Downloads
 
 Installing as a package
---------------------
+--------------------------------
 
 **pip**
 
@@ -136,7 +136,7 @@ same directory as ``run.py``):
     python run.py your_robot.py /path/your_other_robot.py
 
 Coding your own robots
-----------
+------------------------------
 
 Once installed, you should only need the ``rg`` module to develop your
 own robots. The package can be imported like any other module:
@@ -150,7 +150,7 @@ own robots. The package can be imported like any other module:
             return ['guard']
 
 Other Tools
-----------
+--------------------
 
 Here are some excellent tools made by fellow players!
 

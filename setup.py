@@ -1,5 +1,8 @@
 #!/usr/bin/env python
-'''./setup.py register sdist upload'''
+'''
+Run: ./setup.py register sdist upload
+Check: ./setup.py checkdocs (pip install collective.checkdocs)
+'''
 
 from setuptools import setup
 
@@ -8,7 +11,7 @@ with open('README.rst') as readme_file:
 
 setup(
     name='rgkit',
-    version='0.5.1',
+    version='0.5.2',
     description='Game Engine for Robot Game',
     maintainer='Peter Wen',
     maintainer_email='peter@whitehalmos.org',
