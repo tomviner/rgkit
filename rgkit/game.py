@@ -328,7 +328,7 @@ class Game(object):
             print((' running turn %d ' % (self._state.turn)).center(70, '-'))
 
         responses = self._get_robots_responses()
-        actions = responses[1]
+        actions = responses[0]
 
         delta = self._state.get_delta(actions)
 
