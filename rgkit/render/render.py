@@ -23,8 +23,8 @@ class Render(object):
 
         self._animations = animations
         self._blocksize = 25
-        self._winsize = (self._blocksize * settings.board_size
-                         + self.board_margin)
+        self._winsize = (
+            self._blocksize * settings.board_size + self.board_margin)
         self._game = game_inst
         self._paused = True
         self._names = names

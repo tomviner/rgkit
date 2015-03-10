@@ -142,8 +142,8 @@ class TestDelta(unittest.TestCase):
         self.assertEqual(d_player1_move.damage_caused,
                          settings.collision_damage)
 
-        self.assertTrue(settings.attack_range[0]
-                        <= d_player1_attack.damage_caused <=
+        self.assertTrue(settings.attack_range[0] <=
+                        d_player1_attack.damage_caused <=
                         settings.attack_range[1])
 
         self.assertEqual(d_player0.hp - d_player0.hp_end,

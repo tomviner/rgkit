@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+'''./setup.py register sdist upload'''
 
 from setuptools import setup
 
@@ -7,7 +8,7 @@ with open('README.rst') as readme_file:
 
 setup(
     name='rgkit',
-    version='0.5.0',
+    version='0.5.1',
     description='Game Engine for Robot Game',
     maintainer='Peter Wen',
     maintainer_email='peter@whitehalmos.org',

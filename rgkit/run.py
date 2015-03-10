@@ -234,8 +234,8 @@ class Runner(object):
         return is_multiprocessing_supported
 
 
-def _task(arg):
-    return Runner.from_command_line_args(arg).run()
+def run_single_from_command_line(args):
+    return Runner.from_command_line_args(args).run()
 
 
 def run_concurrently(args):
@@ -260,7 +260,7 @@ def run_concurrently(args):
         data.append(copy_args)
 
     pool = multiprocessing.Pool(num_cpu)
-    results = pool.map(_task, data)
+    results = pool.map(run_single_from_command_line, data)
     return [score for scores in results for score in scores]
 
 
@@ -399,7 +399,7 @@ def main():
         if Runner.is_multiprocessing_supported() and args.count > 1:
             runner = run_concurrently
         else:
-            runner = lambda _args: Runner.from_command_line_args(_args).run()
+            runner = run_single_from_command_line
 
         start_time = time.time()
         scores = runner(args)

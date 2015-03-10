@@ -143,7 +143,9 @@ class Player(object):
         try:
             exc_flag = False
             captured_output = io.BytesIO()
-            conv = lambda s: s.encode('ascii', 'replace')
+
+            def conv(s):
+                return s.encode('ascii', 'replace')
 
             _stdout = sys.stdout
             _stderr = sys.stderr
