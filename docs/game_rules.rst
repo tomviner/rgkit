@@ -52,5 +52,3 @@ Whoever has more robots left after **100** turns wins.
 Your get to code the AI for a single robot. All your robots will use
 this AI. To win, your robots must work together with other copies of
 themselves—to surround an enemy robot, for example.
-
-Next: `Getting started <getting_started>`__
