@@ -61,7 +61,7 @@ class TestJson(unittest.TestCase):
         # Oh man why, oh why.
         def to_str(data):
             if isinstance(data, dict):
-                for k, v in data.iteritems():
+                for k, v in data.items():
                     data[k] = to_str(v)
             elif isinstance(data, list) or isinstance(data, tuple):
                 new_data = []
