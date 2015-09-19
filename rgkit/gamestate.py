@@ -31,6 +31,29 @@ class GameState(object):
         else:
             self._get_spawn_locations = self._get_spawn_locations_random
 
+    @staticmethod
+    def _loc_from_json(location):
+        return (int(location[0]), int(location[1]))
+
+    @classmethod
+    def create_from_json(cls, data):
+        state = GameState(turn=int(data['turn']), seed=data['seed'])
+        for bot in data['robots']:
+            state.add_robot(bot['location'], bot['player_id'], bot['hp'],
+                            bot['robot_id'])
+        return state
+
+    @classmethod
+    def create_actions_from_json(cls, actions):
+        moves = {}
+        for action in actions:
+            loc = cls._loc_from_json(action['location'])
+            move = action['action']
+            if len(move) > 1:
+                move[1] = cls._loc_from_json(move[1])
+            moves[loc] = move
+        return moves
+
     def add_robot(self, loc, player_id, hp=None, robot_id=None):
         if hp is None:
             hp = settings.robot_hp
@@ -39,11 +62,11 @@ class GameState(object):
             robot_id = self._next_robot_id
             self._next_robot_id += 1
 
-        self.robots[loc] = AttrDict({
-            'location': loc,
-            'hp': hp,
-            'player_id': player_id,
-            'robot_id': robot_id
+        self.robots[self._loc_from_json(loc)] = AttrDict({
+            'location': self._loc_from_json(loc),
+            'hp': int(hp),
+            'player_id': int(player_id),
+            'robot_id': int(robot_id),
         })
 
     def remove_robot(self, loc):
@@ -315,15 +338,25 @@ class GameState(object):
         return scores
 
     # export GameState to be used by a robot
-    def get_game_info(self, player_id):
+    def get_game_info(self, player_id=None, json=None, seed=None):
         game_info = AttrDict()
 
-        game_info.robots = dict((loc, AttrDict(robot))
-                                for loc, robot in self.robots.items())
-        for robot in game_info.robots.values():
-            if robot.player_id != player_id:
-                del robot.robot_id
+        if json:
+            game_info.robots = self.robots.values()
+        else:
+            game_info.robots = dict((loc, AttrDict(robot))
+                                    for loc, robot in self.robots.items())
+
+        if player_id is not None:
+            for robot in game_info.robots.values():
+                if robot.player_id != player_id:
+                    del robot.robot_id
+
+        if seed:
+            game_info.seed = self._seed
 
         game_info.turn = self.turn
+        if json:
+            game_info.turn = str(game_info.turn)
 
         return game_info
