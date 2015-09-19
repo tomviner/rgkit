@@ -1,7 +1,9 @@
 import json
+import random
 import unittest
 
 from rgkit.gamestate import GameState
+from rgkit.settings import settings
 
 
 class TestJson(unittest.TestCase):
@@ -35,16 +37,13 @@ class TestJson(unittest.TestCase):
         }
     ]
 
-    # TODO: Less mysterious randomization please -_-.
-    # r = random.Random('0' + 's')
-    # self.result1['seed'] = str(r.randint(0, settings.max_seed))
     result1 = {
-        'seed': '27992006',  # Randomized.
+        'seed': '----',  # Randomized.
         'turn': '13',
         'robots': [
             {
                 'location': ['10', '11'],
-                'hp': '42',  # Randomized.
+                'hp': '----',  # Randomized.
                 'player_id': '0',
                 'robot_id': '5',
             },
@@ -94,5 +93,12 @@ class TestJson(unittest.TestCase):
         moves = GameState.create_actions_from_json(self.actions1)
         new_state = state.apply_actions(moves, False)  # turn is 12
         info = new_state.get_game_info(json=True, seed=True)
+
+        # TODO: Less mysterious randomization please -_-.
+        r1 = random.Random('0' + 's')
+        self.result1['seed'] = str(r1.randint(0, settings.max_seed))
+        r2 = random.Random('0' + 'a')
+        hp_left = 50 - r2.randint(*settings.attack_range)
+        self.result1['robots'][0]['hp'] = hp_left
 
         self.assertEqual(self.sprint(self.result1), self.sprint(info))

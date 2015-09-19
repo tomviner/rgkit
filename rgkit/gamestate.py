@@ -342,7 +342,7 @@ class GameState(object):
         game_info = AttrDict()
 
         if json:
-            game_info.robots = self.robots.values()
+            game_info.robots = list(self.robots.values())
         else:
             game_info.robots = dict((loc, AttrDict(robot))
                                     for loc, robot in self.robots.items())
