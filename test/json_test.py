@@ -70,7 +70,7 @@ class TestJson(unittest.TestCase):
             else:
                 data = str(data)
             return data
-        return json.dumps(to_str(val))
+        return json.dumps(to_str(val), sort_keys=True)
 
     def test_load_json_game_state(self):
         # Dump and load to validate
