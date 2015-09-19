@@ -1,9 +1,8 @@
 import json
-import random
 import unittest
 
 from rgkit.gamestate import GameState
-from rgkit.settings import settings
+
 
 class TestJson(unittest.TestCase):
     game1 = {
