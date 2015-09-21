@@ -91,7 +91,7 @@ class TestJson(unittest.TestCase):
     def test_apply_actions(self):
         state = GameState.create_from_json(self.game1)
         moves = GameState.create_actions_from_json(self.actions1)
-        new_state = state.apply_actions(moves, False)  # turn is 12
+        new_state = state.apply_actions(moves)
         info = new_state.get_game_info(json=True, seed=True)
 
         # TODO: Less mysterious randomization please -_-.
