@@ -1,6 +1,10 @@
 rgkit -- Testing kit for `Robot Game <http://robotgame.net/>`__
 ===============================================================
 
+.. image:: https://badges.gitter.im/Join%20Chat.svg
+   :alt: Join the chat at https://gitter.im/RobotGame/rgkit
+   :target: https://gitter.im/RobotGame/rgkit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
 .. image:: https://travis-ci.org/RobotGame/rgkit.svg?branch=master
     :target: https://travis-ci.org/RobotGame/rgkit
     :alt: Build Status
