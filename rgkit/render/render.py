@@ -1,8 +1,20 @@
 from __future__ import division
+
+import sys
 try:
     import Tkinter
 except ImportError:
-    import tkinter as Tkinter
+    try:
+        import tkinter as Tkinter
+    except ImportError:
+        sys.exit(
+            "\033[1;31m"+'rgrun has problem importing tkinter, '
+            'which rgrun GUI is dependent on by default. \n'
+            'Tkinter is likely not installed or '
+            'configured incorrectly. \n'
+            'Alternatively, you can try running rgrun as '
+            'headless (-H) or use text base UI (-C).'+"\033[0m")
+
 import math
 
 from rgkit.settings import settings

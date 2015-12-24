@@ -382,33 +382,11 @@ def print_score_grid(scores, player1, player2, size):
         print(str2)
 
 
-def check_tkinter(args):
-    if not args.headless and not args.curses:
-        try:
-            import Tkinter
-            return
-        except ImportError:
-            pass
-        try:
-            import tkinter as Tkinter
-            return
-        except ImportError:
-            sys.exit(
-                "\033[1;31m"+'rgrun has problem importing tkinter, '
-                'which rgrun GUI is dependent on by default. \n'
-                'Tkinter is likely not installed or '
-                'configured incorrectly. \n'
-                'Alternatively, you can try running rgrun as '
-                'headless (-H) or use text base UI (-C).'+"\033[0m")
-
-
 def main():
     args = get_arg_parser().parse_args()
 
     if "nice" in args:
         os.nice(args.nice)
-
-    check_tkinter(args)
 
     num_opponents = len(args.opponents)
     total_won, total_lost, total_draw, total_avg_score, total_diff = (
