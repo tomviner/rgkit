@@ -1,5 +1,6 @@
 import sys
 
+
 def test_mapeditor_importable(monkeypatch, capsys):
     """At least catch import errors!"""
     from rgkit.mapeditor import main
