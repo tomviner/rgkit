@@ -6,6 +6,8 @@ python:
   - "3.5"
   - "3.6"
 cache: pip
+install:
+  - pip install coveralls
 script:
   - nosetests
   - flake8 rgkit test
@@ -18,3 +20,5 @@ notifications:
     use_notice: true
     on_success: change
     on_failure: always
+after_success:
+  - coveralls
