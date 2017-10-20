@@ -8,7 +8,7 @@ def millis():
 
 def rgb_to_hex(r, g, b, normalized=True):
     if normalized:
-        return '#%02x%02x%02x' % (r * 255, g * 255, b * 255)
+        return '#%02x%02x%02x' % (int(r * 255), int(g * 255), int(b * 255))
     else:
         return '#%02x%02x%02x' % (r, g, b)
 

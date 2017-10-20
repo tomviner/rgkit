@@ -3,9 +3,14 @@ language: python
 python:
   - "2.7"
   - "3.4"
+  - "3.5"
+  - "3.6"
 cache: pip
+install:
+  - pip install coveralls
+  - pip install -r requirements.txt
 script:
-  - nosetests
+  - pytest --cov=rgkit/ --cov=test/ test/
   - flake8 rgkit test
   - ./build-docs.sh
 notifications:
@@ -16,3 +21,5 @@ notifications:
     use_notice: true
     on_success: change
     on_failure: always
+after_success:
+  - coveralls
