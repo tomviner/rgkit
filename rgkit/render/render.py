@@ -403,9 +403,11 @@ class Render(object):
                     loc, fill=self.get_bg_color(loc), layer=1, width=0)
         # draw text labels
         text_color = rgb_to_hex(*render_settings.text_color)
-        for y in range(settings.board_size):
-            self.draw_text((y, 0), str(y), color=text_color)
-            self.draw_text((0, y), str(y), color=text_color)
+        # for some reason this kills the grid cell labels in Py3
+        if sys.version_info[0] == 2:
+            for y in range(settings.board_size):
+                self.draw_text((y, 0), str(y), color=text_color)
+                self.draw_text((0, y), str(y), color=text_color)
 
     def update_sprites_new_turn(self):
         for sprite in self._sprites:
