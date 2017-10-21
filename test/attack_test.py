@@ -62,7 +62,7 @@ class TestAttack(unittest.TestCase):
         self.assertTrue(state2.is_robot((9, 10)))
         damage = settings.robot_hp - state2.robots[9, 10].hp
         self.assertTrue(
-            settings.attack_range[0]/2 <= damage <= settings.attack_range[1]/2)
+            settings.attack_range[0] // 2 <= damage <= settings.attack_range[1] // 2)
 
     def test_attack_does_no_damage_to_teammates(self):
         state = GameState()

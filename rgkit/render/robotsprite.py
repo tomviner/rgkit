@@ -169,10 +169,10 @@ class RobotSprite(object):
             self.text,
             (x + ox +
                 (self.renderer._blocksize -
-                    self.renderer.cell_border_width) / 2,
+                    self.renderer.cell_border_width) // 2,
              y + oy +
                 (self.renderer._blocksize -
-                    self.renderer.cell_border_width) / 2))
+                    self.renderer.cell_border_width) // 2))
 
     def clear(self):
         self.renderer.remove_object(self.square)

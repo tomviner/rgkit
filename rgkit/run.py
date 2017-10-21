@@ -412,7 +412,7 @@ def main():
         p1won = sum(p1 > p2 for p1, p2 in scores)
         p2won = sum(p2 > p1 for p1, p2 in scores)
         draw = args.count - p1won - p2won
-        avg_score = [float(sum(x))/len(x) for x in zip(*scores)]
+        avg_score = [float(sum(x)) // len(x) for x in zip(*scores)]
         diff = avg_score[0] - avg_score[1]
         if args.heatmap:
             print_score_grid(scores, args.player1, args.player2, 26)
@@ -432,7 +432,7 @@ def main():
         total_avg_score = list(map(int, (total_avg_score[0] // num_opponents,
                                          total_avg_score[1] // num_opponents)))
         total_diff = int(total_diff // num_opponents)
-        win_rate = (100 * float(total_won + 0.5 * total_draw) /
+        win_rate = (100 * float(total_won + 0.5 * total_draw) //
                     (total_won + total_lost + total_draw))
         print('Overall: [{}, {}, {}] WR: {:<5.1f} Score: {} ({})'.format(
             total_won, total_lost, total_draw, win_rate, total_avg_score,
