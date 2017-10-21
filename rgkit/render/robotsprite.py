@@ -163,7 +163,8 @@ class RobotSprite(object):
         tex_hex = rgb_to_hex(*tex_rgb)
         val = int(self.hp * (1 - delta) + self.hp_next * delta)
         if self.text is None:
-            self.text = self.renderer.draw_text(self.location, val, tex_hex)
+            self.text = self.renderer.draw_text(
+                self.location, val, tex_hex, layer=8)
         self.renderer._win.itemconfig(self.text, text=val, fill=tex_hex)
         self.renderer._win.coords(
             self.text,
