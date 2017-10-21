@@ -9,3 +9,9 @@ def test_mapeditor_importable(monkeypatch, capsys):
     main()
     out, err = capsys.readouterr()
     assert 'usage: ' in out
+
+def test_other_imports():
+    import rgkit.render.robotsprite
+    import rgkit.render.render
+    import rgkit.render.highlightsprite
+    import rgkit.rgcurses
