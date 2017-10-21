@@ -338,7 +338,7 @@ def print_score_grid(scores, player1, player2, size):
     max_score = 50
 
     def to_grid(n):
-        return int(round(float(n) / max_score * (size - 1)))
+        return int(round(float(n) // max_score * (size - 1)))
 
     def print_heat(n):
         if n > 9:
@@ -406,7 +406,7 @@ def main():
         total_time = time.time() - start_time
 
         print('{0:6.2f}s per game, {1} games, total {2:.0f}s'.format(
-            total_time / args.count, args.count, total_time))
+            total_time // args.count, args.count, total_time))
         if args.quiet >= 3:
             unmute_all()
         p1won = sum(p1 > p2 for p1, p2 in scores)
@@ -429,9 +429,9 @@ def main():
             repr(avg_score), diff))
 
     if num_opponents > 1:
-        total_avg_score = list(map(int, (total_avg_score[0] / num_opponents,
-                                         total_avg_score[1] / num_opponents)))
-        total_diff = int(total_diff / num_opponents)
+        total_avg_score = list(map(int, (total_avg_score[0] // num_opponents,
+                                         total_avg_score[1] // num_opponents)))
+        total_diff = int(total_diff // num_opponents)
         win_rate = (100 * float(total_won + 0.5 * total_draw) /
                     (total_won + total_lost + total_draw))
         print('Overall: [{}, {}, {}] WR: {:<5.1f} Score: {} ({})'.format(

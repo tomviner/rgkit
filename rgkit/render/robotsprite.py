@@ -100,15 +100,15 @@ class RobotSprite(object):
                     render_settings.bot_suicide_animation):
                 # explosion animation
                 # expand size (up to 1.5x original size)
-                bot_size = self.renderer._blocksize * (1 + delta / 2)
+                bot_size = self.renderer._blocksize * (1 + delta // 2)
                 # color fade to yellow
                 bot_rgb = blend_colors(bot_rgb, (1, 1, 0), 1 - delta)
 
         # DRAW ARROWS AND BORDER AND CIRCLE
         if self.renderer.show_arrows.get():
             if arrow_fill is not None and self.overlay is None:
-                offset = (self.renderer._blocksize / 2,
-                          self.renderer._blocksize / 2)
+                offset = (self.renderer._blocksize // 2,
+                          self.renderer._blocksize // 2)
                 self.overlay = self.renderer.draw_line(
                     self.location, self.target, layer=5, fill=arrow_fill,
                     offset=offset, width=3.0, arrow=Tkinter.LAST)
@@ -157,7 +157,7 @@ class RobotSprite(object):
         x, y = self.renderer.grid_to_xy(loc)
         ox, oy = self.animation_offset
         tex_rgb = render_settings.text_color_bright \
-            if self.hp > settings.robot_hp / 4 \
+            if self.hp > settings.robot_hp // 4 \
             else render_settings.text_color_dark
         tex_rgb = blend_colors(tex_rgb, bot_color, alpha)
         tex_hex = rgb_to_hex(*tex_rgb)
