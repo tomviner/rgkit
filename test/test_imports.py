@@ -10,8 +10,11 @@ def test_mapeditor_importable(monkeypatch, capsys):
     out, err = capsys.readouterr()
     assert 'usage: ' in out
 
+
 def test_other_imports():
-    import rgkit.render.robotsprite
-    import rgkit.render.render
-    import rgkit.render.highlightsprite
-    import rgkit.rgcurses
+    from rgkit.render.robotsprite import RobotSprite
+    from rgkit.render.render import Render
+    from rgkit.render.highlightsprite import HighlightSprite
+    from rgkit.rgcurses import RGCurses
+    # prevent flake8 complaining
+    (RobotSprite, Render, HighlightSprite, RGCurses)

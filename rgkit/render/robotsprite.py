@@ -10,6 +10,7 @@ from rgkit.render.utils import compute_color
 
 PY3 = sys.version_info[0] == 3
 
+
 class RobotSprite(object):
     def __init__(self, action_info, render):
         self.location = action_info['loc']
