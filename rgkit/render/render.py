@@ -275,8 +275,8 @@ class Render(object):
         for layer in self._layers:
             self._win.tag_raise(layer)
 
-    def draw_text(self, loc, text, color=None):
-        layer_id = 'layer %d' % 9
+    def draw_text(self, loc, text, color=None, layer=9):
+        layer_id = 'layer %d' % layer
         self._layers[layer_id] = None
         x, y = self.grid_to_xy(loc)
         item = self._win.create_text(
@@ -404,8 +404,8 @@ class Render(object):
         # draw text labels
         text_color = rgb_to_hex(*render_settings.text_color)
         for y in range(settings.board_size):
-            self.draw_text((y, 0), str(y), color=text_color)
-            self.draw_text((0, y), str(y), color=text_color)
+            self.draw_text((y, 0), str(y), color=text_color, layer=9)
+            self.draw_text((0, y), str(y), color=text_color, layer=9)
 
     def update_sprites_new_turn(self):
         for sprite in self._sprites:

@@ -1,7 +1,7 @@
 from rgkit.settings import settings
 
 
-CENTER_POINT = (int(settings.board_size / 2), int(settings.board_size / 2))
+CENTER_POINT = (int(settings.board_size // 2), int(settings.board_size // 2))
 
 
 def dist(p1, p2):
