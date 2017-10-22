@@ -2,11 +2,13 @@ try:
     import Tkinter
 except ImportError:
     import tkinter as Tkinter
+import sys
 from rgkit.settings import settings
 from rgkit.render.settings import settings as render_settings
 from rgkit.render.utils import rgb_to_hex, rgb_tuple_to_hex, blend_colors
 from rgkit.render.utils import compute_color
 
+PY3 = sys.version_info[0] == 3
 
 class RobotSprite(object):
     def __init__(self, action_info, render):
@@ -163,8 +165,9 @@ class RobotSprite(object):
         tex_hex = rgb_to_hex(*tex_rgb)
         val = int(self.hp * (1 - delta) + self.hp_next * delta)
         if self.text is None:
+            layer = 8 if PY3 else 9
             self.text = self.renderer.draw_text(
-                self.location, val, tex_hex, layer=8)
+                self.location, val, tex_hex, layer=layer)
         self.renderer._win.itemconfig(self.text, text=val, fill=tex_hex)
         self.renderer._win.coords(
             self.text,
