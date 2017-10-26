@@ -1,5 +1,5 @@
 import rg
-
+import random
 
 
 class Robot:
@@ -18,8 +18,10 @@ class Robot:
             return ['attack', min(adjacent_bots, key=lambda b: b.hp).location]
 
         adj = rg.locs_around(target.location, filter_out=('invalid', 'obstacle'))
-        dest = min(adj, key=lambda loc: rg.wdist(loc, self.location))
-        if rg.wdist(target.location, self.location) > 1:
-            return ['move', rg.toward(self.location, dest)]
-        else:
+        closest_locs = min(rg.wdist(loc, self.location) for loc in adj)
+        dests = [loc for loc in adj if rg.wdist(loc, self.location) == closest_locs]
+        dest = random.choice(dests)
+        if rg.wdist(target.location, self.location) == 1:
             return ['attack', target.location]
+        else:
+            return ['move', rg.toward(self.location, dest)]
