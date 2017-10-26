@@ -22,7 +22,9 @@ class Robot:
         if is_surrounded:
             return ['suicide']
 
-
-
-        else:
-            return ['guard']
+        for loc in game.robots:
+            bot = game.robots.get(loc)
+                if bot.player_id != self.player_id:
+                    if rg.dist(loc, self.location) <= 1:
+                        return ['attack', loc]
+        return ['move', rg.toward(self.location, rg.CENTER_POINT)]
