@@ -1,3 +1,4 @@
+import random
 import rg
 
 
@@ -14,6 +15,8 @@ class Robot:
         # CAMP THE SPAWN! SHOOT NOW!
         shoot = 'attack'
         if bad_neighbours:
+            if random.randint(0, 10) > 7:
+                print('HAHAHA! DIE DIE DIE!')
             return [shoot, bad_neighbours[0]['location']]
 
         return ['guard']
